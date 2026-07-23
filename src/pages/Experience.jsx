@@ -130,7 +130,7 @@ export default function Experience() {
             Internships, study abroad, campus activities: everything that builds your story.
           </p>
         </div>
-        <Button onClick={openAddModal}>
+        <Button onClick={openAddModal} className="flex-shrink-0">
           <Plus className="h-4 w-4" aria-hidden="true" />
           Add experience
         </Button>

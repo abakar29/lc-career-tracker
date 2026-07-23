@@ -124,24 +124,6 @@ function CareerReadinessHero({ score, checks, classYear, major, onReplayOnboardi
   );
 }
 
-function ResumeGeneratorCard() {
-  return (
-    <div className="flex h-full flex-col justify-between rounded-xl bg-white p-6 shadow-sm">
-      <div>
-        <h2 className="text-lg font-semibold text-slate-900">Resume Generator</h2>
-        <p className="mt-1 text-sm text-slate-500">Paste your resume for ATS optimization</p>
-      </div>
-      <button
-        type="button"
-        className="mt-6 inline-flex w-fit items-center gap-1.5 rounded-lg bg-brand-orange px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-      >
-        Optimize Resume
-        <ArrowRight className="h-4 w-4" aria-hidden="true" />
-      </button>
-    </div>
-  );
-}
-
 function ApplicationTrackerCard({ applications: initialApplications }) {
   const [applications, setApplications] = useState(initialApplications);
   const [showForm, setShowForm] = useState(false);
@@ -363,14 +345,11 @@ export default function Dashboard() {
         onReplayOnboarding={() => setShowOnboarding(true)}
       />
 
-      <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
-        <div className="grid grid-cols-2 gap-4">
-          <CompactStatCard icon={GraduationCap} value={experiences.length} label="Experience" />
-          <CompactStatCard icon={Network} value={networkConnections.length} label="Network" />
-          <CompactStatCard icon={Zap} value={skills.length} label="Skills" />
-          <CompactStatCard icon={FileCheck} value={applications.length} label="Applications" />
-        </div>
-        <ResumeGeneratorCard />
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <CompactStatCard icon={GraduationCap} value={experiences.length} label="Experience" />
+        <CompactStatCard icon={Network} value={networkConnections.length} label="Network" />
+        <CompactStatCard icon={Zap} value={skills.length} label="Skills" />
+        <CompactStatCard icon={FileCheck} value={applications.length} label="Applications" />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

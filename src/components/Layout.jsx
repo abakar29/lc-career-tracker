@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom";
-import { LayoutDashboard, Briefcase, Users, Sparkles, Building2 } from "lucide-react";
+import { LayoutDashboard, Briefcase, Users, Sparkles, FileText, Building2 } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
 const NAV_ITEMS = [
@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { to: "/experience", label: "Experience", icon: Briefcase },
   { to: "/network", label: "Network", icon: Users },
   { to: "/skills", label: "Skills", icon: Sparkles },
+  { to: "/resume", label: "Resume", icon: FileText },
   { to: "/career-center", label: "Career Center", icon: Building2 },
 ];
 
