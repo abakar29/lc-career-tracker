@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  ClipboardList,
   AlertTriangle,
   ArrowRight,
   HelpCircle,
@@ -9,11 +8,25 @@ import {
   Network,
   Zap,
   FileCheck,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import { useData } from "../context/DataContext";
 import { formatDate, daysSince, computeProfileCompleteness } from "../lib/utils";
-import { Card, CardHeader, Badge, RadialProgress } from "../components/ui";
+import {
+  Card,
+  CardHeader,
+  Badge,
+  RadialProgress,
+  Button,
+  IconButton,
+  TextField,
+  SelectField,
+  DateField,
+} from "../components/ui";
 import Onboarding from "../components/Onboarding";
+
+const APPLICATION_STATUSES = ["Applied", "Interviewing", "Offer", "Rejected"];
 
 const STATUS_TONE = {
   Active: "green",
@@ -129,27 +142,136 @@ function ResumeGeneratorCard() {
   );
 }
 
-function ApplicationTrackerCard({ applications }) {
+function ApplicationTrackerCard({ applications: initialApplications }) {
+  const [applications, setApplications] = useState(initialApplications);
+  const [showForm, setShowForm] = useState(false);
+  const [company, setCompany] = useState("");
+  const [role, setRole] = useState("");
+  const [dateApplied, setDateApplied] = useState("");
+  const [status, setStatus] = useState("Applied");
+
   const sorted = [...applications].sort(
     (a, b) => new Date(b.dateApplied) - new Date(a.dateApplied)
   );
+
+  function resetForm() {
+    setCompany("");
+    setRole("");
+    setDateApplied("");
+    setStatus("Applied");
+    setShowForm(false);
+  }
+
+  function handleSave() {
+    setApplications((prev) => [
+      ...prev,
+      {
+        id: `app-${Date.now()}`,
+        company: company.trim(),
+        role: role.trim(),
+        dateApplied,
+        status,
+      },
+    ]);
+    resetForm();
+  }
+
+  function cycleStatus(id) {
+    setApplications((prev) =>
+      prev.map((a) => {
+        if (a.id !== id) return a;
+        const nextIndex = (APPLICATION_STATUSES.indexOf(a.status) + 1) % APPLICATION_STATUSES.length;
+        return { ...a, status: APPLICATION_STATUSES[nextIndex] };
+      })
+    );
+  }
+
+  function deleteApplication(id) {
+    setApplications((prev) => prev.filter((a) => a.id !== id));
+  }
+
   return (
     <Card className="border-l-4 border-l-brand-black transition-all hover:shadow-md">
       <CardHeader
         title="Application Tracker"
         subtitle={`${applications.length} applications`}
-        action={<ClipboardList className="h-5 w-5 text-slate-400" aria-hidden="true" />}
+        action={
+          <button
+            type="button"
+            onClick={() => setShowForm((v) => !v)}
+            className="inline-flex items-center gap-1 rounded-lg bg-brand-orange px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+          >
+            <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+            Add Application
+          </button>
+        }
       />
-      <ul className="px-5 pb-5 mt-2 divide-y divide-slate-100">
+
+      {showForm && (
+        <div className="mx-5 mt-3 space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
+          <TextField
+            label="Company"
+            value={company}
+            onChange={(e) => setCompany(e.target.value)}
+            placeholder="e.g. Nike, Inc."
+          />
+          <TextField
+            label="Role"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            placeholder="e.g. UX Research Intern"
+          />
+          <DateField
+            label="Date Applied"
+            value={dateApplied}
+            onChange={(e) => setDateApplied(e.target.value)}
+          />
+          <SelectField label="Status" value={status} onChange={(e) => setStatus(e.target.value)}>
+            {APPLICATION_STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </SelectField>
+          <div className="flex items-center gap-4 pt-1">
+            <Button type="button" onClick={handleSave}>Save</Button>
+            <button
+              type="button"
+              onClick={resetForm}
+              className="text-sm font-medium text-slate-500 hover:text-slate-700"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      <ul className="mt-2 max-h-[260px] divide-y divide-slate-100 overflow-y-auto px-5 pb-5">
         {sorted.map((a) => (
-          <li key={a.id} className="py-3 flex items-center justify-between gap-3">
+          <li key={a.id} className="group flex items-center justify-between gap-3 py-3">
             <div>
               <p className="text-sm font-medium text-slate-800">{a.company}</p>
               <p className="text-xs text-slate-500">
                 {a.role} · Applied {formatDate(a.dateApplied)}
               </p>
             </div>
-            <Badge tone={STATUS_TONE[a.status] ?? "slate"}>{a.status}</Badge>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => cycleStatus(a.id)}
+                className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                aria-label={`Cycle status for ${a.company}, currently ${a.status}`}
+              >
+                <Badge tone={STATUS_TONE[a.status] ?? "slate"}>{a.status}</Badge>
+              </button>
+              <IconButton
+                icon={Trash2}
+                label={`Delete ${a.company} application`}
+                variant="danger"
+                onClick={() => deleteApplication(a.id)}
+                className="opacity-0 transition-opacity group-hover:opacity-100"
+              />
+            </div>
           </li>
         ))}
       </ul>
