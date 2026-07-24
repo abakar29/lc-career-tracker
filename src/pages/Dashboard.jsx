@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import {
   AlertTriangle,
   ArrowRight,
-  HelpCircle,
   GraduationCap,
   Network,
   Zap,
@@ -14,7 +13,6 @@ import {
 import { useData } from "../context/DataContext";
 import { formatDate, daysSince, computeProfileCompleteness } from "../lib/utils";
 import {
-  Card,
   CardHeader,
   Badge,
   RadialProgress,
@@ -38,21 +36,30 @@ const STATUS_TONE = {
   Rejected: "red",
 };
 
-function CompactStatCard({ icon: Icon, value, label }) {
+const STAT_TINTS = {
+  orange: { bg: "bg-orange-50", text: "text-orange-600" },
+  blue: { bg: "bg-blue-50", text: "text-blue-600" },
+  purple: { bg: "bg-purple-50", text: "text-purple-600" },
+  green: { bg: "bg-emerald-50", text: "text-emerald-600" },
+};
+
+function CompactStatCard({ icon: Icon, value, label, tint = "orange" }) {
+  const colors = STAT_TINTS[tint];
   return (
-    <div className="flex items-center gap-3 rounded-xl border-l-4 border-l-brand-orange bg-white p-4 shadow-sm">
-      <div className="rounded-lg bg-orange-50 p-2.5">
-        <Icon className="h-5 w-5 text-brand-orange" aria-hidden="true" />
+    <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow-sm">
+      <div className={`rounded-lg ${colors.bg} p-2.5`}>
+        <Icon className={`h-5 w-5 ${colors.text}`} aria-hidden="true" />
       </div>
       <div>
-        <p className="text-xl font-bold text-slate-900">{value}</p>
+        <p className="text-[28px] font-bold leading-tight text-slate-900">{value}</p>
         <p className="text-xs text-slate-500">{label}</p>
+        <p className="mt-0.5 text-xs font-medium text-emerald-600">+1 this month</p>
       </div>
     </div>
   );
 }
 
-function CareerReadinessHero({ score, checks, classYear, major, onReplayOnboarding }) {
+function CareerReadinessHero({ score, checks, classYear, major }) {
   const next = checks.filter((c) => !c.done);
   return (
     <div className="relative overflow-hidden rounded-2xl bg-[#433E3C] px-6 py-8 md:px-8 md:py-10 text-white shadow-lg">
@@ -69,18 +76,13 @@ function CareerReadinessHero({ score, checks, classYear, major, onReplayOnboardi
           <p className="text-orange-300 text-sm font-medium">
             Class of {classYear} · {major}
           </p>
-          <h1 className="mt-1 text-3xl font-bold">Good evening, Abu 👋</h1>
+          <h1 className="mt-1 text-[32px] font-bold">Good evening, Abu 👋</h1>
           <p className="mt-3 max-w-md text-neutral-300 text-sm">
             Your Career Readiness Score reflects how prepared you are to apply, right now,
             based on your logged experience, network, and skills.
           </p>
 
-          {next.length === 0 ? (
-            <p className="mt-4 max-w-md text-sm text-neutral-300">
-              Every readiness check is complete. Keep your resume and applications current to
-              stay ahead.
-            </p>
-          ) : (
+          {next.length > 0 && (
             <ol className="mt-4 max-w-md space-y-3.5">
               {next.map((c, i) => (
                 <li key={c.label} className="flex items-start gap-3">
@@ -104,20 +106,15 @@ function CareerReadinessHero({ score, checks, classYear, major, onReplayOnboardi
               ))}
             </ol>
           )}
-
-          <button
-            type="button"
-            onClick={onReplayOnboarding}
-            className="mt-4 inline-flex items-center gap-1.5 rounded text-xs font-medium text-neutral-300 underline decoration-neutral-500 underline-offset-2 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-          >
-            <HelpCircle className="h-3.5 w-3.5" aria-hidden="true" />
-            What is PioneerPath?
-          </button>
         </div>
 
         <div className="flex flex-col items-center gap-2">
           <RadialProgress value={score} size={140} strokeWidth={12} progressColor="#f97316" />
           <p className="text-xs text-neutral-300 font-medium">Career Readiness Score</p>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-[11px] font-medium text-emerald-300">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden="true" />
+            All systems go
+          </span>
         </div>
       </div>
     </div>
@@ -173,7 +170,7 @@ function ApplicationTrackerCard({ applications: initialApplications }) {
   }
 
   return (
-    <Card className="border-l-4 border-l-brand-black transition-all hover:shadow-md">
+    <div className="rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md">
       <CardHeader
         title="Application Tracker"
         subtitle={`${applications.length} applications`}
@@ -257,7 +254,7 @@ function ApplicationTrackerCard({ applications: initialApplications }) {
           </li>
         ))}
       </ul>
-    </Card>
+    </div>
   );
 }
 
@@ -269,7 +266,9 @@ function NeedsAttentionCard({ networkConnections, resumeVersions }) {
     if (days > 30) {
       items.push({
         key: `net-${c.id}`,
-        text: `Follow up with ${c.contact_name} at ${c.employer_company}, ${days} days since last contact`,
+        prefix: `Follow up with ${c.contact_name} at ${c.employer_company}, `,
+        days,
+        suffix: " since last contact",
       });
     }
   });
@@ -286,7 +285,7 @@ function NeedsAttentionCard({ networkConnections, resumeVersions }) {
   if (items.length === 0) return null;
 
   return (
-    <div className="rounded-xl shadow-sm bg-[#FEF0E6] transition-all hover:shadow-md">
+    <div className="rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md">
       <div className="flex items-start justify-between gap-3 px-5 pt-5">
         <h2 className="text-base font-semibold text-slate-900">Needs Your Attention</h2>
         <AlertTriangle className="h-5 w-5 flex-shrink-0 text-red-500" aria-hidden="true" />
@@ -295,10 +294,20 @@ function NeedsAttentionCard({ networkConnections, resumeVersions }) {
         {items.map((item) => (
           <li key={item.key} className="flex items-start gap-2.5 text-sm text-slate-600">
             <span
-              className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-brand-orange"
+              className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-red-500"
               aria-hidden="true"
             />
-            {item.text}
+            <span>
+              {item.days !== undefined ? (
+                <>
+                  {item.prefix}
+                  <strong className="font-bold text-red-600">{item.days} days</strong>
+                  {item.suffix}
+                </>
+              ) : (
+                item.text
+              )}
+            </span>
           </li>
         ))}
       </ul>
@@ -342,14 +351,30 @@ export default function Dashboard() {
         checks={checks}
         classYear="2029"
         major="Economics &amp; Entrepreneurship"
-        onReplayOnboarding={() => setShowOnboarding(true)}
       />
 
+      <hr className="border-t border-slate-200" aria-hidden="true" />
+
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <CompactStatCard icon={GraduationCap} value={experiences.length} label="Experience" />
-        <CompactStatCard icon={Network} value={networkConnections.length} label="Network" />
-        <CompactStatCard icon={Zap} value={skills.length} label="Skills" />
-        <CompactStatCard icon={FileCheck} value={applications.length} label="Applications" />
+        <CompactStatCard
+          icon={GraduationCap}
+          value={experiences.length}
+          label="Experience"
+          tint="orange"
+        />
+        <CompactStatCard
+          icon={Network}
+          value={networkConnections.length}
+          label="Network"
+          tint="blue"
+        />
+        <CompactStatCard icon={Zap} value={skills.length} label="Skills" tint="purple" />
+        <CompactStatCard
+          icon={FileCheck}
+          value={applications.length}
+          label="Applications"
+          tint="green"
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

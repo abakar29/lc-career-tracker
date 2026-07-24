@@ -12,12 +12,28 @@ import {
   ConfirmDialog,
   TextField,
   SelectField,
-  DateField,
 } from "../components/ui";
 
 const CONTEXTS = ["Internship", "Study Abroad", "Campus Activity"];
 const PROFICIENCY_LEVELS = ["Advanced", "Intermediate", "Beginner"];
 const PROFICIENCY_TONE = { Advanced: "green", Intermediate: "amber", Beginner: "slate" };
+
+const ORANGE = "#E87722";
+
+const PROFICIENCY_OPTIONS = [
+  { level: "Beginner", description: "Just started learning" },
+  { level: "Intermediate", description: "Can work independently" },
+  { level: "Advanced", description: "Can teach others" },
+];
+
+const BUILD_CONTEXTS = [
+  "Internship",
+  "Study Abroad",
+  "Campus Activity",
+  "Coursework",
+  "Employment",
+  "Research",
+];
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -26,8 +42,10 @@ function todayISO() {
 function emptyForm() {
   return {
     skill_name: "",
-    proficiency_level: "Beginner",
-    context: CONTEXTS[0],
+    proficiency_level: "",
+    context: "",
+    experience_id: "",
+    resume_description: "",
     date_added: todayISO(),
   };
 }
@@ -35,7 +53,10 @@ function emptyForm() {
 function validate(values) {
   const errors = {};
   if (!values.skill_name.trim()) errors.skill_name = "Skill name is required.";
-  if (!values.date_added) errors.date_added = "Date added is required.";
+  if (!values.proficiency_level) errors.proficiency_level = "Select a proficiency level.";
+  if (!values.context) errors.context = "Select where you built this skill.";
+  if (!values.experience_id) errors.experience_id = "Select the related experience.";
+  if (!values.resume_description.trim()) errors.resume_description = "Add a one-line description.";
   return errors;
 }
 
@@ -112,7 +133,8 @@ function SkillChip({ skill, onEdit, onDelete }) {
 }
 
 export default function Skills() {
-  const { skills, profile, setTargetCareerPath, addSkill, updateSkill, deleteSkill } = useData();
+  const { skills, profile, experiences, setTargetCareerPath, addSkill, updateSkill, deleteSkill } =
+    useData();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -138,9 +160,11 @@ export default function Skills() {
     setEditingId(skill.id);
     setFormValues({
       skill_name: skill.skill_name,
-      proficiency_level: skill.proficiency_level,
-      context: skill.context,
-      date_added: skill.date_added,
+      proficiency_level: skill.proficiency_level ?? "",
+      context: skill.context ?? "",
+      experience_id: skill.experience_id ?? "",
+      resume_description: skill.resume_description ?? "",
+      date_added: skill.date_added ?? todayISO(),
     });
     setErrors({});
     setModalOpen(true);
@@ -301,53 +325,121 @@ export default function Skills() {
         onClose={() => setModalOpen(false)}
         title={editingId ? "Edit skill" : "Add skill"}
       >
-        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+        <form onSubmit={handleSubmit} className="space-y-5" noValidate>
           <TextField
             label="Skill name"
             required
-            placeholder="e.g. Data Analysis"
+            placeholder="e.g. Python, Public Speaking, Excel"
             value={formValues.skill_name}
             error={errors.skill_name}
             onChange={(e) => updateField("skill_name", e.target.value)}
           />
-          <div className="grid grid-cols-2 gap-4">
-            <SelectField
-              label="Proficiency"
-              required
-              value={formValues.proficiency_level}
-              onChange={(e) => updateField("proficiency_level", e.target.value)}
-            >
-              {["Beginner", "Intermediate", "Advanced"].map((level) => (
-                <option key={level} value={level}>
-                  {level}
-                </option>
-              ))}
-            </SelectField>
-            <SelectField
-              label="Built through"
-              required
-              value={formValues.context}
-              onChange={(e) => updateField("context", e.target.value)}
-            >
-              {CONTEXTS.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </SelectField>
+
+          <div>
+            <p className="mb-1.5 text-sm font-medium text-slate-700">
+              Proficiency level <span className="text-red-500">*</span>
+            </p>
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+              {PROFICIENCY_OPTIONS.map((opt) => {
+                const isSelected = formValues.proficiency_level === opt.level;
+                return (
+                  <button
+                    key={opt.level}
+                    type="button"
+                    onClick={() => updateField("proficiency_level", opt.level)}
+                    className="rounded-xl border-2 px-3 py-3 text-left transition-all"
+                    style={{
+                      borderColor: isSelected ? ORANGE : "#e2e8f0",
+                      backgroundColor: isSelected ? "#FDF1E9" : "#ffffff",
+                    }}
+                  >
+                    <p
+                      className="text-sm font-semibold"
+                      style={{ color: isSelected ? ORANGE : "#1e293b" }}
+                    >
+                      {opt.level}
+                    </p>
+                    <p className="mt-0.5 text-xs text-slate-500">{opt.description}</p>
+                  </button>
+                );
+              })}
+            </div>
+            {errors.proficiency_level && (
+              <p className="mt-1.5 text-xs text-red-600">{errors.proficiency_level}</p>
+            )}
           </div>
-          <DateField
-            label="Date added"
+
+          <div>
+            <p className="mb-1.5 text-sm font-medium text-slate-700">
+              Where did you build this skill? <span className="text-red-500">*</span>
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {BUILD_CONTEXTS.map((c) => {
+                const isSelected = formValues.context === c;
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => updateField("context", c)}
+                    className="rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors"
+                    style={{
+                      borderColor: isSelected ? ORANGE : "#e2e8f0",
+                      backgroundColor: isSelected ? ORANGE : "#ffffff",
+                      color: isSelected ? "#ffffff" : "#334155",
+                    }}
+                  >
+                    {c}
+                  </button>
+                );
+              })}
+            </div>
+            {errors.context && <p className="mt-1.5 text-xs text-red-600">{errors.context}</p>}
+          </div>
+
+          <SelectField
+            label="Which experience?"
             required
-            value={formValues.date_added}
-            error={errors.date_added}
-            onChange={(e) => updateField("date_added", e.target.value)}
-          />
-          <div className="flex justify-end gap-3 pt-2">
-            <Button type="button" variant="ghost" onClick={() => setModalOpen(false)}>
+            value={formValues.experience_id}
+            error={errors.experience_id}
+            onChange={(e) => updateField("experience_id", e.target.value)}
+          >
+            <option value="">Select an experience</option>
+            {experiences.map((exp) => (
+              <option key={exp.id} value={exp.id}>
+                {exp.organization_name}
+              </option>
+            ))}
+          </SelectField>
+
+          <div>
+            <TextField
+              label="One line resume description"
+              required
+              placeholder="e.g. Managed cross-functional teams of 5+ people"
+              value={formValues.resume_description}
+              error={errors.resume_description}
+              onChange={(e) => updateField("resume_description", e.target.value)}
+            />
+            <p className="mt-1.5 text-xs text-slate-400">
+              This will appear in your Resume Snapshot
+            </p>
+          </div>
+
+          <div className="flex items-center justify-end gap-5 pt-2">
+            <button
+              type="button"
+              onClick={() => setModalOpen(false)}
+              className="text-sm font-medium text-slate-500 transition-colors hover:text-slate-700"
+            >
               Cancel
-            </Button>
-            <Button type="submit">{editingId ? "Save changes" : "Add skill"}</Button>
+            </button>
+            <button
+              type="submit"
+              className="rounded-lg px-5 py-2.5 text-sm font-medium text-white transition-colors"
+              style={{ backgroundColor: ORANGE }}
+            >
+              {editingId ? "Save changes" : "Add Skill"}
+            </button>
           </div>
         </form>
       </Modal>

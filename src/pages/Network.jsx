@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Users, Plus, Pencil, Trash2 } from "lucide-react";
+import { Users, Plus, Pencil, Trash2, Camera } from "lucide-react";
 import { useData } from "../context/DataContext";
 import { formatDate, daysSince } from "../lib/utils";
 import {
@@ -32,6 +32,14 @@ const AVATAR_COLORS = [
   "bg-orange-800",
   "bg-slate-800",
 ];
+
+function LinkedinIcon({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124zM7.114 20.452H3.558V9h3.556v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+    </svg>
+  );
+}
 
 function initials(name) {
   return name
@@ -79,6 +87,15 @@ function validate(values) {
   return errors;
 }
 
+function loadStoredMap(prefix, contacts) {
+  const map = {};
+  contacts.forEach((c) => {
+    const stored = localStorage.getItem(`${prefix}${c.contact_name}`);
+    if (stored) map[c.contact_name] = stored;
+  });
+  return map;
+}
+
 export default function Network() {
   const { networkConnections, addContact, updateContact, deleteContact } = useData();
 
@@ -87,6 +104,41 @@ export default function Network() {
   const [formValues, setFormValues] = useState(emptyForm());
   const [errors, setErrors] = useState({});
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [uploadedPhotos, setUploadedPhotos] = useState(() =>
+    loadStoredMap("photo_", networkConnections)
+  );
+  const [linkedinUrls, setLinkedinUrls] = useState(() =>
+    loadStoredMap("linkedin_", networkConnections)
+  );
+  const [linkedinEditingId, setLinkedinEditingId] = useState(null);
+  const [linkedinDraft, setLinkedinDraft] = useState("");
+
+  function handlePhotoChange(contact, e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result;
+      localStorage.setItem(`photo_${contact.contact_name}`, base64);
+      setUploadedPhotos((p) => ({ ...p, [contact.contact_name]: base64 }));
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function openLinkedinEditor(c) {
+    setLinkedinEditingId(c.id);
+    setLinkedinDraft(linkedinUrls[c.contact_name] ?? "");
+  }
+
+  function saveLinkedinUrl(contact) {
+    const trimmed = linkedinDraft.trim();
+    if (trimmed) {
+      localStorage.setItem(`linkedin_${contact.contact_name}`, trimmed);
+      setLinkedinUrls((u) => ({ ...u, [contact.contact_name]: trimmed }));
+    }
+    setLinkedinEditingId(null);
+    setLinkedinDraft("");
+  }
 
   function openAddModal() {
     setEditingId(null);
@@ -175,11 +227,36 @@ export default function Network() {
               <Card key={c.id} className="p-4 hover:shadow-md hover:-translate-y-0.5 transition-all">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-start gap-3 min-w-0">
-                    <div
-                      className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white ${avatarColor(c.contact_name)}`}
-                      aria-hidden="true"
-                    >
-                      {initials(c.contact_name)}
+                    <div className="relative flex-shrink-0">
+                      {uploadedPhotos[c.contact_name] ? (
+                        <img
+                          src={uploadedPhotos[c.contact_name]}
+                          alt={c.contact_name}
+                          className="h-10 w-10 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div
+                          className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white ${avatarColor(c.contact_name)}`}
+                          aria-hidden="true"
+                        >
+                          {initials(c.contact_name)}
+                        </div>
+                      )}
+                      <label
+                        htmlFor={`photo-upload-${c.id}`}
+                        title={`Upload photo for ${c.contact_name}`}
+                        className="absolute -bottom-1 -right-1 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50"
+                      >
+                        <Camera className="h-3 w-3" aria-hidden="true" />
+                        <span className="sr-only">Upload photo for {c.contact_name}</span>
+                      </label>
+                      <input
+                        id={`photo-upload-${c.id}`}
+                        type="file"
+                        accept="image/png, image/jpeg"
+                        className="hidden"
+                        onChange={(e) => handlePhotoChange(c, e)}
+                      />
                     </div>
                     <div className="min-w-0">
                       <h3 className="font-semibold text-slate-900 truncate">{c.contact_name}</h3>
@@ -188,7 +265,32 @@ export default function Network() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex gap-1 flex-shrink-0">
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <IconButton
+                      icon={LinkedinIcon}
+                      label={
+                        linkedinUrls[c.contact_name]
+                          ? `View ${c.contact_name} on LinkedIn`
+                          : `Add LinkedIn URL for ${c.contact_name}`
+                      }
+                      style={{ color: linkedinUrls[c.contact_name] ? "#0077B5" : "#cbd5e1" }}
+                      onClick={() => {
+                        if (linkedinUrls[c.contact_name]) {
+                          window.open(linkedinUrls[c.contact_name], "_blank", "noopener,noreferrer");
+                        } else {
+                          openLinkedinEditor(c);
+                        }
+                      }}
+                    />
+                    {linkedinUrls[c.contact_name] && linkedinEditingId !== c.id && (
+                      <button
+                        type="button"
+                        onClick={() => openLinkedinEditor(c)}
+                        className="text-xs text-slate-500 hover:text-slate-700 underline"
+                      >
+                        Edit
+                      </button>
+                    )}
                     <IconButton
                       icon={Pencil}
                       label={`Edit ${c.contact_name}`}
@@ -202,6 +304,26 @@ export default function Network() {
                     />
                   </div>
                 </div>
+
+                {linkedinEditingId === c.id && (
+                  <div className="mt-3 flex items-center gap-2">
+                    <input
+                      type="text"
+                      autoFocus
+                      placeholder="Paste LinkedIn URL..."
+                      value={linkedinDraft}
+                      onChange={(e) => setLinkedinDraft(e.target.value)}
+                      className="flex-1 rounded-lg border border-slate-300 px-2 py-1.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    />
+                    <Button
+                      type="button"
+                      className="px-3 py-1.5 text-xs"
+                      onClick={() => saveLinkedinUrl(c)}
+                    >
+                      Save
+                    </Button>
+                  </div>
+                )}
 
                 <div className="mt-3 flex flex-wrap items-center gap-1.5">
                   <Badge tone="slate">{c.connection_source}</Badge>

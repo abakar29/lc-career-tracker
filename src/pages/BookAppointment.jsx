@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Camera } from "lucide-react";
 
 const ADVISORS = [
   {
     id: "tasia",
-    name: "Tasia Sullivan",
+    name: "Sarah Johnson",
     role: "Career Advisor",
     initials: "TS",
     bg: "#E87722",
   },
   {
     id: "nina",
-    name: "Nina Olken",
+    name: "Emily Carter",
     role: "Resume Specialist",
     initials: "NO",
     bg: "#1a1a1a",
@@ -49,6 +49,36 @@ export default function BookAppointment() {
   const [calendarMonth, setCalendarMonth] = useState(new Date(2026, 6, 1));
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
+  const [advisorPhotos, setAdvisorPhotos] = useState(() => {
+    const tasia = localStorage.getItem('advisor_photo_tasia');
+    const nina = localStorage.getItem('advisor_photo_nina');
+    const restored = {};
+    if (tasia) restored.tasia = tasia;
+    if (nina) restored.nina = nina;
+    return restored;
+  });
+
+  const handlePhotoUpload = (advisorId, e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result;
+      const updated = { ...advisorPhotos, [advisorId]: base64 };
+      setAdvisorPhotos(updated);
+      localStorage.setItem(`advisor_photo_${advisorId}`, base64);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  function handleRemovePhoto(advisor) {
+    localStorage.removeItem(`advisor_photo_${advisor.id}`);
+    setAdvisorPhotos((prev) => {
+      const next = { ...prev };
+      delete next[advisor.id];
+      return next;
+    });
+  }
 
   function selectPill(advisorId, duration) {
     setSelectedAdvisor(advisorId);
@@ -89,11 +119,50 @@ export default function BookAppointment() {
       <div className="mt-8 grid gap-8 sm:grid-cols-2">
         {ADVISORS.map((advisor) => (
           <div key={advisor.id} className="flex flex-col items-center text-center">
-            <div
-              className="flex items-center justify-center rounded-full text-2xl font-semibold text-white"
-              style={{ width: "120px", height: "120px", backgroundColor: advisor.bg }}
-            >
-              {advisor.initials}
+            <div className="group relative" style={{ width: "120px", height: "120px" }}>
+              {advisorPhotos[advisor.id] ? (
+                <img
+                  src={advisorPhotos[advisor.id]}
+                  alt={advisor.name}
+                  className="w-full h-full object-cover rounded-full"
+                />
+              ) : (
+                <div
+                  className="flex h-full w-full items-center justify-center rounded-full"
+                  style={{ backgroundColor: advisor.bg }}
+                >
+                  <span className="text-white text-2xl font-bold">{advisor.initials}</span>
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={() => document.getElementById("input-" + advisor.id).click()}
+                title={`Upload photo for ${advisor.name}`}
+                aria-label={`Upload photo for ${advisor.name}`}
+                className="absolute -bottom-1 -right-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50"
+              >
+                <Camera className="h-4 w-4" aria-hidden="true" />
+              </button>
+              <input
+                id={"input-" + advisor.id}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handlePhotoUpload(advisor.id, e)}
+              />
+
+              {advisorPhotos[advisor.id] && (
+                <button
+                  type="button"
+                  onClick={() => handleRemovePhoto(advisor)}
+                  aria-label={`Remove photo for ${advisor.name}`}
+                  title="Remove photo"
+                  className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white text-xs font-bold text-slate-600 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 hover:bg-red-50 hover:text-red-600"
+                >
+                  ✕
+                </button>
+              )}
             </div>
             <p className="mt-4 font-bold text-slate-900">{advisor.name}</p>
             <p className="text-sm text-slate-500">{advisor.role}</p>
