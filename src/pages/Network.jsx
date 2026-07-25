@@ -28,6 +28,7 @@ const DEFAULT_CONTACT_PHOTOS = {
   "Maya Okonkwo": "/Maya.jpg",
   "Daniel Ferreira": "/Daniel.jpg",
   "James Lim": "/James.jpg",
+  "Sarah Whitmore": "/Sarah-Whitmore.png",
 };
 
 const AVATAR_COLORS = [
