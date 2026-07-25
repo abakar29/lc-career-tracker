@@ -225,7 +225,13 @@ export function Modal({ open, onClose, title, children, className = "" }) {
           <h2 id={titleId} className="text-lg font-semibold text-slate-900">
             {title}
           </h2>
-          <IconButton icon={X} label="Close dialog" onClick={onClose} />
+          <IconButton
+            icon={X}
+            label="Close dialog"
+            onClick={onClose}
+            type="button"
+            className="relative z-0"
+          />
         </div>
         <div className="px-6 pb-6 pt-3">{children}</div>
       </div>

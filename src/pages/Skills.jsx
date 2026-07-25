@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Sparkles, Plus, Pencil, Trash2, Target, BarChart3, CheckCircle2 } from "lucide-react";
 import { useData } from "../context/DataContext";
 import { careerPaths, getMissingSkills } from "../data/careerPaths";
@@ -14,7 +14,7 @@ import {
   SelectField,
 } from "../components/ui";
 
-const CONTEXTS = ["Internship", "Study Abroad", "Campus Activity"];
+const BAR_CONTEXTS = ["Internship", "Campus Activity", "Study Abroad"];
 const PROFICIENCY_LEVELS = ["Advanced", "Intermediate", "Beginner"];
 const PROFICIENCY_TONE = { Advanced: "green", Intermediate: "amber", Beginner: "slate" };
 
@@ -25,6 +25,28 @@ const PROFICIENCY_OPTIONS = [
   { level: "Intermediate", description: "Can work independently" },
   { level: "Advanced", description: "Can teach others" },
 ];
+
+const PROFICIENCY_DEFINITIONS = {
+  Beginner: "I understand the basics and need guidance",
+  Intermediate: "I can use this skill independently in real projects",
+  Advanced: "I can handle complex problems and teach others",
+};
+
+const SKILL_CATEGORIES = {
+  Python: "Technical",
+  "Data Visualization": "Technical",
+  "Project Management": "Professional",
+  "Event Planning": "Professional",
+  "Qualitative Research": "Research",
+  "Public Speaking": "Communication",
+  "French (B2)": "Language",
+};
+
+const CATEGORY_ORDER = ["Technical", "Professional", "Research", "Communication", "Language", "Other"];
+
+function categoryFor(skillName) {
+  return SKILL_CATEGORIES[skillName] ?? "Other";
+}
 
 const BUILD_CONTEXTS = [
   "Internship",
@@ -60,56 +82,35 @@ function validate(values) {
   return errors;
 }
 
-function RadarChart({ data, size = 220 }) {
-  const center = size / 2;
-  const radius = size / 2 - 42;
-  const maxValue = Math.max(1, ...data.map((d) => d.value));
-  const angleStep = (2 * Math.PI) / data.length;
+function computeSkillSourceBreakdown(skills) {
+  const counts = BAR_CONTEXTS.map((c) => skills.filter((s) => s.context === c).length);
+  const total = counts.reduce((sum, c) => sum + c, 0) || 1;
+  const percents = counts.map((c) => Math.round((c / total) * 100));
+  const diff = 100 - percents.reduce((sum, p) => sum + p, 0);
+  percents[percents.length - 1] += diff;
+  return BAR_CONTEXTS.map((label, i) => ({ label, count: counts[i], percent: percents[i] }));
+}
 
-  function pointFor(i, value) {
-    const angle = -Math.PI / 2 + i * angleStep;
-    const r = (value / maxValue) * radius;
-    return [center + r * Math.cos(angle), center + r * Math.sin(angle)];
-  }
-
-  const ringLevels = [0.25, 0.5, 0.75, 1];
-  const dataPoints = data.map((d, i) => pointFor(i, d.value));
-  const polygonPoints = dataPoints.map(([x, y]) => `${x},${y}`).join(" ");
-  const summary = data.map((d) => `${d.label}: ${d.value}`).join(", ");
-
+function SkillSourceBars({ data }) {
   return (
-    <svg width={size} height={size} role="img" aria-label={`Skill distribution by context: ${summary}`}>
-      {ringLevels.map((level) => {
-        const ringPoints = data
-          .map((_, i) => pointFor(i, maxValue * level).join(","))
-          .join(" ");
-        return <polygon key={level} points={ringPoints} fill="none" stroke="#e2e8f0" strokeWidth="1" />;
-      })}
-      {data.map((_, i) => {
-        const [x, y] = pointFor(i, maxValue);
-        return <line key={data[i].label} x1={center} y1={center} x2={x} y2={y} stroke="#e2e8f0" strokeWidth="1" />;
-      })}
-      <polygon points={polygonPoints} fill="rgba(234,88,12,0.25)" stroke="#ea580c" strokeWidth="2" />
-      {dataPoints.map(([x, y], i) => (
-        <circle key={data[i].label} cx={x} cy={y} r="3.5" fill="#ea580c" />
+    <div className="w-full space-y-4">
+      {data.map((d) => (
+        <div key={d.label}>
+          <div className="flex items-center justify-between text-sm">
+            <span className="font-medium text-slate-700">{d.label}</span>
+            <span className="text-xs text-slate-500">
+              {d.count} skill{d.count !== 1 ? "s" : ""} · {d.percent}%
+            </span>
+          </div>
+          <div className="mt-1.5 h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
+            <div
+              className="h-full rounded-full"
+              style={{ width: `${d.percent}%`, backgroundColor: ORANGE }}
+            />
+          </div>
+        </div>
       ))}
-      {data.map((d, i) => {
-        const [lx, ly] = pointFor(i, maxValue * 1.32);
-        return (
-          <text
-            key={d.label}
-            x={lx}
-            y={ly}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fontSize="11"
-            className="fill-slate-500"
-          >
-            {d.label} ({d.value})
-          </text>
-        );
-      })}
-    </svg>
+    </div>
   );
 }
 
@@ -141,6 +142,13 @@ export default function Skills() {
   const [formValues, setFormValues] = useState(emptyForm());
   const [errors, setErrors] = useState({});
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [addedToPlan, setAddedToPlan] = useState([]);
+
+  const closeModal = useCallback(() => setModalOpen(false), []);
+
+  function handleAddToLearningPlan(name) {
+    setAddedToPlan((prev) => (prev.includes(name) ? prev : [...prev, name]));
+  }
 
   const selectedPathId = profile.targetCareerPath ?? careerPaths[0].id;
   const selectedPath = careerPaths.find((p) => p.id === selectedPathId) ?? careerPaths[0];
@@ -193,10 +201,7 @@ export default function Skills() {
     setDeleteTarget(null);
   }
 
-  const radarData = CONTEXTS.map((c) => ({
-    label: c,
-    value: skills.filter((s) => s.context === c).length,
-  }));
+  const skillSourceData = computeSkillSourceBreakdown(skills);
 
   return (
     <div>
@@ -216,15 +221,14 @@ export default function Skills() {
       <div className="mt-6 grid lg:grid-cols-2 gap-6">
         <Card className="hover:shadow-md transition-all">
           <CardHeader
-            title="Skill Distribution"
-            subtitle="Where your skills come from"
+            title="Where Your Skills Come From"
             action={<BarChart3 className="h-5 w-5 text-slate-400" aria-hidden="true" />}
           />
-          <div className="px-5 pb-6 pt-2 flex justify-center">
+          <div className="px-5 pb-6 pt-2">
             {skills.length === 0 ? (
               <p className="text-sm text-slate-500 py-10">Add skills to see your distribution.</p>
             ) : (
-              <RadarChart data={radarData} />
+              <SkillSourceBars data={skillSourceData} />
             )}
           </div>
         </Card>
@@ -256,17 +260,29 @@ export default function Skills() {
             ) : (
               <div>
                 <p className="text-sm text-slate-500 mb-2">Missing for {selectedPath.label}:</p>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-col gap-2">
                   {missingSkills.map((name) => (
-                    <button
+                    <div
                       key={name}
-                      type="button"
-                      onClick={() => openAddModal(name)}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-red-300 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 transition-all hover:bg-red-100 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+                      className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-dashed border-red-300 bg-red-50 px-3 py-2"
                     >
-                      <Plus className="h-3 w-3" aria-hidden="true" />
-                      {name}
-                    </button>
+                      <span className="text-xs font-medium text-red-700">{name}</span>
+                      <div className="flex items-center gap-2">
+                        {addedToPlan.includes(name) && (
+                          <span className="text-xs font-medium text-emerald-600">
+                            Added to your learning plan
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleAddToLearningPlan(name)}
+                          aria-label={`Add ${name} to learning plan`}
+                          className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-700 transition-colors hover:bg-red-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+                        >
+                          Add to Learning Plan
+                        </button>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -291,27 +307,40 @@ export default function Skills() {
             </Button>
           </Card>
         ) : (
-          <div className="space-y-6">
-            {PROFICIENCY_LEVELS.map((level) => {
-              const group = skills.filter((s) => s.proficiency_level === level);
-              if (group.length === 0) return null;
+          <div className="space-y-8">
+            {CATEGORY_ORDER.map((category) => {
+              const categorySkills = skills.filter((s) => categoryFor(s.skill_name) === category);
+              if (categorySkills.length === 0) return null;
               return (
-                <div key={level}>
-                  <div className="flex items-center gap-2 mb-2.5">
-                    <Badge tone={PROFICIENCY_TONE[level]}>{level}</Badge>
-                    <span className="text-xs text-slate-400">
-                      {group.length} skill{group.length !== 1 ? "s" : ""}
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {group.map((s) => (
-                      <SkillChip
-                        key={s.id}
-                        skill={s}
-                        onEdit={() => openEditModal(s)}
-                        onDelete={() => setDeleteTarget(s)}
-                      />
-                    ))}
+                <div key={category}>
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    {category}
+                  </p>
+                  <div className="space-y-6">
+                    {PROFICIENCY_LEVELS.map((level) => {
+                      const group = categorySkills.filter((s) => s.proficiency_level === level);
+                      if (group.length === 0) return null;
+                      return (
+                        <div key={level}>
+                          <div className="flex items-center gap-2 mb-2.5">
+                            <Badge tone={PROFICIENCY_TONE[level]}>{level}</Badge>
+                            <span className="text-xs text-slate-400">
+                              {group.length} skill{group.length !== 1 ? "s" : ""}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {group.map((s) => (
+                              <SkillChip
+                                key={s.id}
+                                skill={s}
+                                onEdit={() => openEditModal(s)}
+                                onDelete={() => setDeleteTarget(s)}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               );
@@ -322,17 +351,19 @@ export default function Skills() {
 
       <Modal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={closeModal}
         title={editingId ? "Edit skill" : "Add skill"}
       >
         <form onSubmit={handleSubmit} className="space-y-5" noValidate>
           <TextField
             label="Skill name"
             required
+            autoFocus
             placeholder="e.g. Python, Public Speaking, Excel"
             value={formValues.skill_name}
             error={errors.skill_name}
             onChange={(e) => updateField("skill_name", e.target.value)}
+            className="relative z-10"
           />
 
           <div>
@@ -364,6 +395,11 @@ export default function Skills() {
                 );
               })}
             </div>
+            {formValues.proficiency_level && (
+              <p className="mt-2 text-xs text-slate-500">
+                {PROFICIENCY_DEFINITIONS[formValues.proficiency_level]}
+              </p>
+            )}
             {errors.proficiency_level && (
               <p className="mt-1.5 text-xs text-red-600">{errors.proficiency_level}</p>
             )}

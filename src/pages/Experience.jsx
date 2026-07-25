@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Briefcase, Plus, Pencil, Trash2 } from "lucide-react";
+import { Briefcase, Plus, Pencil, Trash2, ChevronDown, ChevronUp, Copy } from "lucide-react";
 import { useData } from "../context/DataContext";
 import { formatDate } from "../lib/utils";
 import {
@@ -10,6 +10,7 @@ import {
   Modal,
   ConfirmDialog,
   TextField,
+  TextArea,
   SelectField,
   DateField,
 } from "../components/ui";
@@ -31,6 +32,12 @@ const STATUS_TONE = {
   Completed: "slate",
 };
 
+const STATUS_LABELS = {
+  Active: "Current",
+  "In Progress": "In Progress",
+  Completed: "Completed",
+};
+
 const TYPE_STYLES = {
   Internship: { dot: "bg-orange-500", badge: "orange" },
   "Study Abroad": { dot: "bg-amber-500", badge: "amber" },
@@ -47,7 +54,17 @@ const EMPTY_FORM = {
   start_date: "",
   end_date: "",
   current_status: "In Progress",
+  role_description: "",
 };
+
+function loadStoredMap(prefix, items) {
+  const map = {};
+  items.forEach((item) => {
+    const stored = localStorage.getItem(`${prefix}${item.id}`);
+    if (stored) map[item.id] = stored;
+  });
+  return map;
+}
 
 function validate(values) {
   const errors = {};
@@ -64,13 +81,46 @@ function validate(values) {
 }
 
 export default function Experience() {
-  const { experiences, addExperience, updateExperience, deleteExperience } = useData();
+  const { experiences, skills, addExperience, updateExperience, deleteExperience } = useData();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formValues, setFormValues] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [expandedId, setExpandedId] = useState(null);
+  const [copiedId, setCopiedId] = useState(null);
+  const [descriptions, setDescriptions] = useState(() =>
+    loadStoredMap("exp_description_", experiences)
+  );
+  const [achievements, setAchievements] = useState(() =>
+    loadStoredMap("exp_achievements_", experiences)
+  );
+
+  function toggleExpand(id) {
+    setExpandedId((prev) => (prev === id ? null : id));
+  }
+
+  function updateDescription(exp, value) {
+    setDescriptions((prev) => ({ ...prev, [exp.id]: value }));
+    localStorage.setItem(`exp_description_${exp.id}`, value);
+  }
+
+  function updateAchievements(exp, value) {
+    setAchievements((prev) => ({ ...prev, [exp.id]: value }));
+    localStorage.setItem(`exp_achievements_${exp.id}`, value);
+  }
+
+  function descriptionFor(exp) {
+    return descriptions[exp.id] ?? exp.role_description ?? "";
+  }
+
+  function handleCopyBullet(exp) {
+    const bulletText = `• ${exp.organization_name}: ${descriptionFor(exp)}`;
+    navigator.clipboard.writeText(bulletText);
+    setCopiedId(exp.id);
+    setTimeout(() => setCopiedId((id) => (id === exp.id ? null : id)), 1500);
+  }
 
   function openAddModal() {
     setEditingId(null);
@@ -88,6 +138,7 @@ export default function Experience() {
       start_date: exp.start_date ?? "",
       end_date: exp.end_date ?? "",
       current_status: exp.current_status,
+      role_description: exp.role_description ?? "",
     });
     setErrors({});
     setModalOpen(true);
@@ -155,44 +206,114 @@ export default function Experience() {
         <ol className="relative mt-6 border-l-2 border-slate-200 pl-6 space-y-6">
           {sorted.map((exp) => {
             const style = TYPE_STYLES[exp.experience_type] ?? TYPE_STYLES.Other;
+            const isExpanded = expandedId === exp.id;
+            const matchedSkills = skills.filter((s) => s.context === exp.experience_type);
             return (
               <li key={exp.id} className="relative">
                 <span
                   className={`absolute -left-[1.9rem] top-5 h-3 w-3 rounded-full ring-4 ring-slate-50 ${style.dot}`}
                   aria-hidden="true"
                 />
-                <Card className="p-4 hover:shadow-md hover:-translate-y-0.5 transition-all">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <Badge tone={style.badge}>{exp.experience_type}</Badge>
-                        <Badge tone={STATUS_TONE[exp.current_status] ?? "slate"}>
-                          {exp.current_status}
-                        </Badge>
+                <div onClick={() => toggleExpand(exp.id)} className="cursor-pointer">
+                  <Card className="p-4 hover:shadow-md hover:-translate-y-0.5 transition-all">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Badge tone={style.badge}>{exp.experience_type}</Badge>
+                          <Badge tone={STATUS_TONE[exp.current_status] ?? "slate"}>
+                            {STATUS_LABELS[exp.current_status] ?? exp.current_status}
+                          </Badge>
+                        </div>
+                        <h3 className="mt-2 font-semibold text-slate-900 truncate">
+                          {exp.organization_name}
+                        </h3>
+                        {exp.location && <p className="text-sm text-slate-500">{exp.location}</p>}
+                        <p className="text-xs text-slate-400 mt-1">
+                          {formatDate(exp.start_date)} – {formatDate(exp.end_date)}
+                        </p>
                       </div>
-                      <h3 className="mt-2 font-semibold text-slate-900 truncate">
-                        {exp.organization_name}
-                      </h3>
-                      {exp.location && <p className="text-sm text-slate-500">{exp.location}</p>}
-                      <p className="text-xs text-slate-400 mt-1">
-                        {formatDate(exp.start_date)} – {formatDate(exp.end_date)}
-                      </p>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <IconButton
+                          icon={Pencil}
+                          label={`Edit ${exp.organization_name}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEditModal(exp);
+                          }}
+                        />
+                        <IconButton
+                          icon={Trash2}
+                          label={`Delete ${exp.organization_name}`}
+                          variant="danger"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteTarget(exp);
+                          }}
+                        />
+                        {isExpanded ? (
+                          <ChevronUp className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                        )}
+                      </div>
                     </div>
-                    <div className="flex gap-1 flex-shrink-0">
-                      <IconButton
-                        icon={Pencil}
-                        label={`Edit ${exp.organization_name}`}
-                        onClick={() => openEditModal(exp)}
-                      />
-                      <IconButton
-                        icon={Trash2}
-                        label={`Delete ${exp.organization_name}`}
-                        variant="danger"
-                        onClick={() => setDeleteTarget(exp)}
-                      />
-                    </div>
-                  </div>
-                </Card>
+
+                    {isExpanded && (
+                      <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="mt-4 space-y-4 border-t border-slate-100 pt-4 cursor-default"
+                      >
+                        <TextArea
+                          label="Role Description"
+                          placeholder="What did you do here? e.g. Conducted market research for new product lines"
+                          value={descriptionFor(exp)}
+                          onChange={(e) => updateDescription(exp, e.target.value)}
+                        />
+                        <TextArea
+                          label="Key Achievements"
+                          placeholder="e.g. Presented findings to team of 10, analysed 500+ customer responses"
+                          value={achievements[exp.id] ?? ""}
+                          onChange={(e) => updateAchievements(exp, e.target.value)}
+                        />
+                        <div>
+                          <p className="mb-1 block text-sm font-medium text-slate-700">
+                            Skills Developed
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {matchedSkills.length > 0 ? (
+                              matchedSkills.map((s) => (
+                                <Badge key={s.id} tone="orange">
+                                  {s.skill_name}
+                                </Badge>
+                              ))
+                            ) : (
+                              <p className="text-sm text-slate-400">No matching skills yet</p>
+                            )}
+                          </div>
+                        </div>
+                        <div>
+                          <p className="mb-1 block text-sm font-medium text-slate-700">
+                            Resume Bullet
+                          </p>
+                          <div className="flex items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
+                            <p className="flex-1 text-sm text-slate-700">
+                              • {exp.organization_name}:{" "}
+                              {descriptionFor(exp) || "Add a role description to generate a bullet"}
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => handleCopyBullet(exp)}
+                              className="flex flex-shrink-0 items-center gap-1 text-xs font-semibold text-brand-orange hover:text-orange-600"
+                            >
+                              <Copy className="h-3.5 w-3.5" aria-hidden="true" />
+                              {copiedId === exp.id ? "Copied!" : "Copy"}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </Card>
+                </div>
               </li>
             );
           })}
@@ -231,6 +352,12 @@ export default function Experience() {
             value={formValues.location}
             onChange={(e) => updateField("location", e.target.value)}
           />
+          <TextArea
+            label="Role Description"
+            placeholder="Briefly describe what you did or are doing here"
+            value={formValues.role_description}
+            onChange={(e) => updateField("role_description", e.target.value)}
+          />
           <div className="grid grid-cols-2 gap-4">
             <DateField
               label="Start date"
@@ -254,7 +381,7 @@ export default function Experience() {
           >
             {STATUS_OPTIONS.map((s) => (
               <option key={s} value={s}>
-                {s}
+                {STATUS_LABELS[s] ?? s}
               </option>
             ))}
           </SelectField>

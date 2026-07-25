@@ -249,6 +249,22 @@ export default function Resume() {
                       <div className="h-full rounded-full bg-brand-orange" style={{ width: "73%" }} />
                     </div>
 
+                    <div className="mt-5 rounded-lg bg-green-50 p-3 text-[12px] text-green-700">
+                      <p className="font-semibold uppercase tracking-wide">
+                        Relevant Experiences From Your Profile
+                      </p>
+                      <ul className="mt-2 space-y-1">
+                        {experiences.map((exp, i) => (
+                          <li key={i}>
+                            ✓ {exp.organization_name} - {exp.experience_type}
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="mt-2">
+                        Consider adding these to your resume to improve your match score
+                      </p>
+                    </div>
+
                     <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-[#6B7280]">
                       Missing Keywords
                     </p>
