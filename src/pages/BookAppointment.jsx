@@ -9,7 +9,7 @@ const ADVISORS = [
     role: "Career Advisor",
     initials: "TS",
     bg: "#E87722",
-    defaultPhoto: "/Career_Advisor.jpg",
+    defaultPhoto: "/Career-Advisor.jpg",
   },
   {
     id: "nina",
@@ -17,7 +17,7 @@ const ADVISORS = [
     role: "Resume Specialist",
     initials: "NO",
     bg: "#1a1a1a",
-    defaultPhoto: "/Resume_Specialist.jpg",
+    defaultPhoto: "/Resume-Specialist.jpg",
   },
 ];
 
