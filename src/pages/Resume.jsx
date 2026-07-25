@@ -24,7 +24,7 @@ const IMPROVEMENTS = [
 ];
 
 function buildAtsReportText() {
-  return `ATS Match Score: 73%
+  return `Job Match Score: 73%
 
 MISSING KEYWORDS
 ${MISSING_KEYWORDS.join(", ")}
@@ -149,7 +149,7 @@ export default function Resume() {
         <div className="flex flex-col gap-6">
           <div className="rounded-2xl border-l-2 border-l-brand-orange bg-white p-6 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-wide text-brand-orange">
-              ATS Resume Checker
+              Job Fit & Resume Optimizer
             </p>
             <h2 className="mt-2 text-lg font-bold text-[#111827]">
               See how well your resume fits a job
@@ -226,7 +226,7 @@ export default function Resume() {
                       onClick={handleAnalyzeMatch}
                       className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-lg bg-brand-orange px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
                     >
-                      Analyze Match
+                      Analyze Job Fit
                       <ArrowRight className="h-4 w-4" aria-hidden="true" />
                     </button>
                   </div>
@@ -242,7 +242,7 @@ export default function Resume() {
                 {atsStage === "result" && (
                   <div>
                     <div className="flex items-baseline justify-between">
-                      <p className="text-sm font-semibold text-[#111827]">ATS Match Score</p>
+                      <p className="text-sm font-semibold text-[#111827]">Job Match Score</p>
                       <p className="text-sm font-bold text-brand-orange">73%</p>
                     </div>
                     <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-100">

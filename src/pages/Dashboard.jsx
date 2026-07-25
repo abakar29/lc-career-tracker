@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   AlertTriangle,
   ArrowRight,
@@ -43,10 +43,77 @@ const STAT_TINTS = {
   green: { bg: "bg-emerald-50", text: "text-emerald-600" },
 };
 
-function CompactStatCard({ icon: Icon, value, label, tint = "orange" }) {
+const COMPANY_LOGOS = {
+  "Portland General Electric": "/portland-ge-logo.png",
+  "Nike, Inc.": "/nike-logo.png",
+  "Adidas North America": "/adidas-logo.png",
+  "Intel Corporation": "/intel-logo.png",
+};
+
+const LOGO_COLORS = [
+  "bg-orange-600",
+  "bg-slate-600",
+  "bg-amber-500",
+  "bg-neutral-700",
+  "bg-orange-800",
+  "bg-slate-800",
+];
+
+function companyInitials(name) {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join("");
+}
+
+function companyColor(name) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+  return LOGO_COLORS[hash % LOGO_COLORS.length];
+}
+
+function CompanyLogo({ company }) {
+  const [failed, setFailed] = useState(false);
+  const logoUrl = COMPANY_LOGOS[company];
+
+  if (!logoUrl || failed) {
+    return (
+      <div
+        className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white ${companyColor(company)}`}
+        aria-hidden="true"
+      >
+        {companyInitials(company)}
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={logoUrl}
+      alt={`${company} logo`}
+      className="h-8 w-8 flex-shrink-0 rounded-full object-cover"
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
+function CompactStatCard({ icon: Icon, value, label, tint = "orange", onClick }) {
   const colors = STAT_TINTS[tint];
   return (
-    <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow-sm">
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick?.();
+        }
+      }}
+      className="flex cursor-pointer items-center gap-3 rounded-xl bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+    >
       <div className={`rounded-lg ${colors.bg} p-2.5`}>
         <Icon className={`h-5 w-5 ${colors.text}`} aria-hidden="true" />
       </div>
@@ -228,11 +295,14 @@ function ApplicationTrackerCard({ applications: initialApplications }) {
       <ul className="mt-2 max-h-[260px] divide-y divide-slate-100 overflow-y-auto px-5 pb-5">
         {sorted.map((a) => (
           <li key={a.id} className="group flex items-center justify-between gap-3 py-3">
-            <div>
-              <p className="text-sm font-medium text-slate-800">{a.company}</p>
-              <p className="text-xs text-slate-500">
-                {a.role} · Applied {formatDate(a.dateApplied)}
-              </p>
+            <div className="flex min-w-0 items-center gap-3">
+              <CompanyLogo company={a.company} />
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-slate-800">{a.company}</p>
+                <p className="text-xs text-slate-500">
+                  {a.role} · Applied {formatDate(a.dateApplied)}
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-1">
               <button
@@ -259,6 +329,7 @@ function ApplicationTrackerCard({ applications: initialApplications }) {
 }
 
 function NeedsAttentionCard({ networkConnections, resumeVersions }) {
+  const navigate = useNavigate();
   const items = [];
 
   networkConnections.forEach((c) => {
@@ -269,6 +340,8 @@ function NeedsAttentionCard({ networkConnections, resumeVersions }) {
         prefix: `Follow up with ${c.contact_name} at ${c.employer_company}, `,
         days,
         suffix: " since last contact",
+        actionLabel: "Follow up →",
+        onAction: () => navigate("/network"),
       });
     }
   });
@@ -278,6 +351,8 @@ function NeedsAttentionCard({ networkConnections, resumeVersions }) {
       items.push({
         key: `res-${r.id}`,
         text: `"${r.name}" resume hasn't been reviewed since ${formatDate(r.lastUpdated)}`,
+        actionLabel: "Review →",
+        onAction: () => navigate("/resume"),
       });
     }
   });
@@ -292,22 +367,33 @@ function NeedsAttentionCard({ networkConnections, resumeVersions }) {
       </div>
       <ul className="px-5 pb-5 mt-2 space-y-3">
         {items.map((item) => (
-          <li key={item.key} className="flex items-start gap-2.5 text-sm text-slate-600">
-            <span
-              className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-red-500"
-              aria-hidden="true"
-            />
-            <span>
-              {item.days !== undefined ? (
-                <>
-                  {item.prefix}
-                  <strong className="font-bold text-red-600">{item.days} days</strong>
-                  {item.suffix}
-                </>
-              ) : (
-                item.text
-              )}
-            </span>
+          <li key={item.key} className="flex items-start justify-between gap-2.5 text-sm text-slate-600">
+            <div className="flex items-start gap-2.5">
+              <span
+                className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-red-500"
+                aria-hidden="true"
+              />
+              <span>
+                {item.days !== undefined ? (
+                  <>
+                    {item.prefix}
+                    <strong className="font-bold text-red-600">{item.days} days</strong>
+                    {item.suffix}
+                  </>
+                ) : (
+                  item.text
+                )}
+              </span>
+            </div>
+            {item.actionLabel && (
+              <button
+                type="button"
+                onClick={item.onAction}
+                className="flex-shrink-0 rounded-full bg-brand-orange px-2.5 py-1 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+              >
+                {item.actionLabel}
+              </button>
+            )}
           </li>
         ))}
       </ul>
@@ -328,10 +414,16 @@ export default function Dashboard() {
   } = useData();
 
   const [showOnboarding, setShowOnboarding] = useState(!onboarded);
+  const navigate = useNavigate();
+  const applicationTrackerRef = useRef(null);
 
   function dismissOnboarding() {
     completeOnboarding();
     setShowOnboarding(false);
+  }
+
+  function scrollToApplications() {
+    applicationTrackerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   const { score, checks } = computeProfileCompleteness({
@@ -361,24 +453,33 @@ export default function Dashboard() {
           value={experiences.length}
           label="Experience"
           tint="orange"
+          onClick={() => navigate("/experience")}
         />
         <CompactStatCard
           icon={Network}
           value={networkConnections.length}
           label="Network"
           tint="blue"
+          onClick={() => navigate("/network")}
         />
-        <CompactStatCard icon={Zap} value={skills.length} label="Skills" tint="purple" />
+        <CompactStatCard
+          icon={Zap}
+          value={skills.length}
+          label="Skills"
+          tint="purple"
+          onClick={() => navigate("/skills")}
+        />
         <CompactStatCard
           icon={FileCheck}
           value={applications.length}
           label="Applications"
           tint="green"
+          onClick={scrollToApplications}
         />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2" ref={applicationTrackerRef}>
           <ApplicationTrackerCard applications={applications} />
         </div>
         <NeedsAttentionCard networkConnections={networkConnections} resumeVersions={resumeVersions} />
