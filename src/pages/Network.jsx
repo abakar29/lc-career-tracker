@@ -31,6 +31,13 @@ const DEFAULT_CONTACT_PHOTOS = {
   "Sarah Whitmore": "/Sarah-Whitmore.png",
 };
 
+const DEFAULT_LINKEDIN_URLS = {
+  "Maya Okonkwo": "https://www.linkedin.com/in/abu-bakar-085870336/",
+  "Daniel Ferreira": "https://www.linkedin.com/in/abu-bakar-085870336/",
+  "Sarah Whitmore": "https://www.linkedin.com/in/abu-bakar-085870336/",
+  "James Lim": "https://www.linkedin.com/in/abu-bakar-085870336/",
+};
+
 const AVATAR_COLORS = [
   "bg-orange-600",
   "bg-slate-600",
@@ -230,6 +237,7 @@ export default function Network() {
           {sorted.map((c) => {
             const days = daysSince(c.last_contacted_date);
             const status = urgency(days);
+            const contactLinkedin = linkedinUrls[c.contact_name] || DEFAULT_LINKEDIN_URLS[c.contact_name];
             return (
               <Card key={c.id} className="p-4 hover:shadow-md hover:-translate-y-0.5 transition-all">
                 <div className="flex items-start justify-between gap-2">
@@ -276,20 +284,20 @@ export default function Network() {
                     <IconButton
                       icon={LinkedinIcon}
                       label={
-                        linkedinUrls[c.contact_name]
+                        contactLinkedin
                           ? `View ${c.contact_name} on LinkedIn`
                           : `Add LinkedIn URL for ${c.contact_name}`
                       }
-                      style={{ color: linkedinUrls[c.contact_name] ? "#0077B5" : "#cbd5e1" }}
+                      style={{ color: contactLinkedin ? "#0077B5" : "#cbd5e1" }}
                       onClick={() => {
-                        if (linkedinUrls[c.contact_name]) {
-                          window.open(linkedinUrls[c.contact_name], "_blank", "noopener,noreferrer");
+                        if (contactLinkedin) {
+                          window.open(contactLinkedin, "_blank", "noopener,noreferrer");
                         } else {
                           openLinkedinEditor(c);
                         }
                       }}
                     />
-                    {linkedinUrls[c.contact_name] && linkedinEditingId !== c.id && (
+                    {contactLinkedin && linkedinEditingId !== c.id && (
                       <button
                         type="button"
                         onClick={() => openLinkedinEditor(c)}
