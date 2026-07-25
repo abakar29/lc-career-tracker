@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Camera } from "lucide-react";
+import { ChevronLeft, ChevronRight, Camera, CheckCircle2 } from "lucide-react";
 
 const ADVISORS = [
   {
@@ -51,6 +51,8 @@ export default function BookAppointment() {
   const [calendarMonth, setCalendarMonth] = useState(new Date(2026, 6, 1));
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
+  const [confirmationError, setConfirmationError] = useState(false);
+  const [confirmedBooking, setConfirmedBooking] = useState(null);
   const [advisorPhotos, setAdvisorPhotos] = useState(() => {
     const tasia = localStorage.getItem('advisor_photo_tasia');
     const nina = localStorage.getItem('advisor_photo_nina');
@@ -87,6 +89,33 @@ export default function BookAppointment() {
     setSelectedDuration(duration);
   }
 
+  function handleConfirmBooking(advisor) {
+    if (!advisor || !selectedDuration || !selectedDate || !selectedTime) {
+      setConfirmationError(true);
+      return;
+    }
+    setConfirmationError(false);
+    setConfirmedBooking({
+      advisorName: advisor.name,
+      duration: selectedDuration,
+      dateLabel: selectedDate.toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+      }),
+      time: selectedTime,
+    });
+  }
+
+  function resetBooking() {
+    setSelectedAdvisor(null);
+    setSelectedDuration(null);
+    setSelectedDate(null);
+    setSelectedTime(null);
+    setConfirmationError(false);
+    setConfirmedBooking(null);
+  }
+
   function prevMonth() {
     setCalendarMonth((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
   }
@@ -118,6 +147,29 @@ export default function BookAppointment() {
       <h1 className="mt-3 text-2xl font-bold text-slate-900">Book an Appointment</h1>
       <p className="mt-1 text-slate-500">Choose an advisor and select your session length</p>
 
+      {confirmedBooking ? (
+        <div className="mt-8 flex flex-col items-center rounded-2xl bg-white p-10 text-center shadow-sm">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-100">
+            <CheckCircle2 className="h-8 w-8 text-green-600" aria-hidden="true" />
+          </div>
+          <h2 className="mt-4 text-xl font-bold text-slate-900">Appointment Confirmed!</h2>
+          <p className="mt-2 max-w-sm text-slate-600">
+            Your {confirmedBooking.duration} min session with {confirmedBooking.advisorName} is
+            booked for {confirmedBooking.dateLabel} at {confirmedBooking.time}
+          </p>
+          <p className="mt-1 text-sm text-slate-500">
+            A confirmation has been sent to careers@lclark.edu
+          </p>
+          <button
+            type="button"
+            onClick={resetBooking}
+            className="mt-6 rounded-lg px-5 py-2.5 text-sm font-medium text-white transition-colors"
+            style={{ backgroundColor: "#E87722" }}
+          >
+            Book Another Appointment
+          </button>
+        </div>
+      ) : (
       <div className="mt-8 grid gap-8 sm:grid-cols-2">
         {ADVISORS.map((advisor) => (
           <div key={advisor.id} className="flex flex-col items-center text-center">
@@ -320,17 +372,25 @@ export default function BookAppointment() {
                 {selectedTime && (
                   <button
                     type="button"
+                    onClick={() => handleConfirmBooking(advisor)}
                     className="mt-3 w-full rounded-lg py-3 text-sm font-medium text-white transition-colors"
                     style={{ backgroundColor: "#E87722" }}
                   >
                     Confirm Booking
                   </button>
                 )}
+
+                {confirmationError && selectedAdvisor === advisor.id && (
+                  <p className="mt-2 text-xs font-medium text-red-600">
+                    Please select all options before confirming
+                  </p>
+                )}
               </div>
             )}
           </div>
         ))}
       </div>
+      )}
     </div>
   );
 }
