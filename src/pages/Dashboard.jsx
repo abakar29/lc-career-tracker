@@ -76,7 +76,7 @@ function CareerReadinessHero({ score, checks, classYear, major }) {
           <p className="text-orange-300 text-sm font-medium">
             Class of {classYear} · {major}
           </p>
-          <h1 className="mt-1 text-[32px] font-bold">Good evening, Abu 👋</h1>
+          <h1 className="mt-1 text-[32px] font-bold">Good evening, Abu</h1>
           <p className="mt-3 max-w-md text-neutral-300 text-sm">
             Your Career Readiness Score reflects how prepared you are to apply, right now,
             based on your logged experience, network, and skills.

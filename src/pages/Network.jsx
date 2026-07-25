@@ -24,6 +24,12 @@ const CONNECTION_SOURCES = [
   "Other",
 ];
 
+const DEFAULT_CONTACT_PHOTOS = {
+  "Maya Okonkwo": "/Maya.jpg",
+  "Daniel Ferreira": "/Daniel.jpg",
+  "James Lim": "/James.jpg",
+};
+
 const AVATAR_COLORS = [
   "bg-orange-600",
   "bg-slate-600",
@@ -228,9 +234,9 @@ export default function Network() {
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-start gap-3 min-w-0">
                     <div className="relative flex-shrink-0">
-                      {uploadedPhotos[c.contact_name] ? (
+                      {uploadedPhotos[c.contact_name] || DEFAULT_CONTACT_PHOTOS[c.contact_name] ? (
                         <img
-                          src={uploadedPhotos[c.contact_name]}
+                          src={uploadedPhotos[c.contact_name] || DEFAULT_CONTACT_PHOTOS[c.contact_name]}
                           alt={c.contact_name}
                           className="h-10 w-10 rounded-full object-cover"
                         />

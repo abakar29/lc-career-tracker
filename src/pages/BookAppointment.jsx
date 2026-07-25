@@ -9,6 +9,7 @@ const ADVISORS = [
     role: "Career Advisor",
     initials: "TS",
     bg: "#E87722",
+    defaultPhoto: "/Career_Advisor.jpg",
   },
   {
     id: "nina",
@@ -16,6 +17,7 @@ const ADVISORS = [
     role: "Resume Specialist",
     initials: "NO",
     bg: "#1a1a1a",
+    defaultPhoto: "/Resume_Specialist.jpg",
   },
 ];
 
@@ -120,9 +122,9 @@ export default function BookAppointment() {
         {ADVISORS.map((advisor) => (
           <div key={advisor.id} className="flex flex-col items-center text-center">
             <div className="group relative" style={{ width: "120px", height: "120px" }}>
-              {advisorPhotos[advisor.id] ? (
+              {advisorPhotos[advisor.id] || advisor.defaultPhoto ? (
                 <img
-                  src={advisorPhotos[advisor.id]}
+                  src={advisorPhotos[advisor.id] || advisor.defaultPhoto}
                   alt={advisor.name}
                   className="w-full h-full object-cover rounded-full"
                 />
