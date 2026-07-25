@@ -17,7 +17,7 @@ const ADVISORS = [
     role: "Resume Specialist",
     initials: "NO",
     bg: "#1a1a1a",
-    defaultPhoto: "/Emily Carter.jpg",
+    defaultPhoto: "/Emily-Carter.jpg",
   },
 ];
 
