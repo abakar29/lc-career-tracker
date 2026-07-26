@@ -66,7 +66,7 @@ export function IconButton({ icon: Icon, label, variant = "default", className =
     <button
       aria-label={label}
       title={label}
-      className={`inline-flex items-center justify-center rounded-lg p-2 transition-all active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
+      className={`inline-flex items-center justify-center rounded-lg p-3 transition-all active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
         variant === "danger"
           ? "text-red-600 hover:bg-red-50 focus-visible:ring-red-500"
           : "text-slate-500 hover:bg-slate-100 focus-visible:ring-slate-400"

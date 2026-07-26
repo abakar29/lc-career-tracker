@@ -303,7 +303,7 @@ export default function Experience() {
                             <button
                               type="button"
                               onClick={() => handleCopyBullet(exp)}
-                              className="flex flex-shrink-0 items-center gap-1 text-xs font-semibold text-brand-orange hover:text-orange-600"
+                              className="flex flex-shrink-0 items-center gap-1 text-xs font-semibold text-[#B85A12] hover:text-orange-600"
                             >
                               <Copy className="h-3.5 w-3.5" aria-hidden="true" />
                               {copiedId === exp.id ? "Copied!" : "Copy"}

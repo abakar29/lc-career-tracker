@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "../supabaseClient";
+import { Button } from "../components/ui";
 
 const LC_EMAIL_DOMAIN = "@lclark.edu";
 const ORANGE = "#E87722";
@@ -123,14 +124,9 @@ export default function Login() {
           {error && <p className="text-sm text-red-600">{error}</p>}
           {info && <p className="text-sm text-emerald-600">{info}</p>}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-            style={{ backgroundColor: ORANGE }}
-          >
+          <Button type="submit" disabled={loading} className="w-full">
             {loading ? "Please wait..." : mode === "signup" ? "Sign Up" : "Sign In"}
-          </button>
+          </Button>
         </form>
 
         <p className="text-center text-sm text-slate-500 mt-5">

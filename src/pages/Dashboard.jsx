@@ -167,7 +167,7 @@ function CareerReadinessHero({ score, checks, classYear, major }) {
             <ol className="mt-4 max-w-md space-y-3.5">
               {next.map((c, i) => (
                 <li key={c.label} className="flex items-start gap-3">
-                  <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-bold text-brand-orange">
+                  <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-bold text-[#B85A12]">
                     {i + 1}
                   </span>
                   <div className="flex-1 min-w-0">
@@ -176,7 +176,7 @@ function CareerReadinessHero({ score, checks, classYear, major }) {
                     {c.cta && (
                       <Link
                         to={c.cta.to}
-                        className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-brand-orange hover:text-orange-300"
+                        className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-[#B85A12] hover:text-orange-300"
                       >
                         {c.cta.label}
                         <ArrowRight className="h-3 w-3" aria-hidden="true" />
@@ -332,7 +332,7 @@ function ApplicationTrackerCard({ applications: initialApplications }) {
                 label={`Delete ${a.company} application`}
                 variant="danger"
                 onClick={() => deleteApplication(a.id)}
-                className="opacity-0 transition-opacity group-hover:opacity-100"
+                className="opacity-60 transition-opacity group-hover:opacity-100"
               />
             </div>
           </li>

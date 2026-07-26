@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Camera, CheckCircle2 } from "lucide-react";
+import { Button } from "../components/ui";
 
 const ADVISORS = [
   {
@@ -370,14 +371,13 @@ export default function BookAppointment() {
                 </p>
 
                 {selectedTime && (
-                  <button
+                  <Button
                     type="button"
                     onClick={() => handleConfirmBooking(advisor)}
-                    className="mt-3 w-full rounded-lg py-3 text-sm font-medium text-white transition-colors"
-                    style={{ backgroundColor: "#E87722" }}
+                    className="mt-3 w-full"
                   >
                     Confirm Booking
-                  </button>
+                  </Button>
                 )}
 
                 {confirmationError && selectedAdvisor === advisor.id && (

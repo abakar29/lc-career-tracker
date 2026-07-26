@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, Badge, Button } from "../components/ui";
 
@@ -58,6 +59,16 @@ const TABLE_COLUMNS = [
   "Last Active",
 ];
 
+const COLUMN_KEYS = {
+  "Student ID": "id",
+  Major: "major",
+  Experiences: "experiences",
+  Skills: "skills",
+  Applications: "applications",
+  "Readiness Score": "readiness",
+  "Last Active": "lastActive",
+};
+
 function BarRow({ label, value, color = "#E87722" }) {
   return (
     <div>
@@ -77,6 +88,35 @@ function BarRow({ label, value, color = "#E87722" }) {
 
 export default function Admin() {
   const navigate = useNavigate();
+  const [sortKey, setSortKey] = useState("readiness");
+  const [sortDirection, setSortDirection] = useState("desc");
+
+  function handleSort(column) {
+    const key = COLUMN_KEYS[column];
+    if (sortKey === key) {
+      setSortDirection((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDirection("desc");
+    }
+  }
+
+  function handleSortKeyDown(e, column) {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleSort(column);
+    }
+  }
+
+  const sortedRows = [...STUDENT_ROWS].sort((a, b) => {
+    const aVal = a[sortKey];
+    const bVal = b[sortKey];
+    const comparison =
+      typeof aVal === "number" && typeof bVal === "number"
+        ? aVal - bVal
+        : String(aVal).localeCompare(String(bVal));
+    return sortDirection === "asc" ? comparison : -comparison;
+  });
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#F8F9FB" }}>
@@ -173,18 +213,30 @@ export default function Admin() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-200">
-                  {TABLE_COLUMNS.map((col) => (
-                    <th
-                      key={col}
-                      className="text-left font-medium text-slate-500 px-3 py-2 cursor-pointer select-none hover:text-slate-700"
-                    >
-                      {col} <span className="text-slate-300">↕</span>
-                    </th>
-                  ))}
+                  {TABLE_COLUMNS.map((col) => {
+                    const key = COLUMN_KEYS[col];
+                    const isActive = sortKey === key;
+                    return (
+                      <th
+                        key={col}
+                        role="button"
+                        tabIndex={0}
+                        aria-sort={isActive ? (sortDirection === "asc" ? "ascending" : "descending") : "none"}
+                        onClick={() => handleSort(col)}
+                        onKeyDown={(e) => handleSortKeyDown(e, col)}
+                        className="text-left font-medium text-slate-500 px-3 py-2 cursor-pointer select-none hover:text-slate-700"
+                      >
+                        {col}{" "}
+                        <span className={isActive ? "text-slate-600" : "text-slate-300"}>
+                          {isActive ? (sortDirection === "asc" ? "↑" : "↓") : "↕"}
+                        </span>
+                      </th>
+                    );
+                  })}
                 </tr>
               </thead>
               <tbody>
-                {STUDENT_ROWS.map((row, i) => (
+                {sortedRows.map((row, i) => (
                   <tr
                     key={row.id}
                     className={i % 2 === 1 ? "bg-slate-50" : "bg-white"}

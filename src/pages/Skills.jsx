@@ -277,7 +277,11 @@ export default function Skills() {
                           type="button"
                           onClick={() => handleAddToLearningPlan(name)}
                           aria-label={`Add ${name} to learning plan`}
-                          className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-700 transition-colors hover:bg-red-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+                          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 ${
+                            addedToPlan.includes(name)
+                              ? "bg-green-100 text-green-700 hover:bg-green-200 focus-visible:ring-green-400"
+                              : "bg-red-100 text-red-700 hover:bg-red-200 focus-visible:ring-red-400"
+                          }`}
                         >
                           Add to Learning Plan
                         </button>
@@ -386,7 +390,7 @@ export default function Skills() {
                   >
                     <p
                       className="text-sm font-semibold"
-                      style={{ color: isSelected ? ORANGE : "#1e293b" }}
+                      style={{ color: isSelected ? "#B85A12" : "#1e293b" }}
                     >
                       {opt.level}
                     </p>
@@ -469,13 +473,7 @@ export default function Skills() {
             >
               Cancel
             </button>
-            <button
-              type="submit"
-              className="rounded-lg px-5 py-2.5 text-sm font-medium text-white transition-colors"
-              style={{ backgroundColor: ORANGE }}
-            >
-              {editingId ? "Save changes" : "Add Skill"}
-            </button>
+            <Button type="submit">{editingId ? "Save changes" : "Add Skill"}</Button>
           </div>
         </form>
       </Modal>

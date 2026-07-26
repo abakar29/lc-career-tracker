@@ -83,7 +83,7 @@ export default function Resume() {
       <div className="mt-6 grid grid-cols-1 items-stretch gap-6 lg:grid-cols-2">
         <div className="flex flex-col gap-6">
           <div className="rounded-2xl border-l-2 border-l-brand-orange bg-white p-6 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-brand-orange">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[#B85A12]">
               Experience Snapshot
             </p>
             <h2 className="mt-2 text-lg font-bold text-[#111827]">
@@ -148,7 +148,7 @@ export default function Resume() {
 
         <div className="flex flex-col gap-6">
           <div className="rounded-2xl border-l-2 border-l-brand-orange bg-white p-6 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-brand-orange">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[#B85A12]">
               Job Fit & Resume Optimizer
             </p>
             <h2 className="mt-2 text-lg font-bold text-[#111827]">

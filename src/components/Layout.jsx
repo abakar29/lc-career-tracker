@@ -107,7 +107,7 @@ export default function Layout() {
   }, [profileOpen]);
 
   return (
-    <div className="min-h-screen bg-[#F5F4F2] md:flex">
+    <div className="min-h-screen bg-[#F8F9FB] md:flex">
       {/* Desktop sidebar */}
       <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-neutral-950">
         <div className="flex flex-col items-center gap-2 px-5 py-6 border-b border-white/10">
