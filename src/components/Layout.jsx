@@ -61,7 +61,39 @@ export default function Layout() {
   const navigate = useNavigate();
   const [profileOpen, setProfileOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const [photoUrl, setPhotoUrl] = useState(null);
   const profileRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUserEmail(data.user?.email ?? "");
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!userEmail) return;
+    const saved = localStorage.getItem(`profile_photo_${userEmail}`);
+    setPhotoUrl(saved || null);
+  }, [userEmail]);
+
+  const userInitial = userEmail ? userEmail[0].toUpperCase() : "";
+
+  function handlePhotoChange(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result;
+      setPhotoUrl(dataUrl);
+      if (userEmail) {
+        localStorage.setItem(`profile_photo_${userEmail}`, dataUrl);
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  }
 
   useEffect(() => {
     if (!profileOpen) return;
@@ -101,7 +133,7 @@ export default function Layout() {
           {profileOpen && (
             <div className="absolute bottom-full left-3 right-3 mb-2 rounded-lg bg-neutral-900 border border-white/10 shadow-lg overflow-hidden">
               <div className="px-4 py-3">
-                <p className="text-sm font-medium text-white truncate">Abu Bakar</p>
+                <p className="text-sm font-medium text-white truncate">{userEmail}</p>
                 <p className="text-xs text-neutral-400">Class of 2029</p>
               </div>
               <div className="border-t border-white/10" />
@@ -160,21 +192,55 @@ export default function Layout() {
               </div>
             </div>
           )}
-          <button
-            type="button"
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png"
+            className="hidden"
+            onChange={handlePhotoChange}
+          />
+          <div
+            role="button"
+            tabIndex={0}
             onClick={() => setProfileOpen((open) => !open)}
-            className="w-full flex items-center gap-3 rounded-lg -mx-2 px-2 py-1.5 hover:bg-white/10 transition-colors"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setProfileOpen((open) => !open);
+              }
+            }}
+            className="w-full flex items-center gap-3 rounded-lg -mx-2 px-2 py-1.5 hover:bg-white/10 transition-colors cursor-pointer"
           >
-            <img
-              src="/Abu_Bakar.jpeg"
-              alt=""
-              className="h-9 w-9 flex-shrink-0 rounded-full object-cover"
-            />
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                fileInputRef.current?.click();
+              }}
+              aria-label="Change profile photo"
+              className="group relative h-9 w-9 flex-shrink-0 rounded-full overflow-hidden"
+            >
+              {photoUrl ? (
+                <img
+                  src={photoUrl}
+                  alt=""
+                  className="h-9 w-9 rounded-full object-cover"
+                />
+              ) : (
+                <div className="h-9 w-9 rounded-full bg-orange-700 flex items-center justify-center text-sm font-semibold text-white">
+                  {userInitial}
+                </div>
+              )}
+
+              <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/60 text-white text-[10px] font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                Edit
+              </div>
+            </button>
             <div className="min-w-0 text-left">
-              <p className="text-sm font-medium text-white truncate">Abu Bakar</p>
+              <p className="text-sm font-medium text-white truncate">{userEmail}</p>
               <p className="text-xs text-neutral-400">Class of 2029</p>
             </div>
-          </button>
+          </div>
         </div>
       </aside>
 

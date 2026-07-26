@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  AlertTriangle,
   ArrowRight,
   GraduationCap,
   Network,
@@ -9,9 +8,14 @@ import {
   FileCheck,
   Plus,
   Trash2,
+  Compass,
+  AlertCircle,
+  Clock,
+  TrendingUp,
 } from "lucide-react";
 import { useData } from "../context/DataContext";
 import { formatDate, daysSince, computeProfileCompleteness } from "../lib/utils";
+import { networkConnections as mockNetworkConnections } from "../data/mockData";
 import {
   CardHeader,
   Badge,
@@ -247,7 +251,7 @@ function ApplicationTrackerCard({ applications: initialApplications }) {
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md">
+    <div className="h-full rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md">
       <CardHeader
         title="Application Tracker"
         subtitle={`${applications.length} applications`}
@@ -338,75 +342,82 @@ function ApplicationTrackerCard({ applications: initialApplications }) {
   );
 }
 
-function NeedsAttentionCard({ networkConnections, resumeVersions }) {
+function CareerCompassCard() {
   const navigate = useNavigate();
-  const items = [];
 
-  networkConnections.forEach((c) => {
-    const days = daysSince(c.last_contacted_date);
-    if (days > 30) {
-      items.push({
-        key: `net-${c.id}`,
-        prefix: `Follow up with ${c.contact_name} at ${c.employer_company}, `,
-        days,
-        suffix: " since last contact",
-        actionLabel: "Follow up →",
-        onAction: () => navigate("/network"),
-      });
-    }
-  });
+  const mostOverdueContact = [...mockNetworkConnections].sort(
+    (a, b) => daysSince(b.last_contacted_date) - daysSince(a.last_contacted_date)
+  )[0];
+  const overdueDays = daysSince(mostOverdueContact.last_contacted_date);
 
-  resumeVersions.forEach((r) => {
-    if (r.status === "Needs review") {
-      items.push({
-        key: `res-${r.id}`,
-        text: `"${r.name}" resume hasn't been reviewed since ${formatDate(r.lastUpdated)}`,
-        actionLabel: "Review →",
-        onAction: () => navigate("/resume"),
-      });
-    }
-  });
-
-  if (items.length === 0) return null;
+  const items = [
+    {
+      key: "follow-up",
+      borderColor: "border-l-red-500",
+      icon: AlertCircle,
+      iconColor: "text-red-500",
+      title: `Follow up with ${mostOverdueContact.contact_name}`,
+      subtitle: `${overdueDays} days since last contact — overdue`,
+      actionLabel: "Follow up →",
+      onAction: () => navigate("/network"),
+    },
+    {
+      key: "resume",
+      borderColor: "border-l-amber-500",
+      icon: Clock,
+      iconColor: "text-amber-500",
+      title: "Update your Product Management resume",
+      subtitle: "Last reviewed May 5 — needs attention",
+      actionLabel: "Review →",
+      onAction: () => navigate("/resume"),
+    },
+    {
+      key: "skills",
+      borderColor: "border-l-emerald-500",
+      icon: TrendingUp,
+      iconColor: "text-emerald-500",
+      title: "Add more skills to your profile",
+      subtitle: "You have 5 experiences but only 7 skills logged",
+      actionLabel: "Add Skills →",
+      onAction: () => navigate("/skills"),
+    },
+  ];
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md">
+    <div className="h-full rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md">
       <div className="flex items-start justify-between gap-3 px-5 pt-5">
-        <h2 className="text-base font-semibold text-slate-900">Needs Your Attention</h2>
-        <AlertTriangle className="h-5 w-5 flex-shrink-0 text-red-500" aria-hidden="true" />
+        <div>
+          <h2 className="text-base font-semibold text-slate-900">Career Compass</h2>
+          <p className="text-sm text-slate-500 mt-0.5">Your personalized next steps</p>
+        </div>
+        <Compass className="h-5 w-5 flex-shrink-0 text-brand-orange" aria-hidden="true" />
       </div>
-      <ul className="px-5 pb-5 mt-2 space-y-3">
+      <div className="px-5 pb-5 mt-3 space-y-3">
         {items.map((item) => (
-          <li key={item.key} className="flex items-start justify-between gap-2.5 text-sm text-slate-600">
+          <div
+            key={item.key}
+            className={`rounded-lg border border-slate-200 border-l-4 bg-slate-50/60 px-3 py-3 ${item.borderColor}`}
+          >
             <div className="flex items-start gap-2.5">
-              <span
-                className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-red-500"
+              <item.icon
+                className={`h-4 w-4 flex-shrink-0 mt-0.5 ${item.iconColor}`}
                 aria-hidden="true"
               />
-              <span>
-                {item.days !== undefined ? (
-                  <>
-                    {item.prefix}
-                    <strong className="font-bold text-red-600">{item.days} days</strong>
-                    {item.suffix}
-                  </>
-                ) : (
-                  item.text
-                )}
-              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-slate-900">{item.title}</p>
+                <p className="text-xs text-slate-500 mt-0.5">{item.subtitle}</p>
+                <button
+                  type="button"
+                  onClick={item.onAction}
+                  className="mt-2 rounded-full bg-brand-orange px-2.5 py-1 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+                >
+                  {item.actionLabel}
+                </button>
+              </div>
             </div>
-            {item.actionLabel && (
-              <button
-                type="button"
-                onClick={item.onAction}
-                className="flex-shrink-0 rounded-full bg-brand-orange px-2.5 py-1 text-xs font-semibold text-white transition-opacity hover:opacity-90"
-              >
-                {item.actionLabel}
-              </button>
-            )}
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
@@ -488,11 +499,13 @@ export default function Dashboard() {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2" ref={applicationTrackerRef}>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 items-stretch">
+        <div className="lg:col-span-2 h-full" ref={applicationTrackerRef}>
           <ApplicationTrackerCard applications={applications} />
         </div>
-        <NeedsAttentionCard networkConnections={networkConnections} resumeVersions={resumeVersions} />
+        <div className="h-full">
+          <CareerCompassCard />
+        </div>
       </div>
     </div>
   );
