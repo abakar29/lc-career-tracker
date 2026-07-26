@@ -1,6 +1,20 @@
-import { NavLink, Outlet, useLocation } from "react-router-dom";
-import { LayoutDashboard, Briefcase, Users, Sparkles, FileText, Building2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import {
+  LayoutDashboard,
+  Briefcase,
+  Users,
+  Sparkles,
+  FileText,
+  Building2,
+  Settings,
+  Shield,
+  Info,
+  LogOut,
+  Target,
+} from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { supabase } from "../supabaseClient";
 
 const NAV_ITEMS = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
@@ -9,6 +23,27 @@ const NAV_ITEMS = [
   { to: "/skills", label: "Skills", icon: Sparkles },
   { to: "/resume", label: "Resume", icon: FileText },
   { to: "/career-center", label: "Career Center", icon: Building2 },
+];
+
+const ABOUT_SECTIONS = [
+  {
+    icon: Briefcase,
+    title: "Track Your Journey",
+    description:
+      "Log internships, study abroad, campus activities and every experience that builds your career story",
+  },
+  {
+    icon: Users,
+    title: "Build Your Network",
+    description:
+      "Keep track of mentors, alumni and recruiters with smart follow-up reminders so no connection goes cold",
+  },
+  {
+    icon: Target,
+    title: "Land Your Dream Role",
+    description:
+      "Optimize your resume for any job, identify skill gaps, and track applications all in one place",
+  },
 ];
 
 function navLinkClasses(isActive) {
@@ -23,6 +58,21 @@ function navLinkClasses(isActive) {
 export default function Layout() {
   const location = useLocation();
   const reduceMotion = useReducedMotion();
+  const navigate = useNavigate();
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
+  const profileRef = useRef(null);
+
+  useEffect(() => {
+    if (!profileOpen) return;
+    function handleClickOutside(e) {
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setProfileOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [profileOpen]);
 
   return (
     <div className="min-h-screen bg-[#F5F4F2] md:flex">
@@ -47,16 +97,84 @@ export default function Layout() {
             </NavLink>
           ))}
         </nav>
-        <div className="flex items-center gap-3 px-5 py-5 border-t border-white/10">
-          <img
-            src="/Abu_Bakar.jpeg"
-            alt=""
-            className="h-9 w-9 flex-shrink-0 rounded-full object-cover"
-          />
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-white truncate">Abu Bakar</p>
-            <p className="text-xs text-neutral-400">Class of 2029</p>
-          </div>
+        <div ref={profileRef} className="relative px-5 py-5 border-t border-white/10">
+          {profileOpen && (
+            <div className="absolute bottom-full left-3 right-3 mb-2 rounded-lg bg-neutral-900 border border-white/10 shadow-lg overflow-hidden">
+              <div className="px-4 py-3">
+                <p className="text-sm font-medium text-white truncate">Abu Bakar</p>
+                <p className="text-xs text-neutral-400">Class of 2029</p>
+              </div>
+              <div className="border-t border-white/10" />
+              <div className="py-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProfileOpen(false);
+                    navigate("/settings");
+                  }}
+                  className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-neutral-200 hover:bg-white/10 hover:text-white transition-colors"
+                >
+                  <Settings className="h-4 w-4" />
+                  Settings
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProfileOpen(false);
+                    navigate("/admin");
+                  }}
+                  className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-neutral-200 hover:bg-white/10 hover:text-white transition-colors"
+                >
+                  <Shield className="h-4 w-4" />
+                  Faculty View
+                  <span className="ml-auto text-xs text-neutral-500">Career Center</span>
+                </button>
+              </div>
+              <div className="border-t border-white/10" />
+              <div className="py-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProfileOpen(false);
+                    setAboutOpen(true);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-neutral-200 hover:bg-white/10 hover:text-white transition-colors"
+                >
+                  <Info className="h-4 w-4" />
+                  About PioneerPath
+                </button>
+              </div>
+              <div className="border-t border-white/10" />
+              <div className="py-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProfileOpen(false);
+                    supabase.auth.signOut();
+                  }}
+                  className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-neutral-200 hover:bg-white/10 hover:text-white transition-colors"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </button>
+              </div>
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => setProfileOpen((open) => !open)}
+            className="w-full flex items-center gap-3 rounded-lg -mx-2 px-2 py-1.5 hover:bg-white/10 transition-colors"
+          >
+            <img
+              src="/Abu_Bakar.jpeg"
+              alt=""
+              className="h-9 w-9 flex-shrink-0 rounded-full object-cover"
+            />
+            <div className="min-w-0 text-left">
+              <p className="text-sm font-medium text-white truncate">Abu Bakar</p>
+              <p className="text-xs text-neutral-400">Class of 2029</p>
+            </div>
+          </button>
         </div>
       </aside>
 
@@ -102,6 +220,59 @@ export default function Layout() {
           </NavLink>
         ))}
       </nav>
+
+      {aboutOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+          onClick={() => setAboutOpen(false)}
+        >
+          <div
+            className="w-full bg-white rounded-2xl shadow-xl p-6"
+            style={{ maxWidth: "500px" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex flex-col items-center text-center mb-6">
+              <img
+                src="/lc-logo.png"
+                alt=""
+                className="h-10 w-10 object-contain mb-2"
+              />
+              <h2 className="text-lg font-bold text-slate-900">PioneerPath</h2>
+              <p className="text-sm text-slate-500 mt-0.5">
+                Lewis &amp; Clark College Career Platform
+              </p>
+            </div>
+
+            <div className="space-y-5 mb-6">
+              {ABOUT_SECTIONS.map(({ icon: Icon, title, description }) => (
+                <div key={title} className="flex items-start gap-3">
+                  <div className="flex-shrink-0 h-9 w-9 rounded-lg bg-orange-50 flex items-center justify-center">
+                    <Icon className="h-5 w-5 text-orange-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">{title}</p>
+                    <p className="text-sm text-slate-500 mt-0.5">{description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="text-center border-t border-slate-100 pt-5">
+              <p className="text-xs text-slate-400 mb-4">
+                Built exclusively for Lewis &amp; Clark College students
+              </p>
+              <button
+                type="button"
+                onClick={() => setAboutOpen(false)}
+                className="rounded-lg px-5 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
+                style={{ backgroundColor: "#E87722" }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
