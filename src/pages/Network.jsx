@@ -60,17 +60,8 @@ const RELATIONSHIP_BADGE_CLASSES = {
 
 const CADENCE_OPTIONS = ["Weekly", "Monthly", "Every 3 months", "As needed"];
 
-function buildCoffeeChatMailto(contact, studentName) {
-  const subject = "Coffee Chat Request";
-  const body = `Hi ${contact.contact_name},
-
-I hope you're doing well! I'd love to grab a quick coffee chat (virtual or in person) to hear more about your work at ${contact.employer_company} and get your advice on my career path.
-
-Would you have 15-20 minutes sometime in the next couple of weeks?
-
-Best,
-${studentName}`;
-  return `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+function buildCoffeeChatMessage(contact) {
+  return `Hi ${contact.contact_name}, I'd love to connect for a quick coffee chat to learn more about your experience at ${contact.employer_company}. Would you be available for 15-20 minutes?`;
 }
 
 const AVATAR_COLORS = [
@@ -171,7 +162,7 @@ function loadStoredMap(prefix, contacts) {
 }
 
 export default function Network() {
-  const { networkConnections, profile, addContact, updateContact, deleteContact } = useData();
+  const { networkConnections, addContact, updateContact, deleteContact } = useData();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -193,6 +184,24 @@ export default function Network() {
     loadStoredMap("next_action_", networkConnections)
   );
   const [cadence, setCadence] = useState(() => loadStoredMap("cadence_", networkConnections));
+  const [coffeeChatOpenId, setCoffeeChatOpenId] = useState(null);
+  const [coffeeChatMessage, setCoffeeChatMessage] = useState("");
+  const [coffeeChatSentId, setCoffeeChatSentId] = useState(null);
+
+  function openCoffeeChatForm(contact) {
+    setCoffeeChatOpenId(contact.id);
+    setCoffeeChatMessage(buildCoffeeChatMessage(contact));
+    setCoffeeChatSentId((id) => (id === contact.id ? null : id));
+  }
+
+  function closeCoffeeChatForm() {
+    setCoffeeChatOpenId(null);
+    setCoffeeChatMessage("");
+  }
+
+  function handleSendCoffeeChat(contactId) {
+    setCoffeeChatSentId(contactId);
+  }
 
   function updateRelationshipPurpose(contact, value) {
     localStorage.setItem(`relationship_${contact.contact_name}`, value);
@@ -295,7 +304,7 @@ export default function Network() {
   );
 
   return (
-    <div>
+    <div className="px-4 sm:px-0">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Network</h1>
@@ -327,7 +336,7 @@ export default function Network() {
           </Button>
         </Card>
       ) : (
-        <div className="mt-6 grid gap-4 px-4 sm:grid-cols-2 sm:px-0 lg:grid-cols-3">
+        <div className="mt-6 grid mx-auto max-w-full gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {sorted.map((c) => {
             const days = daysSince(c.last_contacted_date);
             const status = urgency(days);
@@ -482,13 +491,53 @@ export default function Network() {
                     </select>
                   </div>
 
-                  <a
-                    href={buildCoffeeChatMailto(c, profile.name)}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-brand-orange px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
-                  >
-                    <Coffee className="h-3.5 w-3.5" aria-hidden="true" />
-                    Request Coffee Chat
-                  </a>
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        coffeeChatOpenId === c.id ? closeCoffeeChatForm() : openCoffeeChatForm(c)
+                      }
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-brand-orange px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+                    >
+                      <Coffee className="h-3.5 w-3.5" aria-hidden="true" />
+                      Request Coffee Chat
+                    </button>
+
+                    {coffeeChatOpenId === c.id && (
+                      <div className="mt-2 space-y-2">
+                        {coffeeChatSentId === c.id ? (
+                          <p className="rounded-lg bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-700">
+                            Request sent!
+                          </p>
+                        ) : (
+                          <>
+                            <textarea
+                              rows={3}
+                              value={coffeeChatMessage}
+                              onChange={(e) => setCoffeeChatMessage(e.target.value)}
+                              className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                            <div className="flex items-center gap-4">
+                              <Button
+                                type="button"
+                                className="px-3 py-1.5 text-xs"
+                                onClick={() => handleSendCoffeeChat(c.id)}
+                              >
+                                Send Request
+                              </Button>
+                              <button
+                                type="button"
+                                onClick={closeCoffeeChatForm}
+                                className="text-xs font-medium text-slate-500 hover:text-slate-700"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </Card>
             );
