@@ -52,8 +52,8 @@ export default function CareerCenter() {
   return (
     <div>
       <div
-        className="relative overflow-hidden"
-        style={{ height: "360px", borderRadius: "16px" }}
+        className="relative h-48 overflow-hidden md:h-[360px]"
+        style={{ borderRadius: "16px" }}
       >
         <img
           src="/career-center.jpg"
@@ -262,7 +262,7 @@ export default function CareerCenter() {
                         <div key={label}>{label}</div>
                       ))}
                     </div>
-                    <div className="mt-1 grid grid-cols-7 gap-y-1">
+                    <div className="mt-1 grid grid-cols-7 gap-1">
                       {calendarCells.map((date, i) => {
                         if (!date) return <div key={`empty-${i}`} />;
                         const weekend = isWeekend(date.getDay());
@@ -277,7 +277,7 @@ export default function CareerCenter() {
                                 setSelectedDate(date);
                                 setSelectedTime(null);
                               }}
-                              className={`relative flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium transition-colors ${
+                              className={`relative flex h-9 w-9 touch-manipulation items-center justify-center rounded-full text-sm font-medium transition-colors sm:h-10 sm:w-10 ${
                                 weekend
                                   ? "cursor-not-allowed text-slate-300"
                                   : isSelected

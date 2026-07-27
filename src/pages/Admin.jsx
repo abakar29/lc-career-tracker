@@ -69,6 +69,12 @@ const COLUMN_KEYS = {
   "Last Active": "lastActive",
 };
 
+function readinessTone(score) {
+  if (score >= 80) return "green";
+  if (score >= 50) return "amber";
+  return "red";
+}
+
 function BarRow({ label, value, color = "#E87722" }) {
   return (
     <div>
@@ -119,8 +125,7 @@ export default function Admin() {
   });
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#F8F9FB" }}>
-      <div className="max-w-7xl mx-auto px-6 py-10">
+    <div>
         <button
           type="button"
           onClick={() => navigate("/")}
@@ -207,7 +212,27 @@ export default function Admin() {
           </Card>
         </div>
 
-        <Card className="mb-6">
+        <div className="md:hidden mb-6">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">
+            Student Activity
+          </p>
+          <div className="space-y-3">
+            {sortedRows.map((row) => (
+              <Card key={row.id} className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-medium text-slate-900">{row.id}</p>
+                    <p className="text-sm text-slate-500 truncate">{row.major}</p>
+                  </div>
+                  <Badge tone={readinessTone(row.readiness)}>{row.readiness}%</Badge>
+                </div>
+                <p className="mt-2 text-xs text-slate-400">Last active {row.lastActive}</p>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        <Card className="mb-6 hidden md:block">
           <CardHeader title="Student Activity Table" />
           <div className="p-5 pt-3 overflow-x-auto">
             <table className="w-full text-sm">
@@ -267,7 +292,6 @@ export default function Admin() {
             Data shown is aggregated and anonymized
           </p>
         </div>
-      </div>
     </div>
   );
 }

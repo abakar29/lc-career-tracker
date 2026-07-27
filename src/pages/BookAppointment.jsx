@@ -279,7 +279,7 @@ export default function BookAppointment() {
                         <div key={label}>{label}</div>
                       ))}
                     </div>
-                    <div className="mt-1 grid grid-cols-7 gap-y-1">
+                    <div className="mt-1 grid grid-cols-7 gap-1">
                       {calendarCells.map((date, i) => {
                         if (!date) return <div key={`empty-${i}`} />;
                         const weekend = isWeekend(date.getDay());
@@ -291,7 +291,7 @@ export default function BookAppointment() {
                               type="button"
                               disabled={weekend}
                               onClick={() => setSelectedDate(date)}
-                              className={`relative flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium transition-colors ${
+                              className={`relative flex h-9 w-9 touch-manipulation items-center justify-center rounded-full text-sm font-medium transition-colors sm:h-10 sm:w-10 ${
                                 weekend
                                   ? "cursor-not-allowed text-slate-300"
                                   : isSelected

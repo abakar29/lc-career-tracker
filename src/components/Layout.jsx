@@ -17,12 +17,12 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { supabase } from "../supabaseClient";
 
 const NAV_ITEMS = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { to: "/", label: "Dashboard", mobileLabel: "Home", icon: LayoutDashboard, end: true },
   { to: "/experience", label: "Experience", icon: Briefcase },
   { to: "/network", label: "Network", icon: Users },
   { to: "/skills", label: "Skills", icon: Sparkles },
   { to: "/resume", label: "Resume", icon: FileText },
-  { to: "/career-center", label: "Career Center", icon: Building2 },
+  { to: "/career-center", label: "Career Center", mobileLabel: "Career", icon: Building2 },
 ];
 
 const ABOUT_SECTIONS = [
@@ -269,20 +269,20 @@ export default function Layout() {
 
       {/* Mobile bottom nav */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 z-20 bg-neutral-950 border-t border-white/10 flex">
-        {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
+        {NAV_ITEMS.map(({ to, label, mobileLabel, icon: Icon, end }) => (
           <NavLink
             key={to}
             to={to}
             end={end}
             className={({ isActive }) =>
               [
-                "flex-1 flex flex-col items-center gap-1 py-2.5 text-xs font-medium transition-colors",
+                "flex-1 flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors",
                 isActive ? "text-orange-400" : "text-neutral-400",
               ].join(" ")
             }
           >
             <Icon className="h-5 w-5" />
-            {label}
+            <span className="max-w-full truncate whitespace-nowrap">{mobileLabel ?? label}</span>
           </NavLink>
         ))}
       </nav>

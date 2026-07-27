@@ -324,7 +324,7 @@ export default function Network() {
             return (
               <Card key={c.id} className="p-4 hover:shadow-md hover:-translate-y-0.5 transition-all">
                 <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-start gap-3 min-w-0">
+                  <div className="flex flex-1 items-start gap-3 min-w-0">
                     <div className="relative flex-shrink-0">
                       {uploadedPhotos[c.contact_name] || DEFAULT_CONTACT_PHOTOS[c.contact_name] ? (
                         <img
@@ -363,7 +363,7 @@ export default function Network() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
+                  <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1 flex-shrink-0">
                     <IconButton
                       icon={LinkedinIcon}
                       label={
@@ -372,6 +372,7 @@ export default function Network() {
                           : `Add LinkedIn URL for ${c.contact_name}`
                       }
                       style={{ color: contactLinkedin ? "#0077B5" : "#cbd5e1" }}
+                      className="p-2! sm:p-3!"
                       onClick={() => {
                         if (contactLinkedin) {
                           window.open(contactLinkedin, "_blank", "noopener,noreferrer");
@@ -392,12 +393,14 @@ export default function Network() {
                     <IconButton
                       icon={Pencil}
                       label={`Edit ${c.contact_name}`}
+                      className="p-2! sm:p-3!"
                       onClick={() => openEditModal(c)}
                     />
                     <IconButton
                       icon={Trash2}
                       label={`Delete ${c.contact_name}`}
                       variant="danger"
+                      className="p-2! sm:p-3!"
                       onClick={() => setDeleteTarget(c)}
                     />
                   </div>
