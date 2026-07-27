@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Users, Plus, Pencil, Trash2, Camera, Coffee } from "lucide-react";
+import { Users, Plus, Pencil, Camera, Coffee } from "lucide-react";
 import { useData } from "../context/DataContext";
 import { formatDate, daysSince } from "../lib/utils";
 import {
@@ -145,6 +145,7 @@ function emptyForm() {
     contact_name: "",
     employer_company: "",
     job_title: "",
+    linkedin_url: "",
     last_contacted_date: todayISO(),
     connection_source: CONNECTION_SOURCES[0],
     interaction_notes: "",
@@ -248,6 +249,7 @@ export default function Network() {
       contact_name: c.contact_name,
       employer_company: c.employer_company,
       job_title: c.job_title,
+      linkedin_url: linkedinUrls[c.contact_name] || DEFAULT_LINKEDIN_URLS[c.contact_name] || "",
       last_contacted_date: c.last_contacted_date,
       connection_source: c.connection_source,
       interaction_notes: c.interaction_notes ?? "",
@@ -266,11 +268,20 @@ export default function Network() {
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
+    const { linkedin_url, ...contactFields } = formValues;
     if (editingId) {
-      updateContact(editingId, formValues);
+      updateContact(editingId, contactFields);
     } else {
-      addContact(formValues);
+      addContact(contactFields);
     }
+
+    const trimmedLinkedin = linkedin_url.trim();
+    const key = formValues.contact_name.trim();
+    if (trimmedLinkedin && key) {
+      localStorage.setItem(`linkedin_${key}`, trimmedLinkedin);
+      setLinkedinUrls((u) => ({ ...u, [key]: trimmedLinkedin }));
+    }
+
     setModalOpen(false);
   }
 
@@ -316,7 +327,7 @@ export default function Network() {
           </Button>
         </Card>
       ) : (
-        <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="mt-6 grid gap-4 px-4 sm:grid-cols-2 sm:px-0 lg:grid-cols-3">
           {sorted.map((c) => {
             const days = daysSince(c.last_contacted_date);
             const status = urgency(days);
@@ -381,27 +392,11 @@ export default function Network() {
                         }
                       }}
                     />
-                    {contactLinkedin && linkedinEditingId !== c.id && (
-                      <button
-                        type="button"
-                        onClick={() => openLinkedinEditor(c)}
-                        className="text-xs text-slate-500 hover:text-slate-700 underline"
-                      >
-                        Edit
-                      </button>
-                    )}
                     <IconButton
                       icon={Pencil}
                       label={`Edit ${c.contact_name}`}
                       className="p-2! sm:p-3!"
                       onClick={() => openEditModal(c)}
-                    />
-                    <IconButton
-                      icon={Trash2}
-                      label={`Delete ${c.contact_name}`}
-                      variant="danger"
-                      className="p-2! sm:p-3!"
-                      onClick={() => setDeleteTarget(c)}
                     />
                   </div>
                 </div>
@@ -533,6 +528,12 @@ export default function Network() {
               onChange={(e) => updateField("employer_company", e.target.value)}
             />
           </div>
+          <TextField
+            label="LinkedIn URL"
+            placeholder="https://linkedin.com/in/username"
+            value={formValues.linkedin_url}
+            onChange={(e) => updateField("linkedin_url", e.target.value)}
+          />
           <div className="grid grid-cols-2 gap-4">
             <DateField
               label="Last contacted"
@@ -560,11 +561,28 @@ export default function Network() {
             value={formValues.interaction_notes}
             onChange={(e) => updateField("interaction_notes", e.target.value)}
           />
-          <div className="flex justify-end gap-3 pt-2">
-            <Button type="button" variant="ghost" onClick={() => setModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button type="submit">{editingId ? "Save changes" : "Add contact"}</Button>
+          <div className="flex items-center justify-between pt-2">
+            {editingId ? (
+              <Button
+                type="button"
+                variant="danger"
+                onClick={() => {
+                  const target = networkConnections.find((c) => c.id === editingId);
+                  setModalOpen(false);
+                  setDeleteTarget(target);
+                }}
+              >
+                Delete Contact
+              </Button>
+            ) : (
+              <span />
+            )}
+            <div className="flex gap-3">
+              <Button type="button" variant="ghost" onClick={() => setModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">{editingId ? "Save changes" : "Add contact"}</Button>
+            </div>
           </div>
         </form>
       </Modal>

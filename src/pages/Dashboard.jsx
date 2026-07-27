@@ -7,7 +7,8 @@ import {
   Zap,
   FileCheck,
   Plus,
-  Trash2,
+  ChevronDown,
+  ChevronUp,
   Compass,
   AlertCircle,
   Clock,
@@ -21,7 +22,6 @@ import {
   Badge,
   RadialProgress,
   Button,
-  IconButton,
   TextField,
   SelectField,
   DateField,
@@ -209,6 +209,11 @@ function ApplicationTrackerCard({ applications: initialApplications }) {
   const [role, setRole] = useState("");
   const [dateApplied, setDateApplied] = useState("");
   const [status, setStatus] = useState("Applied");
+  const [expandedId, setExpandedId] = useState(null);
+
+  function toggleExpand(id) {
+    setExpandedId((prev) => (prev === id ? null : id));
+  }
 
   const sorted = [...applications].sort(
     (a, b) => new Date(b.dateApplied) - new Date(a.dateApplied)
@@ -307,36 +312,64 @@ function ApplicationTrackerCard({ applications: initialApplications }) {
       )}
 
       <ul className="mt-2 max-h-[260px] divide-y divide-slate-100 overflow-y-auto px-5 pb-5">
-        {sorted.map((a) => (
-          <li key={a.id} className="group flex items-center justify-between gap-3 py-3">
-            <div className="flex min-w-0 items-center gap-3">
-              <CompanyLogo company={a.company} />
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-slate-800">{a.company}</p>
-                <p className="text-xs text-slate-500">
-                  {a.role} · Applied {formatDate(a.dateApplied)}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => cycleStatus(a.id)}
-                className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
-                aria-label={`Cycle status for ${a.company}, currently ${a.status}`}
+        {sorted.map((a) => {
+          const isExpanded = expandedId === a.id;
+          return (
+            <li key={a.id} className="py-3">
+              <div
+                onClick={() => toggleExpand(a.id)}
+                className="flex cursor-pointer items-center justify-between gap-3"
               >
-                <Badge tone={STATUS_TONE[a.status] ?? "slate"}>{a.status}</Badge>
-              </button>
-              <IconButton
-                icon={Trash2}
-                label={`Delete ${a.company} application`}
-                variant="danger"
-                onClick={() => deleteApplication(a.id)}
-                className="opacity-60 transition-opacity group-hover:opacity-100"
-              />
-            </div>
-          </li>
-        ))}
+                <div className="flex min-w-0 items-center gap-3">
+                  <CompanyLogo company={a.company} />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-slate-800">{a.company}</p>
+                    <p className="text-xs text-slate-500">
+                      {a.role} · Applied {formatDate(a.dateApplied)}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      cycleStatus(a.id);
+                    }}
+                    className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                    aria-label={`Cycle status for ${a.company}, currently ${a.status}`}
+                  >
+                    <Badge tone={STATUS_TONE[a.status] ?? "slate"}>{a.status}</Badge>
+                  </button>
+                  {isExpanded ? (
+                    <ChevronUp className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                  )}
+                </div>
+              </div>
+
+              {isExpanded && (
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 cursor-default"
+                >
+                  <p className="text-xs text-slate-500">
+                    {a.role} at {a.company} · Applied {formatDate(a.dateApplied)}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="danger"
+                    className="px-3 py-1.5 text-xs"
+                    onClick={() => deleteApplication(a.id)}
+                  >
+                    Delete Application
+                  </Button>
+                </div>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

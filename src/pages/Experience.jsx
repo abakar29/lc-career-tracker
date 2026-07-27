@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Briefcase, Plus, Pencil, Trash2, ChevronDown, ChevronUp, Copy } from "lucide-react";
+import { Briefcase, Plus, Pencil, ChevronDown, ChevronUp, Copy } from "lucide-react";
 import { useData } from "../context/DataContext";
 import { formatDate } from "../lib/utils";
 import {
@@ -241,15 +241,6 @@ export default function Experience() {
                             openEditModal(exp);
                           }}
                         />
-                        <IconButton
-                          icon={Trash2}
-                          label={`Delete ${exp.organization_name}`}
-                          variant="danger"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDeleteTarget(exp);
-                          }}
-                        />
                         {isExpanded ? (
                           <ChevronUp className="h-4 w-4 text-slate-400" aria-hidden="true" />
                         ) : (
@@ -385,11 +376,28 @@ export default function Experience() {
               </option>
             ))}
           </SelectField>
-          <div className="flex justify-end gap-3 pt-2">
-            <Button type="button" variant="ghost" onClick={() => setModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button type="submit">{editingId ? "Save changes" : "Add experience"}</Button>
+          <div className="flex items-center justify-between pt-2">
+            {editingId ? (
+              <Button
+                type="button"
+                variant="danger"
+                onClick={() => {
+                  const target = experiences.find((exp) => exp.id === editingId);
+                  setModalOpen(false);
+                  setDeleteTarget(target);
+                }}
+              >
+                Delete Experience
+              </Button>
+            ) : (
+              <span />
+            )}
+            <div className="flex gap-3">
+              <Button type="button" variant="ghost" onClick={() => setModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">{editingId ? "Save changes" : "Add experience"}</Button>
+            </div>
           </div>
         </form>
       </Modal>
