@@ -63,6 +63,9 @@ export default function Layout() {
   const [aboutOpen, setAboutOpen] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [photoUrl, setPhotoUrl] = useState(null);
+  const [classYear, setClassYear] = useState(
+    () => localStorage.getItem("abuve:profile:classyear") || "2029"
+  );
   const profileRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -70,6 +73,12 @@ export default function Layout() {
     supabase.auth.getUser().then(({ data }) => {
       setUserEmail(data.user?.email ?? "");
     });
+  }, []);
+
+  useEffect(() => {
+    const handler = () => setClassYear(localStorage.getItem('abuve:profile:classyear') || '2029');
+    window.addEventListener('storage', handler);
+    return () => window.removeEventListener('storage', handler);
   }, []);
 
   useEffect(() => {
@@ -134,7 +143,7 @@ export default function Layout() {
             <div className="absolute bottom-full left-3 right-3 mb-2 rounded-lg bg-neutral-900 border border-white/10 shadow-lg overflow-hidden">
               <div className="px-4 py-3">
                 <p className="text-sm font-medium text-white truncate">{userEmail}</p>
-                <p className="text-xs text-neutral-400">Class of 2029</p>
+                <p className="text-xs text-neutral-400">Class of {classYear}</p>
               </div>
               <div className="border-t border-white/10" />
               <div className="py-1">
@@ -173,7 +182,7 @@ export default function Layout() {
                   className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-neutral-200 hover:bg-white/10 hover:text-white transition-colors"
                 >
                   <Info className="h-4 w-4" />
-                  About PioneerPath
+                  About Abuve
                 </button>
               </div>
               <div className="border-t border-white/10" />
@@ -303,7 +312,7 @@ export default function Layout() {
                 alt=""
                 className="h-10 w-10 object-contain mb-2"
               />
-              <h2 className="text-lg font-bold text-slate-900">PioneerPath</h2>
+              <h2 className="text-lg font-bold text-slate-900">Abuve</h2>
               <p className="text-sm text-slate-500 mt-0.5">
                 Lewis &amp; Clark College Career Platform
               </p>

@@ -1,11 +1,18 @@
-import { useCallback, useState } from "react";
-import { Sparkles, Plus, Pencil, Trash2, Target, BarChart3, CheckCircle2 } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Sparkles,
+  Plus,
+  Target,
+  BarChart3,
+  CheckCircle2,
+  Search,
+  MoreHorizontal,
+} from "lucide-react";
 import { useData } from "../context/DataContext";
 import { careerPaths, getMissingSkills } from "../data/careerPaths";
 import {
   Card,
   CardHeader,
-  Badge,
   Button,
   IconButton,
   Modal,
@@ -16,7 +23,12 @@ import {
 
 const BAR_CONTEXTS = ["Internship", "Campus Activity", "Study Abroad"];
 const PROFICIENCY_LEVELS = ["Advanced", "Intermediate", "Beginner"];
-const PROFICIENCY_TONE = { Advanced: "green", Intermediate: "amber", Beginner: "slate" };
+const PROFICIENCY_DOT = {
+  Advanced: "bg-green-500",
+  Intermediate: "bg-amber-500",
+  Beginner: "bg-gray-400",
+};
+const PROFICIENCY_WEIGHT = { Advanced: 1, Intermediate: 0.65, Beginner: 0.35 };
 
 const ORANGE = "#E87722";
 
@@ -43,6 +55,21 @@ const SKILL_CATEGORIES = {
 };
 
 const CATEGORY_ORDER = ["Technical", "Professional", "Research", "Communication", "Language", "Other"];
+const CATEGORY_FILTER_OPTIONS = [
+  "All Categories",
+  "Technical",
+  "Professional",
+  "Research",
+  "Communication",
+  "Language",
+];
+const LEVEL_FILTER_OPTIONS = ["All Levels", ...PROFICIENCY_LEVELS];
+
+const SOURCE_INSIGHTS = {
+  Internship: "Your strongest source",
+  "Campus Activity": "Growing fast",
+  "Study Abroad": "Unique advantage",
+};
 
 function categoryFor(skillName) {
   return SKILL_CATEGORIES[skillName] ?? "Other";
@@ -91,9 +118,31 @@ function computeSkillSourceBreakdown(skills) {
   return BAR_CONTEXTS.map((label, i) => ({ label, count: counts[i], percent: percents[i] }));
 }
 
+function computeProfileStrength(skills) {
+  if (skills.length === 0) return 0;
+  const coreCategories = CATEGORY_ORDER.filter((c) => c !== "Other");
+  const categoriesCovered = new Set(
+    skills.map((s) => categoryFor(s.skill_name)).filter((c) => c !== "Other")
+  ).size;
+  const proficiencyScore =
+    skills.reduce((sum, s) => sum + (PROFICIENCY_WEIGHT[s.proficiency_level] ?? 0), 0) /
+    skills.length;
+  const breadthScore = Math.min(1, skills.length / 10);
+  const categoryScore = categoriesCovered / coreCategories.length;
+  return Math.round((proficiencyScore * 0.4 + breadthScore * 0.3 + categoryScore * 0.3) * 100);
+}
+
+function StatPill({ label }) {
+  return (
+    <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
+      {label}
+    </span>
+  );
+}
+
 function SkillSourceBars({ data }) {
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full space-y-2.5">
       {data.map((d) => (
         <div key={d.label}>
           <div className="flex items-center justify-between text-sm">
@@ -102,33 +151,89 @@ function SkillSourceBars({ data }) {
               {d.count} skill{d.count !== 1 ? "s" : ""} · {d.percent}%
             </span>
           </div>
-          <div className="mt-1.5 h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
+          <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100">
             <div
               className="h-full rounded-full"
               style={{ width: `${d.percent}%`, backgroundColor: ORANGE }}
             />
           </div>
+          {SOURCE_INSIGHTS[d.label] && (
+            <p className="mt-1 text-[11px] text-slate-400">{SOURCE_INSIGHTS[d.label]}</p>
+          )}
         </div>
       ))}
     </div>
   );
 }
 
-function SkillChip({ skill, onEdit, onDelete }) {
+function SkillCard({ skill, onEdit, onDelete }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleClickOutside(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpen]);
+
   return (
-    <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white pl-3.5 pr-1.5 py-1.5 text-sm shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
-      <span className="font-medium text-slate-800">{skill.skill_name}</span>
-      <span className="text-xs text-slate-400">· {skill.context}</span>
-      <div className="flex items-center gap-0.5 ml-1">
-        <IconButton icon={Pencil} label={`Edit ${skill.skill_name}`} onClick={onEdit} className="p-1.5" />
-        <IconButton
-          icon={Trash2}
-          label={`Delete ${skill.skill_name}`}
-          variant="danger"
-          onClick={onDelete}
-          className="p-1.5"
-        />
+    <div className="group relative rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-all hover:shadow-md">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5">
+            <span
+              className={`h-2 w-2 flex-shrink-0 rounded-full ${PROFICIENCY_DOT[skill.proficiency_level] ?? "bg-gray-400"}`}
+              aria-hidden="true"
+            />
+            <p className="truncate text-base font-semibold text-slate-900">{skill.skill_name}</p>
+          </div>
+          <p className="mt-0.5 text-xs text-slate-500">
+            {skill.proficiency_level} · {skill.context}
+          </p>
+        </div>
+
+        <div ref={menuRef} className="relative flex-shrink-0">
+          <IconButton
+            icon={MoreHorizontal}
+            label={`More actions for ${skill.skill_name}`}
+            onClick={() => setMenuOpen((v) => !v)}
+            className="p-1.5 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+          />
+          {menuOpen && (
+            <div className="absolute right-0 top-full z-10 mt-1 w-36 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg">
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onEdit();
+                }}
+                className="block w-full px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
+              >
+                Edit skill
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onDelete();
+                }}
+                className="block w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+              >
+                Delete skill
+              </button>
+            </div>
+          )}
+        </div>
       </div>
+
+      <span className="mt-2 inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-600">
+        {skill.context}
+      </span>
     </div>
   );
 }
@@ -143,6 +248,9 @@ export default function Skills() {
   const [errors, setErrors] = useState({});
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [addedToPlan, setAddedToPlan] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("All Categories");
+  const [levelFilter, setLevelFilter] = useState("All Levels");
 
   const closeModal = useCallback(() => setModalOpen(false), []);
 
@@ -202,6 +310,19 @@ export default function Skills() {
   }
 
   const skillSourceData = computeSkillSourceBreakdown(skills);
+  const categoriesCovered = new Set(
+    skills.map((s) => categoryFor(s.skill_name)).filter((c) => c !== "Other")
+  ).size;
+  const sourcesUsed = new Set(skills.map((s) => s.context)).size;
+  const profileStrength = computeProfileStrength(skills);
+
+  const filteredSkills = skills.filter((s) => {
+    const matchesSearch = s.skill_name.toLowerCase().includes(searchQuery.trim().toLowerCase());
+    const matchesCategory =
+      categoryFilter === "All Categories" || categoryFor(s.skill_name) === categoryFilter;
+    const matchesLevel = levelFilter === "All Levels" || s.proficiency_level === levelFilter;
+    return matchesSearch && matchesCategory && matchesLevel;
+  });
 
   return (
     <div>
@@ -218,13 +339,20 @@ export default function Skills() {
         </Button>
       </div>
 
+      <div className="mt-4 flex flex-wrap gap-2">
+        <StatPill label={`${skills.length} Skill${skills.length !== 1 ? "s" : ""}`} />
+        <StatPill label={`${categoriesCovered} Categor${categoriesCovered !== 1 ? "ies" : "y"}`} />
+        <StatPill label={`${sourcesUsed} Learning Source${sourcesUsed !== 1 ? "s" : ""}`} />
+        <StatPill label={`Profile Strength: ${profileStrength}%`} />
+      </div>
+
       <div className="mt-6 grid lg:grid-cols-2 gap-6">
         <Card className="hover:shadow-md transition-all">
           <CardHeader
             title="Where Your Skills Come From"
             action={<BarChart3 className="h-5 w-5 text-slate-400" aria-hidden="true" />}
           />
-          <div className="px-5 pb-6 pt-2">
+          <div className="px-5 pb-3 pt-1.5">
             {skills.length === 0 ? (
               <p className="text-sm text-slate-500 py-10">Add skills to see your distribution.</p>
             ) : (
@@ -235,11 +363,11 @@ export default function Skills() {
 
         <Card className="hover:shadow-md transition-all">
           <CardHeader
-            title="Skill Gap Detection"
+            title="Recommended Skills to Develop"
             subtitle="What's missing for your target path"
-            action={<Target className="h-5 w-5 text-orange-600" aria-hidden="true" />}
+            action={<Target className="h-5 w-5 text-blue-500" aria-hidden="true" />}
           />
-          <div className="px-5 pb-5 mt-2 space-y-4">
+          <div className="px-5 pb-3 mt-1.5 space-y-3">
             <SelectField
               label="Target career path"
               value={selectedPathId}
@@ -264,9 +392,14 @@ export default function Skills() {
                   {missingSkills.map((name) => (
                     <div
                       key={name}
-                      className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-dashed border-red-300 bg-red-50 px-3 py-2"
+                      className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-dashed border-blue-200 bg-blue-50 px-3 py-2"
                     >
-                      <span className="text-xs font-medium text-red-700">{name}</span>
+                      <div className="min-w-0">
+                        <span className="text-xs font-medium text-blue-700">{name}</span>
+                        <p className="text-[11px] text-slate-400">
+                          Required for {selectedPath.label} roles
+                        </p>
+                      </div>
                       <div className="flex items-center gap-2">
                         {addedToPlan.includes(name) && (
                           <span className="text-xs font-medium text-emerald-600">
@@ -280,7 +413,7 @@ export default function Skills() {
                           className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 ${
                             addedToPlan.includes(name)
                               ? "bg-green-100 text-green-700 hover:bg-green-200 focus-visible:ring-green-400"
-                              : "bg-red-100 text-red-700 hover:bg-red-200 focus-visible:ring-red-400"
+                              : "bg-blue-100 text-blue-700 hover:bg-blue-200 focus-visible:ring-blue-400"
                           }`}
                         >
                           Add to Learning Plan
@@ -294,6 +427,49 @@ export default function Skills() {
           </div>
         </Card>
       </div>
+
+      {skills.length > 0 && (
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative flex-1">
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+              aria-hidden="true"
+            />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search skills..."
+              aria-label="Search skills"
+              className="w-full rounded-lg border border-slate-300 py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+          </div>
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            aria-label="Filter by category"
+            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          >
+            {CATEGORY_FILTER_OPTIONS.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+          <select
+            value={levelFilter}
+            onChange={(e) => setLevelFilter(e.target.value)}
+            aria-label="Filter by proficiency level"
+            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          >
+            {LEVEL_FILTER_OPTIONS.map((l) => (
+              <option key={l} value={l}>
+                {l}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className="mt-6">
         {skills.length === 0 ? (
@@ -310,45 +486,21 @@ export default function Skills() {
               Add skill
             </Button>
           </Card>
+        ) : filteredSkills.length === 0 ? (
+          <Card className="flex flex-col items-center justify-center gap-2 py-12 text-center">
+            <p className="font-medium text-slate-700">No skills match your search</p>
+            <p className="text-sm text-slate-500">Try a different search term or filter.</p>
+          </Card>
         ) : (
-          <div className="space-y-8">
-            {CATEGORY_ORDER.map((category) => {
-              const categorySkills = skills.filter((s) => categoryFor(s.skill_name) === category);
-              if (categorySkills.length === 0) return null;
-              return (
-                <div key={category}>
-                  <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                    {category}
-                  </p>
-                  <div className="space-y-6">
-                    {PROFICIENCY_LEVELS.map((level) => {
-                      const group = categorySkills.filter((s) => s.proficiency_level === level);
-                      if (group.length === 0) return null;
-                      return (
-                        <div key={level}>
-                          <div className="flex items-center gap-2 mb-2.5">
-                            <Badge tone={PROFICIENCY_TONE[level]}>{level}</Badge>
-                            <span className="text-xs text-slate-400">
-                              {group.length} skill{group.length !== 1 ? "s" : ""}
-                            </span>
-                          </div>
-                          <div className="flex flex-wrap gap-2">
-                            {group.map((s) => (
-                              <SkillChip
-                                key={s.id}
-                                skill={s}
-                                onEdit={() => openEditModal(s)}
-                                onDelete={() => setDeleteTarget(s)}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+            {filteredSkills.map((s) => (
+              <SkillCard
+                key={s.id}
+                skill={s}
+                onEdit={() => openEditModal(s)}
+                onDelete={() => setDeleteTarget(s)}
+              />
+            ))}
           </div>
         )}
       </div>

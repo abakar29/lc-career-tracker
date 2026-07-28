@@ -31,7 +31,7 @@ export function computeProfileCompleteness({
     {
       label: "Save a network contact",
       done: networkConnections.length >= 1,
-      why: "Most Pioneer internships trace back to a warm intro; an empty network means relying on cold applications alone.",
+      why: "Most internships trace back to a warm intro; an empty network means relying on cold applications alone.",
       cta: { label: "Add a contact", to: "/network" },
     },
     {

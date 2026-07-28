@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -13,6 +13,7 @@ import {
   AlertCircle,
   Clock,
   TrendingUp,
+  Check,
 } from "lucide-react";
 import { useData } from "../context/DataContext";
 import { formatDate, daysSince, computeProfileCompleteness } from "../lib/utils";
@@ -103,7 +104,7 @@ function CompanyLogo({ company }) {
   );
 }
 
-function CompactStatCard({ icon: Icon, value, label, tint = "orange", onClick }) {
+function CompactStatCard({ icon: Icon, value, label, sublabel, tint = "orange", onClick }) {
   const colors = STAT_TINTS[tint];
   return (
     <div
@@ -124,7 +125,7 @@ function CompactStatCard({ icon: Icon, value, label, tint = "orange", onClick })
       <div>
         <p className="text-[28px] font-bold leading-tight text-slate-900">{value}</p>
         <p className="text-xs text-slate-500">{label}</p>
-        <p className="mt-0.5 text-xs font-medium text-emerald-600">+1 this month</p>
+        <p className="mt-0.5 text-xs font-medium text-emerald-600">{sublabel}</p>
       </div>
     </div>
   );
@@ -140,8 +141,28 @@ function getGreeting() {
   return greeting;
 }
 
-function CareerReadinessHero({ score, checks, classYear, major }) {
+function CareerReadinessHero({ score, checks, classYear, major, name, attentionCount, breakdown }) {
   const next = checks.filter((c) => !c.done);
+  const [breakdownOpen, setBreakdownOpen] = useState(false);
+  const breakdownRef = useRef(null);
+
+  useEffect(() => {
+    if (!breakdownOpen) return;
+    function handleClickOutside(e) {
+      if (breakdownRef.current && !breakdownRef.current.contains(e.target)) {
+        setBreakdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [breakdownOpen]);
+
+  const statusLabel =
+    attentionCount > 0
+      ? `${attentionCount} task${attentionCount !== 1 ? "s" : ""} need attention`
+      : "You're on track";
+  const statusTone = attentionCount > 0 ? "amber" : "green";
+
   return (
     <div className="relative overflow-hidden rounded-2xl bg-[#433E3C] px-6 py-8 md:px-8 md:py-10 text-white shadow-lg">
       <div
@@ -157,7 +178,7 @@ function CareerReadinessHero({ score, checks, classYear, major }) {
           <p className="text-orange-300 text-sm font-medium">
             Class of {classYear} · {major}
           </p>
-          <h1 className="mt-1 text-[32px] font-bold">{getGreeting()}, Abu</h1>
+          <h1 className="mt-1 text-[32px] font-bold">{getGreeting()}, {name}</h1>
           <p className="mt-3 max-w-md text-neutral-300 text-sm">
             Your Career Readiness Score reflects how prepared you are to apply, right now,
             based on your logged experience, network, and skills.
@@ -192,9 +213,48 @@ function CareerReadinessHero({ score, checks, classYear, major }) {
         <div className="flex flex-col items-center gap-2">
           <RadialProgress value={score} size={140} strokeWidth={12} progressColor="#f97316" />
           <p className="text-xs text-neutral-300 font-medium">Career Readiness Score</p>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-[11px] font-medium text-emerald-300">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden="true" />
-            All systems go
+
+          <div ref={breakdownRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setBreakdownOpen((v) => !v)}
+              className="text-[11px] font-medium text-orange-300 hover:text-orange-200 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 rounded"
+            >
+              View breakdown
+            </button>
+            {breakdownOpen && (
+              <div className="absolute left-1/2 top-full z-20 mt-2 w-56 -translate-x-1/2 rounded-lg border border-slate-200 bg-white p-3 text-left shadow-xl">
+                <ul className="space-y-2">
+                  {breakdown.map((b) => (
+                    <li key={b.label} className="flex items-center justify-between gap-2 text-xs">
+                      <span className="flex items-center gap-1.5">
+                        <span className="flex h-3.5 w-3.5 flex-shrink-0 items-center justify-center">
+                          {b.complete && (
+                            <Check className="h-3.5 w-3.5 text-emerald-600" aria-hidden="true" />
+                          )}
+                        </span>
+                        <span className="text-slate-700">{b.label}</span>
+                      </span>
+                      <span className="text-slate-400">{b.weight}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium ${
+              statusTone === "amber"
+                ? "bg-amber-500/15 text-amber-300"
+                : "bg-emerald-500/15 text-emerald-300"
+            }`}
+          >
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${statusTone === "amber" ? "bg-amber-400" : "bg-emerald-400"}`}
+              aria-hidden="true"
+            />
+            {statusLabel}
           </span>
         </div>
       </div>
@@ -375,15 +435,13 @@ function ApplicationTrackerCard({ applications: initialApplications }) {
   );
 }
 
-function CareerCompassCard() {
-  const navigate = useNavigate();
-
+function buildCompassItems(navigate) {
   const mostOverdueContact = [...mockNetworkConnections].sort(
     (a, b) => daysSince(b.last_contacted_date) - daysSince(a.last_contacted_date)
   )[0];
   const overdueDays = daysSince(mostOverdueContact.last_contacted_date);
 
-  const items = [
+  return [
     {
       key: "follow-up",
       borderColor: "border-l-red-500",
@@ -415,7 +473,9 @@ function CareerCompassCard() {
       onAction: () => navigate("/skills"),
     },
   ];
+}
 
+function CareerCompassCard({ items }) {
   return (
     <div className="h-full rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md">
       <div className="flex items-start justify-between gap-3 px-5 pt-5">
@@ -468,6 +528,15 @@ export default function Dashboard() {
   } = useData();
 
   const [showOnboarding, setShowOnboarding] = useState(!onboarded);
+  const [profileName] = useState(
+    () => localStorage.getItem("abuve:profile:name") || "Abu"
+  );
+  const [profileMajor] = useState(
+    () => localStorage.getItem("abuve:profile:major") || "Economics & Entrepreneurship"
+  );
+  const [profileClassYear] = useState(
+    () => localStorage.getItem("abuve:profile:classyear") || "2029"
+  );
   const navigate = useNavigate();
   const applicationTrackerRef = useRef(null);
 
@@ -488,6 +557,15 @@ export default function Dashboard() {
     applications,
   });
 
+  const compassItems = buildCompassItems(navigate);
+
+  const scoreBreakdown = [
+    { label: "Experiences logged", weight: "25%", complete: experiences.length > 0 },
+    { label: "Skills added", weight: "25%", complete: skills.length > 0 },
+    { label: "Network contacts", weight: "25%", complete: networkConnections.length > 0 },
+    { label: "Applications tracked", weight: "25%", complete: applications.length > 0 },
+  ];
+
   return (
     <div className="space-y-6">
       <Onboarding open={showOnboarding} onDismiss={dismissOnboarding} />
@@ -495,8 +573,11 @@ export default function Dashboard() {
       <CareerReadinessHero
         score={score}
         checks={checks}
-        classYear="2029"
-        major="Economics &amp; Entrepreneurship"
+        classYear={profileClassYear}
+        major={profileMajor}
+        name={profileName}
+        attentionCount={compassItems.length}
+        breakdown={scoreBreakdown}
       />
 
       <hr className="border-t border-slate-200" aria-hidden="true" />
@@ -506,6 +587,7 @@ export default function Dashboard() {
           icon={GraduationCap}
           value={experiences.length}
           label="Experience"
+          sublabel="2 active"
           tint="orange"
           onClick={() => navigate("/experience")}
         />
@@ -513,6 +595,7 @@ export default function Dashboard() {
           icon={Network}
           value={networkConnections.length}
           label="Network"
+          sublabel="1 overdue"
           tint="blue"
           onClick={() => navigate("/network")}
         />
@@ -520,6 +603,7 @@ export default function Dashboard() {
           icon={Zap}
           value={skills.length}
           label="Skills"
+          sublabel="3 advanced"
           tint="purple"
           onClick={() => navigate("/skills")}
         />
@@ -527,6 +611,7 @@ export default function Dashboard() {
           icon={FileCheck}
           value={applications.length}
           label="Applications"
+          sublabel="1 offer"
           tint="green"
           onClick={scrollToApplications}
         />
@@ -537,7 +622,7 @@ export default function Dashboard() {
           <ApplicationTrackerCard applications={applications} />
         </div>
         <div className="h-full">
-          <CareerCompassCard />
+          <CareerCompassCard items={compassItems} />
         </div>
       </div>
     </div>

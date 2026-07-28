@@ -1,5 +1,5 @@
-const STORAGE_KEY = "pioneerpath:data:v1";
-const ONBOARDED_KEY = "pioneerpath:onboarded";
+const STORAGE_KEY = "abuve:data:v1";
+const ONBOARDED_KEY = "abuve:onboarded";
 
 export function makeId() {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {

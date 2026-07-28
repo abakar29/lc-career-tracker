@@ -64,7 +64,7 @@ export default function Login() {
       <div className="w-full max-w-[400px] bg-white rounded-2xl shadow-sm p-8">
         <div className="flex flex-col items-center text-center mb-6">
           <img src="/lc-logo.png" alt="" className="h-14 w-14 object-contain mb-3" />
-          <h1 className="text-xl font-bold text-slate-900">PioneerPath</h1>
+          <h1 className="text-xl font-bold text-slate-900">Abuve</h1>
           <p className="text-sm text-slate-500 mt-1">
             Lewis &amp; Clark College Career Platform
           </p>

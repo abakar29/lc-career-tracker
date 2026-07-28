@@ -1,4 +1,4 @@
-// Mock data for the PioneerPath demo profile.
+// Mock data for the Abuve demo profile.
 // In production this would be scoped to the signed-in student via student_id.
 
 export const profile = {

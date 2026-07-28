@@ -12,10 +12,10 @@ function FeaturePoint({ icon: Icon, text }) {
 
 export default function Onboarding({ open, onDismiss }) {
   return (
-    <Modal open={open} onClose={onDismiss} title="Welcome to PioneerPath" className="max-w-xl">
+    <Modal open={open} onClose={onDismiss} title="Welcome to Abuve" className="max-w-xl">
       <div className="space-y-5">
         <p className="text-sm text-slate-600">
-          Right now, a Pioneer&apos;s job search is scattered across Handshake, spreadsheets,
+          Right now, your job search is scattered across Handshake, spreadsheets,
           LinkedIn messages, and sticky notes, with no single place connecting what
           you&apos;ve <strong>done</strong> (experience), <strong>who you know</strong> (network),
           and <strong>what you can do</strong> (skills) into a clear picture of how ready you
@@ -38,7 +38,7 @@ export default function Onboarding({ open, onDismiss }) {
         </div>
 
         <p className="text-sm text-slate-600">
-          PioneerPath turns that scattered progress into one connected profile, built for
+          Abuve turns that scattered progress into one connected profile, built for
           L&amp;C students working with the <strong>Career Center</strong> to get ready for
           internships, study abroad, and life after Watzek.
         </p>

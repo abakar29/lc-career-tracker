@@ -43,6 +43,9 @@ export default function Settings() {
 
   function handleSave(e) {
     e.preventDefault();
+    localStorage.setItem("abuve:profile:name", name);
+    localStorage.setItem("abuve:profile:major", major);
+    localStorage.setItem("abuve:profile:classyear", classYear);
     setSaved(true);
     setTimeout(() => setSaved(false), 1500);
   }
@@ -94,7 +97,7 @@ export default function Settings() {
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <CardHeader title="About PioneerPath" />
+          <CardHeader title="About Abuve" />
           <div className="px-5 pb-5 pt-1 space-y-2">
             <p className="text-sm text-slate-500">Version v1.0.0</p>
             <p className="text-sm text-slate-600">
