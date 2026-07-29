@@ -58,10 +58,23 @@ export default function Login() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-4"
-      style={{ backgroundColor: "#F8F9FB" }}
+      className="px-4"
+      style={{
+        minHeight: "100vh",
+        position: "relative",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundImage: "url(/lc-campus.jpg)",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
     >
-      <div className="w-full max-w-[400px] bg-white rounded-2xl shadow-sm p-8">
+      <div style={{ position: "absolute", inset: 0, background: "rgba(26, 23, 20, 0.65)" }} />
+      <div
+        className="w-full max-w-[400px] bg-white rounded-2xl shadow-sm p-8"
+        style={{ position: "relative", zIndex: 1 }}
+      >
         <div className="flex flex-col items-center text-center mb-6">
           <img src="/lc-logo.png" alt="" className="h-14 w-14 object-contain mb-3" />
           <h1 className="text-xl font-bold text-slate-900">Abuve</h1>
