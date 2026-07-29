@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Users, Plus, Pencil, Camera, Coffee } from "lucide-react";
+import { useCallback, useState } from "react";
+import { Users, Plus, Pencil, Camera, Coffee, Search, Clock } from "lucide-react";
 import { useData } from "../context/DataContext";
 import { formatDate, daysSince } from "../lib/utils";
 import {
@@ -51,6 +51,8 @@ function industryFor(employer) {
 
 const RELATIONSHIP_PURPOSES = ["Recruiter", "Mentor", "Alumni", "Career Advice"];
 
+const STATUS_OPTIONS = ["Overdue", "Follow Up Soon", "Active"];
+
 const RELATIONSHIP_BADGE_CLASSES = {
   Recruiter: "bg-orange-50 text-orange-700 ring-1 ring-inset ring-orange-200",
   Mentor: "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200",
@@ -58,7 +60,7 @@ const RELATIONSHIP_BADGE_CLASSES = {
   "Career Advice": "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200",
 };
 
-const CADENCE_OPTIONS = ["Weekly", "Monthly", "Every 3 months", "As needed"];
+const CADENCE_OPTIONS = ["Remind in 2 weeks", "Remind in 1 month", "Remind in 3 months"];
 
 function buildCoffeeChatMessage(contact) {
   return `Hi ${contact.contact_name}, I'd love to connect for a quick coffee chat to learn more about your experience at ${contact.employer_company}. Would you be available for 15-20 minutes?`;
@@ -121,10 +123,9 @@ function avatarColor(name) {
 }
 
 function urgency(days) {
-  if (days <= 0) return { tone: "green", label: "Contacted today" };
-  if (days <= 14) return { tone: "green", label: `${days}d since contact` };
-  if (days <= 30) return { tone: "amber", label: `${days}d since contact, follow up soon` };
-  return { tone: "red", label: `${days}d since contact, overdue` };
+  if (days > 30) return { tone: "red", label: "Overdue" };
+  if (days > 14) return { tone: "amber", label: "Follow Up Soon" };
+  return { tone: "green", label: "Active" };
 }
 
 function todayISO() {
@@ -140,6 +141,7 @@ function emptyForm() {
     last_contacted_date: todayISO(),
     connection_source: CONNECTION_SOURCES[0],
     interaction_notes: "",
+    relationship_purpose: "",
   };
 }
 
@@ -180,13 +182,16 @@ export default function Network() {
   const [relationshipPurpose, setRelationshipPurpose] = useState(() =>
     loadStoredMap("relationship_", networkConnections)
   );
-  const [nextActions, setNextActions] = useState(() =>
-    loadStoredMap("next_action_", networkConnections)
-  );
   const [cadence, setCadence] = useState(() => loadStoredMap("cadence_", networkConnections));
   const [coffeeChatOpenId, setCoffeeChatOpenId] = useState(null);
   const [coffeeChatMessage, setCoffeeChatMessage] = useState("");
   const [coffeeChatSentId, setCoffeeChatSentId] = useState(null);
+  const [reminderOpenId, setReminderOpenId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [relationshipFilter, setRelationshipFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
+  const closeModal = useCallback(() => setModalOpen(false), []);
 
   function openCoffeeChatForm(contact) {
     setCoffeeChatOpenId(contact.id);
@@ -206,11 +211,6 @@ export default function Network() {
   function updateRelationshipPurpose(contact, value) {
     localStorage.setItem(`relationship_${contact.contact_name}`, value);
     setRelationshipPurpose((prev) => ({ ...prev, [contact.contact_name]: value }));
-  }
-
-  function updateNextAction(contact, value) {
-    localStorage.setItem(`next_action_${contact.contact_name}`, value);
-    setNextActions((prev) => ({ ...prev, [contact.contact_name]: value }));
   }
 
   function updateCadence(contact, value) {
@@ -262,6 +262,7 @@ export default function Network() {
       last_contacted_date: c.last_contacted_date,
       connection_source: c.connection_source,
       interaction_notes: c.interaction_notes ?? "",
+      relationship_purpose: relationshipPurpose[c.contact_name] ?? "",
     });
     setErrors({});
     setModalOpen(true);
@@ -277,7 +278,7 @@ export default function Network() {
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
-    const { linkedin_url, ...contactFields } = formValues;
+    const { linkedin_url, relationship_purpose, ...contactFields } = formValues;
     if (editingId) {
       updateContact(editingId, contactFields);
     } else {
@@ -291,6 +292,11 @@ export default function Network() {
       setLinkedinUrls((u) => ({ ...u, [key]: trimmedLinkedin }));
     }
 
+    const trimmedRelationship = relationship_purpose.trim();
+    if (trimmedRelationship && key) {
+      updateRelationshipPurpose({ contact_name: key }, trimmedRelationship);
+    }
+
     setModalOpen(false);
   }
 
@@ -302,6 +308,20 @@ export default function Network() {
   const sorted = [...networkConnections].sort(
     (a, b) => daysSince(b.last_contacted_date) - daysSince(a.last_contacted_date)
   );
+
+  const filtered = sorted.filter((c) => {
+    const query = searchQuery.trim().toLowerCase();
+    const matchesQuery =
+      !query ||
+      c.contact_name.toLowerCase().includes(query) ||
+      c.employer_company.toLowerCase().includes(query) ||
+      c.job_title.toLowerCase().includes(query);
+    const matchesRelationship =
+      !relationshipFilter || relationshipPurpose[c.contact_name] === relationshipFilter;
+    const matchesStatus =
+      !statusFilter || urgency(daysSince(c.last_contacted_date)).label === statusFilter;
+    return matchesQuery && matchesRelationship && matchesStatus;
+  });
 
   return (
     <div className="px-4 sm:px-0">
@@ -320,6 +340,51 @@ export default function Network() {
 
       {sorted.length > 0 && <NetworkInsights contacts={sorted} />}
 
+      {sorted.length > 0 && (
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative flex-1 sm:max-w-sm">
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+              aria-hidden="true"
+            />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search contacts..."
+              aria-label="Search contacts"
+              className="w-full rounded-lg border border-slate-300 py-2 pl-9 pr-3 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+          </div>
+          <select
+            value={relationshipFilter}
+            onChange={(e) => setRelationshipFilter(e.target.value)}
+            aria-label="Filter by relationship type"
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          >
+            <option value="">All relationship types</option>
+            {RELATIONSHIP_PURPOSES.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+          </select>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            aria-label="Filter by status"
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          >
+            <option value="">All statuses</option>
+            {STATUS_OPTIONS.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       {sorted.length === 0 ? (
         <Card className="mt-6 flex flex-col items-center justify-center gap-3 py-16 text-center">
           <div className="rounded-full bg-orange-50 p-3">
@@ -335,14 +400,21 @@ export default function Network() {
             Add contact
           </Button>
         </Card>
+      ) : filtered.length === 0 ? (
+        <Card className="mt-6 flex flex-col items-center justify-center gap-2 py-12 text-center">
+          <p className="font-medium text-slate-700">No contacts match your search</p>
+          <p className="text-sm text-slate-500 max-w-sm">
+            Try a different search term or clear the filters.
+          </p>
+        </Card>
       ) : (
         <div className="mt-6 grid mx-auto max-w-full gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {sorted.map((c) => {
+          {filtered.map((c) => {
             const days = daysSince(c.last_contacted_date);
             const status = urgency(days);
             const contactLinkedin = linkedinUrls[c.contact_name] || DEFAULT_LINKEDIN_URLS[c.contact_name];
             return (
-              <Card key={c.id} className="p-4 hover:shadow-md hover:-translate-y-0.5 transition-all">
+              <Card key={c.id} className="p-3 hover:shadow-md hover:-translate-y-0.5 transition-all">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex flex-1 items-start gap-3 min-w-0">
                     <div className="relative flex-shrink-0">
@@ -401,12 +473,6 @@ export default function Network() {
                         }
                       }}
                     />
-                    <IconButton
-                      icon={Pencil}
-                      label={`Edit ${c.contact_name}`}
-                      className="p-2! sm:p-3!"
-                      onClick={() => openEditModal(c)}
-                    />
                   </div>
                 </div>
 
@@ -433,23 +499,15 @@ export default function Network() {
                 <div className="mt-3 flex flex-wrap items-center gap-1.5">
                   <Badge tone="slate">{c.connection_source}</Badge>
                   <Badge tone={status.tone}>{status.label}</Badge>
-                  <select
-                    value={relationshipPurpose[c.contact_name] ?? ""}
-                    onChange={(e) => updateRelationshipPurpose(c, e.target.value)}
-                    aria-label={`Relationship purpose for ${c.contact_name}`}
-                    className={`rounded-full border-0 px-2.5 py-0.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-orange-400 ${
-                      relationshipPurpose[c.contact_name]
-                        ? RELATIONSHIP_BADGE_CLASSES[relationshipPurpose[c.contact_name]]
-                        : "bg-slate-100 text-slate-400 ring-1 ring-inset ring-slate-200"
-                    }`}
-                  >
-                    <option value="">Set relationship</option>
-                    {RELATIONSHIP_PURPOSES.map((p) => (
-                      <option key={p} value={p}>
-                        {p}
-                      </option>
-                    ))}
-                  </select>
+                  {relationshipPurpose[c.contact_name] && (
+                    <span
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        RELATIONSHIP_BADGE_CLASSES[relationshipPurpose[c.contact_name]]
+                      }`}
+                    >
+                      {relationshipPurpose[c.contact_name]}
+                    </span>
+                  )}
                 </div>
 
                 {c.interaction_notes && (
@@ -460,84 +518,68 @@ export default function Network() {
                 </p>
 
                 <div className="mt-3 space-y-2 border-t border-slate-100 pt-3">
-                  <div>
-                    <label className="mb-0.5 block text-[11px] font-medium text-slate-500">
-                      Next action
-                    </label>
-                    <input
-                      type="text"
-                      value={nextActions[c.contact_name] ?? ""}
-                      onChange={(e) => updateNextAction(c, e.target.value)}
-                      placeholder="e.g. Send follow-up email about internship"
-                      className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-0.5 block text-[11px] font-medium text-slate-500">
-                      Contact cadence
-                    </label>
-                    <select
-                      value={cadence[c.contact_name] ?? ""}
-                      onChange={(e) => updateCadence(c, e.target.value)}
-                      className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    >
-                      <option value="">Select cadence</option>
-                      {CADENCE_OPTIONS.map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
+                  <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() =>
                         coffeeChatOpenId === c.id ? closeCoffeeChatForm() : openCoffeeChatForm(c)
                       }
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-brand-orange px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+                      className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-90"
+                      style={{
+                        background: "#E87722",
+                        color: "#ffffff",
+                        border: "none",
+                        padding: "8px 14px",
+                        borderRadius: "8px",
+                        fontSize: "13px",
+                        fontWeight: "500",
+                      }}
                     >
                       <Coffee className="h-3.5 w-3.5" aria-hidden="true" />
                       Request Coffee Chat
                     </button>
-
-                    {coffeeChatOpenId === c.id && (
-                      <div className="mt-2 space-y-2">
-                        {coffeeChatSentId === c.id ? (
-                          <p className="rounded-lg bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-700">
-                            Request sent!
-                          </p>
-                        ) : (
-                          <>
-                            <textarea
-                              rows={3}
-                              value={coffeeChatMessage}
-                              onChange={(e) => setCoffeeChatMessage(e.target.value)}
-                              className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                            />
-                            <div className="flex items-center gap-4">
-                              <Button
-                                type="button"
-                                className="px-3 py-1.5 text-xs"
-                                onClick={() => handleSendCoffeeChat(c.id)}
-                              >
-                                Send Request
-                              </Button>
-                              <button
-                                type="button"
-                                onClick={closeCoffeeChatForm}
-                                className="text-xs font-medium text-slate-500 hover:text-slate-700"
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    )}
+                    <IconButton
+                      icon={Pencil}
+                      label={`Edit ${c.contact_name}`}
+                      className="p-2!"
+                      onClick={() => openEditModal(c)}
+                    />
                   </div>
+
+                  {coffeeChatOpenId === c.id && (
+                    <div className="space-y-2">
+                      {coffeeChatSentId === c.id ? (
+                        <p className="rounded-lg bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-700">
+                          Request sent!
+                        </p>
+                      ) : (
+                        <>
+                          <textarea
+                            rows={3}
+                            value={coffeeChatMessage}
+                            onChange={(e) => setCoffeeChatMessage(e.target.value)}
+                            className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                          />
+                          <div className="flex items-center gap-4">
+                            <Button
+                              type="button"
+                              className="px-3 py-1.5 text-xs"
+                              onClick={() => handleSendCoffeeChat(c.id)}
+                            >
+                              Send Request
+                            </Button>
+                            <button
+                              type="button"
+                              onClick={closeCoffeeChatForm}
+                              className="text-xs font-medium text-slate-500 hover:text-slate-700"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
               </Card>
             );
@@ -547,7 +589,7 @@ export default function Network() {
 
       <Modal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={closeModal}
         title={editingId ? "Edit contact" : "Add contact"}
       >
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
@@ -604,6 +646,18 @@ export default function Network() {
               ))}
             </SelectField>
           </div>
+          <SelectField
+            label="Relationship"
+            value={formValues.relationship_purpose}
+            onChange={(e) => updateField("relationship_purpose", e.target.value)}
+          >
+            <option value="">Select relationship</option>
+            {RELATIONSHIP_PURPOSES.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+          </SelectField>
           <TextArea
             label="Notes"
             placeholder="What did you talk about? Any follow-up you promised?"

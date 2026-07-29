@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Lightbulb } from "lucide-react";
 import { Card, CardHeader, Badge, Button } from "../components/ui";
+import { formatDate } from "../lib/utils";
 
 const TOP_SKILLS = [
   { label: "Project Management", value: 89 },
@@ -11,11 +13,11 @@ const TOP_SKILLS = [
 ];
 
 const TOP_INDUSTRIES = [
-  { label: "Technology", value: 34 },
-  { label: "Consulting", value: 28 },
-  { label: "Finance", value: 22 },
-  { label: "Nonprofit", value: 10 },
-  { label: "Healthcare", value: 6 },
+  { label: "Technology", interested: 34, ready: 22 },
+  { label: "Consulting", interested: 28, ready: 15 },
+  { label: "Finance", interested: 22, ready: 14 },
+  { label: "Nonprofit", interested: 10, ready: 6 },
+  { label: "Healthcare", interested: 6, ready: 3 },
 ];
 
 const EXPERIENCE_BREAKDOWN = [
@@ -31,48 +33,124 @@ const READINESS_OVERVIEW = [
   { label: "Getting Started", range: "0-49%", count: 7, tone: "red" },
 ];
 
+const TOP_MISSING_SKILLS = [
+  { label: "SQL", value: 61 },
+  { label: "Excel", value: 54 },
+  { label: "Power BI", value: 47 },
+  { label: "Public Speaking", value: 39 },
+  { label: "Leadership", value: 33 },
+];
+
+const EMPLOYER_READINESS = [
+  { label: "Technology", count: 85 },
+  { label: "Marketing", count: 46 },
+  { label: "Finance", count: 31 },
+  { label: "Healthcare", count: 19 },
+];
+
+const STUDENTS_NEEDING_ATTENTION = [
+  { label: "No resume", count: 14 },
+  { label: "No internship", count: 9 },
+  { label: "No networking activity", count: 22 },
+  { label: "No applications submitted", count: 31 },
+];
+
+const RECOMMENDATIONS = [
+  "Host an Excel workshop",
+  "Invite more Finance employers",
+  "42 students are internship-ready",
+  "Marketing students need networking support",
+  "Resume completion has dropped this month",
+];
+
 const STAT_CARDS = [
-  { label: "Total Students", value: 47 },
-  { label: "Experiences Logged", value: 183 },
-  { label: "Skills Recorded", value: 312 },
-  { label: "Applications Submitted", value: 94 },
+  {
+    label: "Students Ready for Internships",
+    value: 42,
+    students: ["Maya Okonkwo", "Daniel Ferreira", "James Lim"],
+  },
+  {
+    label: "Students Needing Support",
+    value: 18,
+    students: ["Sarah Whitmore", "Alex Chen"],
+  },
+  {
+    label: "Students Without Experience",
+    value: 9,
+    students: ["Marcus Webb", "Elena Vasquez", "Tyler Brooks"],
+  },
+  {
+    label: "Missing Critical Skills",
+    value: 23,
+    students: ["Nina Okafor", "Chris Dominguez", "Priya Patel", "Alex Chen"],
+  },
+  {
+    label: "Ready for Employer Matching",
+    value: 31,
+    students: ["Maya Okonkwo", "James Lim", "Jordan Reyes"],
+  },
+  {
+    label: "No Resume on File",
+    value: 14,
+    students: ["Jordan Park", "Sam Rivera"],
+  },
 ];
 
 const STUDENT_ROWS = [
-  { id: "LC24-0113", major: "Computer Science", experiences: 6, skills: 12, applications: 4, readiness: 92, lastActive: "2026-07-24" },
-  { id: "LC25-0287", major: "International Affairs", experiences: 4, skills: 9, applications: 2, readiness: 74, lastActive: "2026-07-23" },
-  { id: "LC24-0056", major: "Biology", experiences: 3, skills: 7, applications: 3, readiness: 61, lastActive: "2026-07-22" },
-  { id: "LC26-0402", major: "Economics", experiences: 5, skills: 11, applications: 5, readiness: 88, lastActive: "2026-07-25" },
-  { id: "LC25-0198", major: "Environmental Studies", experiences: 2, skills: 5, applications: 1, readiness: 38, lastActive: "2026-07-18" },
-  { id: "LC24-0331", major: "Psychology", experiences: 4, skills: 8, applications: 3, readiness: 69, lastActive: "2026-07-21" },
-  { id: "LC26-0075", major: "Sociology/Anthropology", experiences: 1, skills: 4, applications: 0, readiness: 22, lastActive: "2026-07-15" },
-  { id: "LC25-0244", major: "English", experiences: 5, skills: 10, applications: 4, readiness: 81, lastActive: "2026-07-24" },
+  { name: "Ethan Brooks", major: "Computer Science", experiences: 6, skills: 12, applications: 4, readiness: 92, lastActive: "2026-07-24", targetIndustry: "Technology", resumeStatus: "Complete", lastAppointment: "2026-07-20" },
+  { name: "Sofia Martinez", major: "International Affairs", experiences: 4, skills: 9, applications: 2, readiness: 74, lastActive: "2026-07-23", targetIndustry: "Nonprofit", resumeStatus: "Complete", lastAppointment: "2026-07-15" },
+  { name: "Liam Chen", major: "Biology", experiences: 3, skills: 7, applications: 3, readiness: 61, lastActive: "2026-07-22", targetIndustry: "Healthcare", resumeStatus: "Incomplete", lastAppointment: "2026-07-05" },
+  { name: "Ava Thompson", major: "Economics", experiences: 5, skills: 11, applications: 5, readiness: 88, lastActive: "2026-07-25", targetIndustry: "Finance", resumeStatus: "Complete", lastAppointment: "2026-07-22" },
+  { name: "Noah Patel", major: "Environmental Studies", experiences: 2, skills: 5, applications: 1, readiness: 38, lastActive: "2026-07-18", targetIndustry: "Nonprofit", resumeStatus: "Incomplete", lastAppointment: "2026-06-28" },
+  { name: "Grace Kim", major: "Psychology", experiences: 4, skills: 8, applications: 3, readiness: 69, lastActive: "2026-07-21", targetIndustry: "Healthcare", resumeStatus: "Complete", lastAppointment: "2026-07-12" },
+  { name: "Mason Rivera", major: "Sociology/Anthropology", experiences: 1, skills: 4, applications: 0, readiness: 22, lastActive: "2026-07-15", targetIndustry: "Nonprofit", resumeStatus: "Incomplete", lastAppointment: "2026-06-20" },
+  { name: "Chloe Bennett", major: "English", experiences: 5, skills: 10, applications: 4, readiness: 81, lastActive: "2026-07-24", targetIndustry: "Marketing", resumeStatus: "Complete", lastAppointment: "2026-07-18" },
 ];
 
 const TABLE_COLUMNS = [
-  "Student ID",
+  "Student Name",
   "Major",
   "Experiences",
   "Skills",
   "Applications",
   "Readiness Score",
   "Last Active",
+  "Target Industry",
+  "Resume Status",
+  "Last Appointment",
 ];
 
 const COLUMN_KEYS = {
-  "Student ID": "id",
+  "Student Name": "name",
   Major: "major",
   Experiences: "experiences",
   Skills: "skills",
   Applications: "applications",
   "Readiness Score": "readiness",
   "Last Active": "lastActive",
+  "Target Industry": "targetIndustry",
+  "Resume Status": "resumeStatus",
+  "Last Appointment": "lastAppointment",
 };
+
+const ROW_BORDER_CLASSES = {
+  green: "border-l-emerald-500",
+  amber: "border-l-amber-500",
+  red: "border-l-red-500",
+};
+
+const READINESS_FILTER_OPTIONS = ["All Levels", ...READINESS_OVERVIEW.map((r) => r.label)];
 
 function readinessTone(score) {
   if (score >= 80) return "green";
   if (score >= 50) return "amber";
   return "red";
+}
+
+function readinessBand(score) {
+  if (score >= 80) return "Career Ready";
+  if (score >= 50) return "In Progress";
+  return "Getting Started";
 }
 
 function BarRow({ label, value, color = "#E87722" }) {
@@ -96,6 +174,12 @@ export default function Admin() {
   const navigate = useNavigate();
   const [sortKey, setSortKey] = useState("readiness");
   const [sortDirection, setSortDirection] = useState("desc");
+  const [readinessFilter, setReadinessFilter] = useState("All Levels");
+  const [openStatIndex, setOpenStatIndex] = useState(null);
+
+  function toggleStat(index) {
+    setOpenStatIndex((prev) => (prev === index ? null : index));
+  }
 
   function handleSort(column) {
     const key = COLUMN_KEYS[column];
@@ -124,6 +208,11 @@ export default function Admin() {
     return sortDirection === "asc" ? comparison : -comparison;
   });
 
+  const filteredRows =
+    readinessFilter === "All Levels"
+      ? sortedRows
+      : sortedRows.filter((row) => readinessBand(row.readiness) === readinessFilter);
+
   return (
     <div>
         <button
@@ -151,13 +240,73 @@ export default function Admin() {
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-          {STAT_CARDS.map((stat) => (
-            <Card key={stat.label} className="p-5">
-              <p className="text-sm text-slate-500">{stat.label}</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{stat.value}</p>
-            </Card>
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-6">
+          {STAT_CARDS.map((stat, i) => {
+            const isOpen = openStatIndex === i;
+            return (
+              <div key={stat.label} className="relative">
+                <Card className="cursor-pointer border border-slate-200 transition-colors hover:border-[#3b82f6] hover:bg-blue-50/60">
+                  <div style={{ padding: "12px 16px" }}>
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      aria-expanded={isOpen}
+                      onClick={() => toggleStat(i)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          toggleStat(i);
+                        }
+                      }}
+                    >
+                      <p style={{ color: "#6B7280", fontSize: "12px" }}>{stat.label}</p>
+                      <p
+                        className="mt-0.5 leading-tight"
+                        style={{ color: "#111827", fontSize: "28px", fontWeight: 600 }}
+                      >
+                        {stat.value}
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleStat(i);
+                      }}
+                      className="mt-2 font-semibold hover:underline"
+                      style={{ color: "#B85A12", fontSize: "11px" }}
+                    >
+                      View all →
+                    </button>
+                  </div>
+                </Card>
+
+                {isOpen && (
+                  <div
+                    className="absolute left-0 top-full z-50 mt-2 w-64 rounded-xl border border-slate-200 bg-white"
+                    style={{ boxShadow: "0 4px 16px rgba(0,0,0,0.1)", padding: "12px 16px" }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setOpenStatIndex(null)}
+                      aria-label="Close"
+                      className="absolute right-2 top-2 text-xs leading-none text-slate-400 hover:text-slate-600"
+                    >
+                      ✕
+                    </button>
+                    <ul className="space-y-1 pr-4">
+                      {stat.students.map((name) => (
+                        <li key={name} className="text-sm text-slate-700">
+                          {name}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
@@ -165,7 +314,7 @@ export default function Admin() {
             <CardHeader title="Top Skills Across Students" />
             <div className="p-5 space-y-4">
               {TOP_SKILLS.map((skill) => (
-                <BarRow key={skill.label} label={skill.label} value={skill.value} />
+                <BarRow key={skill.label} label={skill.label} value={skill.value} color="#3b82f6" />
               ))}
             </div>
           </Card>
@@ -174,8 +323,54 @@ export default function Admin() {
             <CardHeader title="Top Industries Students Are Targeting" />
             <div className="p-5 space-y-4">
               {TOP_INDUSTRIES.map((industry) => (
-                <BarRow key={industry.label} label={industry.label} value={industry.value} />
+                <div key={industry.label}>
+                  <p className="text-sm text-slate-700 mb-1">{industry.label}</p>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="w-16 shrink-0 text-xs text-slate-500">Interested</span>
+                      <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100">
+                        <div
+                          className="h-full rounded-full"
+                          style={{ width: `${industry.interested}%`, backgroundColor: "#3b82f6" }}
+                        />
+                      </div>
+                      <span className="w-8 shrink-0 text-right text-xs font-medium text-slate-900">
+                        {industry.interested}%
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-16 shrink-0 text-xs text-slate-500">Ready</span>
+                      <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100">
+                        <div
+                          className="h-full rounded-full"
+                          style={{ width: `${industry.ready}%`, backgroundColor: "#0d9488" }}
+                        />
+                      </div>
+                      <span className="w-8 shrink-0 text-right text-xs font-medium text-slate-900">
+                        {industry.ready}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
               ))}
+              <div className="flex items-center gap-4 pt-1 text-xs text-slate-600">
+                <span className="flex items-center gap-1.5">
+                  <span
+                    className="h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: "#3b82f6" }}
+                    aria-hidden="true"
+                  />
+                  Interested
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span
+                    className="h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: "#0d9488" }}
+                    aria-hidden="true"
+                  />
+                  Ready
+                </span>
+              </div>
             </div>
           </Card>
         </div>
@@ -212,21 +407,145 @@ export default function Admin() {
           </Card>
         </div>
 
+        <Card className="mb-6">
+          <CardHeader title="Top Missing Skills" />
+          <div className="p-5 space-y-4">
+            {TOP_MISSING_SKILLS.map((skill) => (
+              <BarRow key={skill.label} label={skill.label} value={skill.value} color="#3b82f6" />
+            ))}
+          </div>
+        </Card>
+
+        <div className="mb-6">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">
+            Employer Readiness
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {EMPLOYER_READINESS.map((item) => (
+              <Card key={item.label}>
+                <div className="flex flex-col gap-3" style={{ padding: "12px 16px" }}>
+                  <div>
+                    <p className="text-slate-500" style={{ fontSize: "13px", fontWeight: 500 }}>
+                      {item.label}
+                    </p>
+                    <p className="text-slate-900 mt-1" style={{ fontSize: "22px", fontWeight: 700 }}>
+                      {item.count}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    style={{
+                      fontSize: "12px",
+                      color: "#3b82f6",
+                      background: "none",
+                      border: "none",
+                      padding: 0,
+                    }}
+                    className="self-start hover:underline"
+                    onClick={() => alert(`Viewing students ready for ${item.label} roles`)}
+                  >
+                    View Students
+                  </button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        <Card className="mb-6">
+          <CardHeader title="Students Needing Attention" />
+          <div className="p-5 pt-3">
+            <ul className="divide-y divide-slate-100">
+              {STUDENTS_NEEDING_ATTENTION.map((item) => (
+                <li key={item.label} className="flex items-center justify-between gap-4 py-3">
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">{item.label}</p>
+                    <p className="text-xs text-slate-500">{item.count} students</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => alert(`Viewing students: ${item.label}`)}
+                    className="text-sm font-semibold hover:underline"
+                    style={{ color: "#3b82f6" }}
+                  >
+                    View Students
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Card>
+
+        <Card className="mb-6">
+          <div className="flex items-center gap-2 px-5 pt-5">
+            <Lightbulb className="h-5 w-5" style={{ color: "#E87722" }} aria-hidden="true" />
+            <h2 className="text-base font-semibold text-slate-900">Recommendations</h2>
+          </div>
+          <ul className="p-5 pt-3 space-y-2.5">
+            {RECOMMENDATIONS.map((rec, i) => (
+              <li key={rec} className="flex items-start gap-2 text-sm text-slate-700">
+                <span
+                  className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full"
+                  style={{ backgroundColor: "#E87722" }}
+                  aria-hidden="true"
+                />
+                <span>{rec}</span>
+                {i < 2 && (
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      background: "#FEE2E2",
+                      color: "#991B1B",
+                      padding: "2px 6px",
+                      borderRadius: "4px",
+                    }}
+                  >
+                    Action needed
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </Card>
+
+        <div className="flex items-center gap-3 mb-3">
+          <label
+            htmlFor="readiness-filter"
+            className="text-xs font-semibold uppercase tracking-wide text-slate-500"
+          >
+            Filter by Readiness
+          </label>
+          <select
+            id="readiness-filter"
+            value={readinessFilter}
+            onChange={(e) => setReadinessFilter(e.target.value)}
+            className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          >
+            {READINESS_FILTER_OPTIONS.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className="md:hidden mb-6">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">
             Student Activity
           </p>
           <div className="space-y-3">
-            {sortedRows.map((row) => (
-              <Card key={row.id} className="p-4">
+            {filteredRows.map((row) => (
+              <Card key={row.name} className="p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="font-medium text-slate-900">{row.id}</p>
+                    <p className="font-medium text-slate-900">{row.name}</p>
                     <p className="text-sm text-slate-500 truncate">{row.major}</p>
                   </div>
                   <Badge tone={readinessTone(row.readiness)}>{row.readiness}%</Badge>
                 </div>
-                <p className="mt-2 text-xs text-slate-400">Last active {row.lastActive}</p>
+                <p className="mt-2 text-xs text-slate-400">
+                  Last active {formatDate(row.lastActive)}
+                </p>
               </Card>
             ))}
           </div>
@@ -249,7 +568,7 @@ export default function Admin() {
                         aria-sort={isActive ? (sortDirection === "asc" ? "ascending" : "descending") : "none"}
                         onClick={() => handleSort(col)}
                         onKeyDown={(e) => handleSortKeyDown(e, col)}
-                        className="text-left font-medium text-slate-500 px-3 py-2 cursor-pointer select-none hover:text-slate-700"
+                        className="text-left font-medium text-[#6B7280] text-[13px] px-3 py-2.5 cursor-pointer select-none hover:text-slate-700"
                       >
                         {col}{" "}
                         <span className={isActive ? "text-slate-600" : "text-slate-300"}>
@@ -261,20 +580,34 @@ export default function Admin() {
                 </tr>
               </thead>
               <tbody>
-                {sortedRows.map((row, i) => (
-                  <tr
-                    key={row.id}
-                    className={i % 2 === 1 ? "bg-slate-50" : "bg-white"}
-                  >
-                    <td className="px-3 py-2.5 font-medium text-slate-900">{row.id}</td>
-                    <td className="px-3 py-2.5 text-slate-700">{row.major}</td>
-                    <td className="px-3 py-2.5 text-slate-700">{row.experiences}</td>
-                    <td className="px-3 py-2.5 text-slate-700">{row.skills}</td>
-                    <td className="px-3 py-2.5 text-slate-700">{row.applications}</td>
-                    <td className="px-3 py-2.5 text-slate-700">{row.readiness}%</td>
-                    <td className="px-3 py-2.5 text-slate-500">{row.lastActive}</td>
-                  </tr>
-                ))}
+                {filteredRows.map((row, i) => {
+                  const tone = readinessTone(row.readiness);
+                  return (
+                    <tr
+                      key={row.name}
+                      className={`border-l-4 ${ROW_BORDER_CLASSES[tone]} transition-colors hover:bg-[#F9FAFB] ${
+                        i % 2 === 1 ? "bg-slate-50" : "bg-white"
+                      }`}
+                    >
+                      <td className="px-3 py-3 font-medium text-slate-900">{row.name}</td>
+                      <td className="px-3 py-3 text-slate-700">{row.major}</td>
+                      <td className="px-3 py-3 text-slate-700">{row.experiences}</td>
+                      <td className="px-3 py-3 text-slate-700">{row.skills}</td>
+                      <td className="px-3 py-3 text-slate-700">{row.applications}</td>
+                      <td className="px-3 py-3">
+                        <Badge tone={tone}>{row.readiness}%</Badge>
+                      </td>
+                      <td className="px-3 py-3 text-slate-500">{formatDate(row.lastActive)}</td>
+                      <td className="px-3 py-3 text-slate-700">{row.targetIndustry}</td>
+                      <td className="px-3 py-3">
+                        <Badge tone={row.resumeStatus === "Complete" ? "green" : "red"}>
+                          {row.resumeStatus}
+                        </Badge>
+                      </td>
+                      <td className="px-3 py-3 text-slate-500">{formatDate(row.lastAppointment)}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

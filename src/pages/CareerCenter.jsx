@@ -10,6 +10,27 @@ const ADVISORS = [
   { id: "emily", name: "Emily Carter", role: "Resume Specialist", initials: "EC", bg: "#1a1a1a" },
 ];
 
+const UPCOMING_EVENTS = [
+  {
+    title: "Career Connections with Alumni",
+    date: "Aug 12, 2026 · 3:00 PM",
+    description: "L&C alumni return to campus to share advice on careers and internships.",
+    image: "/event-alumni-connections.jpg",
+  },
+  {
+    title: "Behind the Swoosh at Nike HQ",
+    date: "Aug 19, 2026 · 10:00 AM",
+    description: "Exclusive tour of Nike headquarters with L&C alumni working there.",
+    image: "/event-nike-hq.jpg",
+  },
+  {
+    title: "Summer Internship Showcase",
+    date: "Aug 26, 2026 · 2:00 PM",
+    description: "Students present their summer internship experiences to the campus community.",
+    image: "/event-internship-showcase.jpg",
+  },
+];
+
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const TIME_SLOTS = ["9:30 AM", "11:00 AM", "2:00 PM", "4:00 PM"];
 const TODAY = new Date(2026, 6, 21);
@@ -41,6 +62,11 @@ export default function CareerCenter() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [confirmed, setConfirmed] = useState(false);
+  const [rsvped, setRsvped] = useState({});
+
+  function toggleRsvp(title) {
+    setRsvped((prev) => ({ ...prev, [title]: !prev[title] }));
+  }
 
   const firstWeekday = new Date(CALENDAR_YEAR, CALENDAR_MONTH, 1).getDay();
   const daysInMonth = new Date(CALENDAR_YEAR, CALENDAR_MONTH + 1, 0).getDate();
@@ -90,6 +116,64 @@ export default function CareerCenter() {
           <p className="mt-3 text-lg font-semibold text-slate-900">Drop-in Hours</p>
           <p className="mt-1 text-sm text-slate-500">Mon-Fri 2-4pm, no booking needed</p>
         </button>
+      </div>
+
+      <div className="mt-6">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Upcoming Events
+        </p>
+        <div className="mt-3 grid grid-cols-3 gap-4">
+          {UPCOMING_EVENTS.map((event) => (
+            <div
+              key={event.title}
+              className="overflow-hidden bg-white"
+              style={{ borderRadius: "16px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}
+            >
+              <img
+                src={event.image}
+                alt={event.title}
+                className="w-full object-cover"
+                style={{ height: "140px" }}
+              />
+              <div style={{ padding: "16px" }}>
+                <p style={{ fontSize: "15px", fontWeight: 600, color: "#111827" }}>
+                  {event.title}
+                </p>
+                <p style={{ fontSize: "12px", color: "#6B7280", marginTop: "4px" }}>
+                  {event.date}
+                </p>
+                <p
+                  style={{
+                    fontSize: "13px",
+                    color: "#6B7280",
+                    marginTop: "8px",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                  }}
+                >
+                  {event.description}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => toggleRsvp(event.title)}
+                  style={{
+                    marginTop: "12px",
+                    background: "#E87722",
+                    color: "#ffffff",
+                    border: "none",
+                    borderRadius: "8px",
+                    padding: "6px 14px",
+                    fontSize: "13px",
+                  }}
+                >
+                  {rsvped[event.title] ? "Registered ✓" : "RSVP"}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {selected === "book" && (

@@ -164,7 +164,7 @@ function CareerReadinessHero({ score, checks, classYear, major, name, attentionC
   const statusTone = attentionCount > 0 ? "amber" : "green";
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-[#433E3C] px-6 py-8 md:px-8 md:py-10 text-white shadow-lg">
+    <div className="relative overflow-visible rounded-2xl bg-[#433E3C] px-6 py-8 md:px-8 md:py-10 text-white shadow-lg">
       <div
         className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-orange-500/20 blur-3xl"
         aria-hidden="true"
@@ -223,19 +223,32 @@ function CareerReadinessHero({ score, checks, classYear, major, name, attentionC
               View breakdown
             </button>
             {breakdownOpen && (
-              <div className="absolute left-1/2 top-full z-20 mt-2 w-56 -translate-x-1/2 rounded-lg border border-slate-200 bg-white p-3 text-left shadow-xl">
-                <ul className="space-y-2">
+              <div className="absolute left-1/2 top-full z-50 mt-3 w-64 -translate-x-1/2 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-xl">
+                <p className="text-sm font-semibold text-slate-900">Score Breakdown</p>
+                <ul className="mt-3 space-y-3">
                   {breakdown.map((b) => (
-                    <li key={b.label} className="flex items-center justify-between gap-2 text-xs">
-                      <span className="flex items-center gap-1.5">
-                        <span className="flex h-3.5 w-3.5 flex-shrink-0 items-center justify-center">
-                          {b.complete && (
-                            <Check className="h-3.5 w-3.5 text-emerald-600" aria-hidden="true" />
-                          )}
+                    <li key={b.label}>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="flex items-center gap-2">
+                          <span
+                            className={`flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full ${
+                              b.complete ? "bg-emerald-100" : "bg-slate-100"
+                            }`}
+                          >
+                            {b.complete && (
+                              <Check className="h-2.5 w-2.5 text-emerald-600" strokeWidth={3} aria-hidden="true" />
+                            )}
+                          </span>
+                          <span className="text-sm font-medium text-slate-700">{b.label}</span>
                         </span>
-                        <span className="text-slate-700">{b.label}</span>
-                      </span>
-                      <span className="text-slate-400">{b.weight}</span>
+                        <span className="text-sm font-semibold text-slate-900">{b.weight}</span>
+                      </div>
+                      <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-slate-100">
+                        <div
+                          className={`h-full rounded-full ${b.complete ? "bg-emerald-500" : "bg-slate-300"}`}
+                          style={{ width: b.complete ? "100%" : "0%" }}
+                        />
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -560,10 +573,10 @@ export default function Dashboard() {
   const compassItems = buildCompassItems(navigate);
 
   const scoreBreakdown = [
-    { label: "Experiences logged", weight: "25%", complete: experiences.length > 0 },
-    { label: "Skills added", weight: "25%", complete: skills.length > 0 },
-    { label: "Network contacts", weight: "25%", complete: networkConnections.length > 0 },
-    { label: "Applications tracked", weight: "25%", complete: applications.length > 0 },
+    { label: "Experiences", weight: "25%", complete: experiences.length > 0 },
+    { label: "Skills", weight: "25%", complete: skills.length > 0 },
+    { label: "Network", weight: "25%", complete: networkConnections.length > 0 },
+    { label: "Applications", weight: "25%", complete: applications.length > 0 },
   ];
 
   return (

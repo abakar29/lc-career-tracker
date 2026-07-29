@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Briefcase, Plus, Pencil, ChevronDown, ChevronUp, Copy } from "lucide-react";
 import { useData } from "../context/DataContext";
 import { formatDate } from "../lib/utils";
@@ -121,6 +121,8 @@ export default function Experience() {
     setCopiedId(exp.id);
     setTimeout(() => setCopiedId((id) => (id === exp.id ? null : id)), 1500);
   }
+
+  const closeModal = useCallback(() => setModalOpen(false), []);
 
   function openAddModal() {
     setEditingId(null);
@@ -313,7 +315,7 @@ export default function Experience() {
 
       <Modal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={closeModal}
         title={editingId ? "Edit experience" : "Add experience"}
       >
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
