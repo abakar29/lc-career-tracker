@@ -32,9 +32,9 @@ function ToggleRow({ label, description, checked, onChange }) {
 }
 
 export default function Settings() {
-  const [name, setName] = useState("Abu Bakar");
-  const [major, setMajor] = useState("Economics & Entrepreneurship");
-  const [classYear, setClassYear] = useState("2029");
+  const [name, setName] = useState(() => localStorage.getItem('abuve:profile:name') || 'Abu Bakar');
+  const [major, setMajor] = useState(() => localStorage.getItem('abuve:profile:major') || 'Economics & Entrepreneurship');
+  const [classYear, setClassYear] = useState(() => localStorage.getItem('abuve:profile:classyear') || 'Class of 2029');
   const [saved, setSaved] = useState(false);
 
   const [followUpReminders, setFollowUpReminders] = useState(true);
@@ -47,7 +47,7 @@ export default function Settings() {
     localStorage.setItem("abuve:profile:major", major);
     localStorage.setItem("abuve:profile:classyear", classYear);
     setSaved(true);
-    setTimeout(() => setSaved(false), 1500);
+    setTimeout(() => setSaved(false), 2000);
   }
 
   return (
@@ -66,8 +66,11 @@ export default function Settings() {
               value={classYear}
               onChange={(e) => setClassYear(e.target.value)}
             />
-            <div className="pt-1">
-              <Button type="submit">{saved ? "Saved!" : "Save Changes"}</Button>
+            <div className="pt-1 flex items-center gap-3">
+              <Button type="submit">Save Changes</Button>
+              {saved && (
+                <span className="text-sm font-medium text-emerald-600">Profile saved</span>
+              )}
             </div>
           </form>
         </div>

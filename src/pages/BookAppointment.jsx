@@ -8,7 +8,7 @@ const ADVISORS = [
     id: "tasia",
     name: "Sarah Johnson",
     role: "Career Advisor",
-    initials: "TS",
+    initials: "SJ",
     bg: "#E87722",
     defaultPhoto: "/Sarah-Johnson.jpg",
   },
@@ -16,7 +16,7 @@ const ADVISORS = [
     id: "nina",
     name: "Emily Carter",
     role: "Resume Specialist",
-    initials: "NO",
+    initials: "EC",
     bg: "#1a1a1a",
     defaultPhoto: "/Emily-Carter.jpg",
   },
@@ -24,7 +24,7 @@ const ADVISORS = [
 
 const DURATIONS = ["30", "60"];
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const TODAY = new Date(2026, 6, 21);
+const TODAY = new Date();
 const MWF_TIME_SLOTS = ["10:00 AM", "1:00 PM", "3:30 PM"];
 const TT_TIME_SLOTS = ["9:30 AM", "11:00 AM", "2:00 PM", "4:00 PM"];
 
@@ -49,7 +49,7 @@ export default function BookAppointment() {
   const navigate = useNavigate();
   const [selectedAdvisor, setSelectedAdvisor] = useState(null);
   const [selectedDuration, setSelectedDuration] = useState(null);
-  const [calendarMonth, setCalendarMonth] = useState(new Date(2026, 6, 1));
+  const [calendarMonth, setCalendarMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [confirmationError, setConfirmationError] = useState(false);

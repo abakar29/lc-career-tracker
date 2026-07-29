@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lightbulb } from "lucide-react";
 import { Card, CardHeader, Badge, Button } from "../components/ui";
@@ -176,6 +176,13 @@ export default function Admin() {
   const [sortDirection, setSortDirection] = useState("desc");
   const [readinessFilter, setReadinessFilter] = useState("All Levels");
   const [openStatIndex, setOpenStatIndex] = useState(null);
+  const [notification, setNotification] = useState(null);
+
+  useEffect(() => {
+    if (!notification) return;
+    const timer = setTimeout(() => setNotification(null), 3000);
+    return () => clearTimeout(timer);
+  }, [notification]);
 
   function toggleStat(index) {
     setOpenStatIndex((prev) => (prev === index ? null : index));
@@ -215,6 +222,34 @@ export default function Admin() {
 
   return (
     <div>
+        {notification && (
+          <div
+            style={{
+              position: 'fixed',
+              top: '20px',
+              right: '20px',
+              background: '#111827',
+              color: '#fff',
+              padding: '12px 20px',
+              borderRadius: '10px',
+              zIndex: 50,
+              fontSize: '14px',
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <span>{notification}</span>
+              <button
+                type="button"
+                onClick={() => setNotification(null)}
+                aria-label="Dismiss notification"
+                style={{ color: '#fff', background: 'none', border: 'none', cursor: 'pointer', lineHeight: 1 }}
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
+
         <button
           type="button"
           onClick={() => navigate("/")}
@@ -442,7 +477,7 @@ export default function Admin() {
                       padding: 0,
                     }}
                     className="self-start hover:underline"
-                    onClick={() => alert(`Viewing students ready for ${item.label} roles`)}
+                    onClick={() => setNotification(`Viewing students ready for ${item.label} roles`)}
                   >
                     View Students
                   </button>
@@ -464,7 +499,7 @@ export default function Admin() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => alert(`Viewing students: ${item.label}`)}
+                    onClick={() => setNotification(`Viewing students: ${item.label}`)}
                     className="text-sm font-semibold hover:underline"
                     style={{ color: "#3b82f6" }}
                   >
@@ -617,7 +652,7 @@ export default function Admin() {
           <Button
             style={{ backgroundColor: "#E87722" }}
             className="text-white hover:opacity-90"
-            onClick={() => alert("Report exported successfully")}
+            onClick={() => setNotification("Report exported successfully")}
           >
             Export Report
           </Button>

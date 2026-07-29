@@ -33,7 +33,7 @@ const UPCOMING_EVENTS = [
 
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const TIME_SLOTS = ["9:30 AM", "11:00 AM", "2:00 PM", "4:00 PM"];
-const TODAY = new Date(2026, 6, 21);
+const TODAY = new Date();
 const CALENDAR_YEAR = 2026;
 const CALENDAR_MONTH = 6;
 

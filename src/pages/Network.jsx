@@ -32,10 +32,10 @@ const DEFAULT_CONTACT_PHOTOS = {
 };
 
 const DEFAULT_LINKEDIN_URLS = {
-  "Maya Okonkwo": "https://www.linkedin.com/in/abu-bakar-085870336/",
-  "Daniel Ferreira": "https://www.linkedin.com/in/abu-bakar-085870336/",
-  "Sarah Whitmore": "https://www.linkedin.com/in/abu-bakar-085870336/",
-  "James Lim": "https://www.linkedin.com/in/abu-bakar-085870336/",
+  "Maya Okonkwo": "https://linkedin.com/search/results/people/?keywords=maya-okonkwo",
+  "Daniel Ferreira": "https://linkedin.com/search/results/people/?keywords=daniel-ferreira",
+  "Sarah Whitmore": "https://linkedin.com/search/results/people/?keywords=sarah-whitmore",
+  "James Lim": "https://linkedin.com/search/results/people/?keywords=james-lim",
 };
 
 const EMPLOYER_INDUSTRIES = {
