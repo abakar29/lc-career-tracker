@@ -1,6 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import { Button } from "../components/ui";
+
+const GUEST_KEY = "abuve:guest";
 
 const LC_EMAIL_DOMAIN = "@lclark.edu";
 const ORANGE = "#E87722";
@@ -10,6 +13,7 @@ function isLcEmail(email) {
 }
 
 export default function Login() {
+  const navigate = useNavigate();
   const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,6 +26,11 @@ export default function Login() {
     setMode(nextMode);
     setError("");
     setInfo("");
+  }
+
+  function handleGuestLogin() {
+    localStorage.setItem(GUEST_KEY, "true");
+    navigate("/");
   }
 
   async function handleSubmit(e) {
@@ -140,6 +149,19 @@ export default function Login() {
           <Button type="submit" disabled={loading} className="w-full">
             {loading ? "Please wait..." : mode === "signup" ? "Sign Up" : "Sign In"}
           </Button>
+
+          <button
+            type="button"
+            onClick={handleGuestLogin}
+            className="w-full inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-orange-500"
+            style={{
+              backgroundColor: "#FFFFFF",
+              border: "1.5px solid #E87722",
+              color: "#B85A12",
+            }}
+          >
+            Continue as Guest Demo
+          </button>
         </form>
 
         <p className="text-center text-sm text-slate-500 mt-5">

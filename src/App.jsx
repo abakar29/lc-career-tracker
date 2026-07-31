@@ -13,6 +13,8 @@ import BookAppointment from "./pages/BookAppointment";
 import Admin from "./pages/Admin";
 import Settings from "./pages/Settings";
 
+const GUEST_KEY = "abuve:guest";
+
 export default function App() {
   const [session, setSession] = useState(undefined);
 
@@ -30,7 +32,9 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  if (session === undefined) {
+  const isGuest = localStorage.getItem(GUEST_KEY) === "true";
+
+  if (session === undefined && !isGuest) {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
@@ -41,25 +45,27 @@ export default function App() {
     );
   }
 
-  if (!session) {
-    return <Login />;
-  }
+  const isLoggedIn = isGuest || !!session;
 
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="experience" element={<Experience />} />
-          <Route path="network" element={<Network />} />
-          <Route path="skills" element={<Skills />} />
-          <Route path="resume" element={<Resume />} />
-          <Route path="career-center" element={<CareerCenter />} />
-          <Route path="book-appointment" element={<BookAppointment />} />
-          <Route path="settings" element={<Settings />} />
-          <Route path="admin" element={<Admin />} />
-        </Route>
-      </Routes>
+      {isLoggedIn ? (
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="experience" element={<Experience />} />
+            <Route path="network" element={<Network />} />
+            <Route path="skills" element={<Skills />} />
+            <Route path="resume" element={<Resume />} />
+            <Route path="career-center" element={<CareerCenter />} />
+            <Route path="book-appointment" element={<BookAppointment />} />
+            <Route path="settings" element={<Settings />} />
+            <Route path="admin" element={<Admin />} />
+          </Route>
+        </Routes>
+      ) : (
+        <Login />
+      )}
     </BrowserRouter>
   );
 }
