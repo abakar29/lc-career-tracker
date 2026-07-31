@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import { Button } from "../components/ui";
 
@@ -13,7 +12,6 @@ function isLcEmail(email) {
 }
 
 export default function Login() {
-  const navigate = useNavigate();
   const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -30,7 +28,7 @@ export default function Login() {
 
   function handleGuestLogin() {
     localStorage.setItem(GUEST_KEY, "true");
-    navigate("/");
+    window.location.href = "/";
   }
 
   async function handleSubmit(e) {
