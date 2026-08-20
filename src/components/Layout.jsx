@@ -16,6 +16,8 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { supabase } from "../supabaseClient";
 
+const GUEST_KEY = "abuve:guest";
+
 const NAV_ITEMS = [
   { to: "/", label: "Dashboard", mobileLabel: "Home", icon: LayoutDashboard, end: true },
   { to: "/experience", label: "Experience", icon: Briefcase },
@@ -189,9 +191,11 @@ export default function Layout() {
               <div className="py-1">
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={async () => {
                     setProfileOpen(false);
-                    supabase.auth.signOut();
+                    await supabase.auth.signOut();
+                    localStorage.removeItem(GUEST_KEY);
+                    navigate("/login");
                   }}
                   className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-neutral-200 hover:bg-white/10 hover:text-white transition-colors"
                 >
