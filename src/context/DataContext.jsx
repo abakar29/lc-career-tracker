@@ -8,6 +8,7 @@ import {
   applications as seedApplications,
 } from "../data/mockData";
 import { loadData, saveData, loadOnboarded, saveOnboarded, makeId } from "../lib/store";
+import { LC_MAJORS } from "../data/academics";
 
 function withIds(list) {
   return list.map((item) => (item.id ? item : { ...item, id: makeId() }));
@@ -24,10 +25,26 @@ function seed() {
   };
 }
 
+// Backfills primaryMajor/secondaryMajor/minors on profiles persisted before
+// those fields existed, so stale localStorage data can't crash the app.
+function normalizeData(data) {
+  const profile = data.profile ?? {};
+  const legacyMajor = profile.major;
+  return {
+    ...data,
+    profile: {
+      ...profile,
+      primaryMajor: profile.primaryMajor ?? (LC_MAJORS.includes(legacyMajor) ? legacyMajor : ""),
+      secondaryMajor: profile.secondaryMajor ?? null,
+      minors: Array.isArray(profile.minors) ? profile.minors : [],
+    },
+  };
+}
+
 const DataContext = createContext(null);
 
 export function DataProvider({ children }) {
-  const [data, setData] = useState(() => loadData(seed));
+  const [data, setData] = useState(() => normalizeData(loadData(seed)));
   const [onboarded, setOnboarded] = useState(() => loadOnboarded());
 
   useEffect(() => {

@@ -177,7 +177,8 @@ function CareerReadinessHero({ score, checks, classYear, major, name, attentionC
       <div className="relative flex flex-col md:flex-row md:items-center gap-8">
         <div className="flex-1">
           <p className="text-orange-300 text-sm font-medium">
-            Class of {classYear} · {major}
+            Class of {classYear}
+            {major ? ` · ${major}` : ""}
           </p>
           <h1 className="mt-1 text-[32px] font-bold">{getGreeting()}, {name}</h1>
           <p className="mt-3 max-w-md text-neutral-300 text-sm">
