@@ -19,6 +19,8 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { supabase } from "../supabaseClient";
 import { useTheme } from "../context/ThemeContext";
+import { useData } from "../context/DataContext";
+import { formatAcademicSummary } from "../data/academics";
 
 const GUEST_KEY = "abuve:guest";
 
@@ -108,6 +110,8 @@ export default function Layout() {
   const location = useLocation();
   const reduceMotion = useReducedMotion();
   const navigate = useNavigate();
+  const { profile } = useData();
+  const academicSummary = formatAcademicSummary(profile);
   const [profileOpen, setProfileOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [userEmail, setUserEmail] = useState("");
@@ -207,6 +211,9 @@ export default function Layout() {
               <div className="px-4 py-3">
                 <p className="text-sm font-medium text-white truncate">{userEmail}</p>
                 <p className="text-xs text-neutral-400">Class of {classYear}</p>
+                {academicSummary && (
+                  <p className="text-xs text-brand-orange mt-0.5 truncate">{academicSummary}</p>
+                )}
               </div>
               <div className="border-t border-white/10" />
               <div className="py-1">
@@ -311,7 +318,7 @@ export default function Layout() {
             </button>
             <div className="min-w-0 text-left">
               <p className="text-sm font-medium text-white truncate">{userEmail}</p>
-              <p className="text-xs text-neutral-400">Class of 2029</p>
+              <p className="text-xs text-neutral-400 truncate">Class of {classYear}</p>
             </div>
           </div>
         </div>
