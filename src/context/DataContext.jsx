@@ -25,9 +25,10 @@ function seed() {
   };
 }
 
-// Backfills primaryMajor/secondaryMajor/minors on profiles persisted before
-// those fields existed, so stale localStorage data can't crash the app.
-function normalizeData(data) {
+// Backfills fields on data persisted before they existed (or corrupted by a
+// prior crash mid-write), so stale localStorage data can never crash the app.
+function normalizeData(rawData) {
+  const data = rawData ?? {};
   const profile = data.profile ?? {};
   const legacyMajor = profile.major;
   return {
@@ -38,6 +39,11 @@ function normalizeData(data) {
       secondaryMajor: profile.secondaryMajor ?? null,
       minors: Array.isArray(profile.minors) ? profile.minors : [],
     },
+    experiences: Array.isArray(data.experiences) ? data.experiences : [],
+    networkConnections: Array.isArray(data.networkConnections) ? data.networkConnections : [],
+    skills: Array.isArray(data.skills) ? data.skills : [],
+    resumeVersions: Array.isArray(data.resumeVersions) ? data.resumeVersions : [],
+    applications: Array.isArray(data.applications) ? data.applications : [],
   };
 }
 
