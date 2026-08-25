@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { Briefcase, Plus, Pencil, ChevronDown, ChevronUp, Copy } from "lucide-react";
+import { Briefcase, Plus, Pencil, ChevronDown, ChevronUp, Copy, Search } from "lucide-react";
 import { useData } from "../context/DataContext";
 import { formatDate } from "../lib/utils";
 import {
@@ -37,6 +37,19 @@ const STATUS_LABELS = {
   "In Progress": "In Progress",
   Completed: "Completed",
 };
+
+const TYPE_FILTER_OPTIONS = [
+  "All Types",
+  "Internship",
+  "Study Abroad",
+  "Campus Activity",
+  "Research",
+  "Campus Job",
+  "Volunteer",
+  "Other",
+];
+
+const STATUS_FILTER_OPTIONS = ["All Status", "Current", "In Progress", "Completed"];
 
 const TYPE_STYLES = {
   Internship: { dot: "bg-orange-500", badge: "orange" },
@@ -96,6 +109,9 @@ export default function Experience() {
   const [achievements, setAchievements] = useState(() =>
     loadStoredMap("exp_achievements_", experiences)
   );
+  const [searchQuery, setSearchQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState("All Types");
+  const [statusFilter, setStatusFilter] = useState("All Status");
 
   function toggleExpand(id) {
     setExpandedId((prev) => (prev === id ? null : id));
@@ -174,6 +190,20 @@ export default function Experience() {
     (a, b) => new Date(b.start_date) - new Date(a.start_date)
   );
 
+  const filteredSorted = sorted.filter((exp) => {
+    const query = searchQuery.trim().toLowerCase();
+    const matchesSearch =
+      query === "" ||
+      exp.organization_name.toLowerCase().includes(query) ||
+      (exp.location ?? "").toLowerCase().includes(query) ||
+      (exp.role_description ?? "").toLowerCase().includes(query);
+    const matchesType = typeFilter === "All Types" || exp.experience_type === typeFilter;
+    const matchesStatus =
+      statusFilter === "All Status" ||
+      (STATUS_LABELS[exp.current_status] ?? exp.current_status) === statusFilter;
+    return matchesSearch && matchesType && matchesStatus;
+  });
+
   return (
     <div>
       <div className="flex items-start justify-between gap-4">
@@ -188,6 +218,51 @@ export default function Experience() {
           Add experience
         </Button>
       </div>
+
+      {sorted.length > 0 && (
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative flex-1">
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#E87722]"
+                aria-hidden="true"
+              />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search experiences..."
+                aria-label="Search experiences"
+                className="w-full rounded-lg border border-[#E5E7EB] bg-white py-2 pl-9 pr-3 text-sm text-[#111827] placeholder:text-[#6B7280] focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              aria-label="Filter by type"
+              className="rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-orange-500 sm:w-48"
+            >
+              {TYPE_FILTER_OPTIONS.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              aria-label="Filter by status"
+              className="rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-orange-500 sm:w-40"
+            >
+              {STATUS_FILTER_OPTIONS.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )}
 
       {sorted.length === 0 ? (
         <Card className="mt-6 flex flex-col items-center justify-center gap-3 py-16 text-center">
@@ -204,9 +279,13 @@ export default function Experience() {
             Add experience
           </Button>
         </Card>
+      ) : filteredSorted.length === 0 ? (
+        <Card className="mt-6 flex flex-col items-center justify-center gap-2 py-12 text-center">
+          <p className="text-sm text-[#6B7280]">No experiences match your search</p>
+        </Card>
       ) : (
         <ol className="relative mt-6 border-l-2 border-slate-200 pl-6 space-y-6">
-          {sorted.map((exp) => {
+          {filteredSorted.map((exp) => {
             const style = TYPE_STYLES[exp.experience_type] ?? TYPE_STYLES.Other;
             const isExpanded = expandedId === exp.id;
             const matchedSkills = skills.filter((s) => s.context === exp.experience_type);

@@ -91,6 +91,20 @@ export default function Layout() {
 
   const userInitial = userEmail ? userEmail[0].toUpperCase() : "";
 
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.log('Sign out error (guest mode):', error);
+    } finally {
+      // Always clear local storage and redirect regardless of auth state
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('abuve:')) localStorage.removeItem(key);
+      });
+      window.location.href = '/login';
+    }
+  }
+
   function handlePhotoChange(e) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -191,11 +205,9 @@ export default function Layout() {
               <div className="py-1">
                 <button
                   type="button"
-                  onClick={async () => {
+                  onClick={() => {
                     setProfileOpen(false);
-                    await supabase.auth.signOut();
-                    localStorage.removeItem(GUEST_KEY);
-                    navigate("/login");
+                    handleSignOut();
                   }}
                   className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-neutral-200 hover:bg-white/10 hover:text-white transition-colors"
                 >
