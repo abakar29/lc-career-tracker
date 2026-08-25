@@ -1,12 +1,22 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
-  --color-brand-orange: #e87722;
-  --color-brand-black: #1a1a1a;
+  /* Lewis & Clark brand tokens */
+  --color-brand-orange: #f37737; /* Palatine Hill Orange - primary brand, nav active states */
+  --color-brand-orange-strong: #ea580c; /* Stronger orange for primary buttons / CTA states */
+  --color-brand-orange-deep: #c2410c; /* Deepest orange for pressed/emphasis states */
+  --color-brand-black: #231f20; /* Primary brand black / slate */
+  --color-brand-gray: #5f6062; /* Secondary / neutral muted gray */
+  --color-brand-surface: #f8f9fa; /* Light neutral surface */
+  --color-brand-surface-alt: #f4f1ea; /* Alt light neutral surface */
+  --color-brand-dark-bg: #1a1919; /* Dark mode page background */
+  --color-brand-dark-card: #232428; /* Dark mode card surface */
 }
 
 body {
-  @apply bg-slate-50 text-slate-800 antialiased;
+  @apply bg-brand-surface text-[#231F20] antialiased transition-colors dark:bg-[#1A1919] dark:text-[#F8F9FA];
 }
 
 @keyframes modal-in {

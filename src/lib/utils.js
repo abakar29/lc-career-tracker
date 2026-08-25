@@ -8,6 +8,15 @@ export function formatDate(dateStr) {
   });
 }
 
+export function formatShortDate(dateStr) {
+  if (!dateStr) return "Present";
+  const date = new Date(`${dateStr}T00:00:00`);
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+}
+
 export function daysSince(dateStr) {
   const then = new Date(`${dateStr}T00:00:00`);
   const now = new Date();

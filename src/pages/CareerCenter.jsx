@@ -61,25 +61,25 @@ export default function CareerCenter() {
         <button
           type="button"
           onClick={() => setSelected("dropin")}
-          className={`rounded-2xl bg-white p-6 text-left transition-colors border-2 ${
-            selected === "dropin" ? "border-[#E87722]" : "border-[#E87722]/40"
+          className={`rounded-2xl bg-white dark:bg-[#232428] p-6 text-left transition-colors border-2 ${
+            selected === "dropin" ? "border-[#EA580C] dark:border-orange-400" : "border-[#EA580C]/40 dark:border-orange-400/30"
           }`}
         >
-          <Clock className="h-7 w-7 text-slate-900" aria-hidden="true" />
-          <p className="mt-3 text-lg font-semibold text-slate-900">Drop-in Hours</p>
-          <p className="mt-1 text-sm text-slate-500">Mon-Fri 2-4pm, no booking needed</p>
+          <Clock className="h-7 w-7 text-slate-900 dark:text-[#F8F9FA]" aria-hidden="true" />
+          <p className="mt-3 text-lg font-semibold text-slate-900 dark:text-[#F8F9FA]">Drop-in Hours</p>
+          <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">Mon-Fri 2-4pm, no booking needed</p>
         </button>
       </div>
 
       <div className="mt-6">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
           Upcoming Events
         </p>
         <div className="mt-3 grid grid-cols-3 gap-4">
           {UPCOMING_EVENTS.map((event) => (
             <div
               key={event.title}
-              className="overflow-hidden bg-white"
+              className="overflow-hidden bg-white dark:bg-[#232428]"
               style={{ borderRadius: "16px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}
             >
               <img
@@ -89,16 +89,22 @@ export default function CareerCenter() {
                 style={{ height: "140px" }}
               />
               <div style={{ padding: "16px" }}>
-                <p style={{ fontSize: "15px", fontWeight: 600, color: "#111827" }}>
+                <p
+                  className="text-slate-900 dark:text-[#F8F9FA]"
+                  style={{ fontSize: "15px", fontWeight: 600 }}
+                >
                   {event.title}
                 </p>
-                <p style={{ fontSize: "12px", color: "#6B7280", marginTop: "4px" }}>
+                <p
+                  className="text-slate-500 dark:text-neutral-400"
+                  style={{ fontSize: "12px", marginTop: "4px" }}
+                >
                   {event.date}
                 </p>
                 <p
+                  className="text-slate-500 dark:text-neutral-400"
                   style={{
                     fontSize: "13px",
-                    color: "#6B7280",
                     marginTop: "8px",
                     display: "-webkit-box",
                     WebkitLineClamp: 2,
@@ -111,10 +117,9 @@ export default function CareerCenter() {
                 <button
                   type="button"
                   onClick={() => toggleRsvp(event.title)}
+                  className="bg-[#EA580C] dark:bg-orange-600 text-white hover:bg-orange-700 dark:hover:bg-orange-500 transition-colors"
                   style={{
                     marginTop: "12px",
-                    background: "#E87722",
-                    color: "#ffffff",
                     border: "none",
                     borderRadius: "8px",
                     padding: "6px 14px",
@@ -130,7 +135,7 @@ export default function CareerCenter() {
       </div>
 
       {selected === "dropin" && (
-        <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-600">
+        <div className="mt-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#232428] p-4 text-sm text-slate-600 dark:text-neutral-400">
           Drop-in hours Mon-Fri 2-4pm. Room 270, Fowler Student Center. Email: careers@lclark.edu
         </div>
       )}

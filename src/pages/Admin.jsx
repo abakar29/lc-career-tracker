@@ -28,7 +28,7 @@ const EXPERIENCE_BREAKDOWN = [
 ];
 
 const READINESS_OVERVIEW = [
-  { label: "Career Ready", range: "80-100%", count: 18, tone: "green" },
+  { label: "Career Ready", range: "80-100%", count: 18, tone: "success" },
   { label: "In Progress", range: "50-79%", count: 22, tone: "amber" },
   { label: "Getting Started", range: "0-49%", count: 7, tone: "red" },
 ];
@@ -134,7 +134,7 @@ const COLUMN_KEYS = {
 };
 
 const ROW_BORDER_CLASSES = {
-  green: "border-l-emerald-500",
+  success: "border-l-orange-500",
   amber: "border-l-amber-500",
   red: "border-l-red-500",
 };
@@ -142,7 +142,7 @@ const ROW_BORDER_CLASSES = {
 const READINESS_FILTER_OPTIONS = ["All Levels", ...READINESS_OVERVIEW.map((r) => r.label)];
 
 function readinessTone(score) {
-  if (score >= 80) return "green";
+  if (score >= 80) return "success";
   if (score >= 50) return "amber";
   return "red";
 }
@@ -153,14 +153,14 @@ function readinessBand(score) {
   return "Getting Started";
 }
 
-function BarRow({ label, value, color = "#E87722" }) {
+function BarRow({ label, value, color = "#EA580C" }) {
   return (
     <div>
       <div className="flex items-center justify-between text-sm mb-1">
-        <span className="text-slate-700">{label}</span>
-        <span className="font-medium text-slate-900">{value}%</span>
+        <span className="text-slate-700 dark:text-neutral-300">{label}</span>
+        <span className="font-medium text-slate-900 dark:text-[#F8F9FA]">{value}%</span>
       </div>
-      <div className="h-2.5 rounded-full bg-slate-100 overflow-hidden">
+      <div className="h-2.5 rounded-full bg-slate-100 dark:bg-white/10 overflow-hidden">
         <div
           className="h-full rounded-full"
           style={{ width: `${value}%`, backgroundColor: color }}
@@ -253,23 +253,23 @@ export default function Admin() {
         <button
           type="button"
           onClick={() => navigate("/")}
-          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 hover:underline mb-6"
+          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 hover:underline mb-6 dark:text-neutral-400 dark:hover:text-neutral-200"
         >
           ← Back to Dashboard
         </button>
 
         <div className="flex items-start justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-[#F8F9FA]">
               Career Center Admin Dashboard
             </h1>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-sm text-slate-500 mt-1 dark:text-neutral-400">
               Student career readiness insights: Lewis &amp; Clark College 2026
             </p>
           </div>
           <span
             className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white shrink-0"
-            style={{ backgroundColor: "#E87722" }}
+            style={{ backgroundColor: "#EA580C" }}
           >
             Faculty Access Only
           </span>
@@ -280,7 +280,7 @@ export default function Admin() {
             const isOpen = openStatIndex === i;
             return (
               <div key={stat.label} className="relative">
-                <Card className="cursor-pointer border border-slate-200 transition-colors hover:border-[#3b82f6] hover:bg-blue-50/60">
+                <Card className="cursor-pointer border border-slate-200 transition-colors hover:border-orange-400 hover:bg-orange-50/60 dark:border-white/10 dark:hover:border-orange-500/50 dark:hover:bg-orange-500/10">
                   <div style={{ padding: "12px 16px" }}>
                     <div
                       role="button"
@@ -294,10 +294,10 @@ export default function Admin() {
                         }
                       }}
                     >
-                      <p style={{ color: "#6B7280", fontSize: "12px" }}>{stat.label}</p>
+                      <p className="text-slate-500 dark:text-neutral-400" style={{ fontSize: "12px" }}>{stat.label}</p>
                       <p
-                        className="mt-0.5 leading-tight"
-                        style={{ color: "#111827", fontSize: "28px", fontWeight: 600 }}
+                        className="mt-0.5 leading-tight text-slate-900 dark:text-[#F8F9FA]"
+                        style={{ fontSize: "28px", fontWeight: 600 }}
                       >
                         {stat.value}
                       </p>
@@ -309,8 +309,8 @@ export default function Admin() {
                         e.stopPropagation();
                         toggleStat(i);
                       }}
-                      className="mt-2 font-semibold hover:underline"
-                      style={{ color: "#B85A12", fontSize: "11px" }}
+                      className="mt-2 font-semibold hover:underline text-orange-800 dark:text-orange-300"
+                      style={{ fontSize: "11px" }}
                     >
                       View all →
                     </button>
@@ -319,20 +319,20 @@ export default function Admin() {
 
                 {isOpen && (
                   <div
-                    className="absolute left-0 top-full z-50 mt-2 w-64 rounded-xl border border-slate-200 bg-white"
+                    className="absolute left-0 top-full z-50 mt-2 w-64 rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-[#232428]"
                     style={{ boxShadow: "0 4px 16px rgba(0,0,0,0.1)", padding: "12px 16px" }}
                   >
                     <button
                       type="button"
                       onClick={() => setOpenStatIndex(null)}
                       aria-label="Close"
-                      className="absolute right-2 top-2 text-xs leading-none text-slate-400 hover:text-slate-600"
+                      className="absolute right-2 top-2 text-xs leading-none text-slate-400 hover:text-slate-600 dark:text-neutral-500 dark:hover:text-neutral-300"
                     >
                       ✕
                     </button>
                     <ul className="space-y-1 pr-4">
                       {stat.students.map((name) => (
-                        <li key={name} className="text-sm text-slate-700">
+                        <li key={name} className="text-sm text-slate-700 dark:text-neutral-300">
                           {name}
                         </li>
                       ))}
@@ -349,7 +349,7 @@ export default function Admin() {
             <CardHeader title="Top Skills Across Students" />
             <div className="p-5 space-y-4">
               {TOP_SKILLS.map((skill) => (
-                <BarRow key={skill.label} label={skill.label} value={skill.value} color="#3b82f6" />
+                <BarRow key={skill.label} label={skill.label} value={skill.value} />
               ))}
             </div>
           </Card>
@@ -359,40 +359,40 @@ export default function Admin() {
             <div className="p-5 space-y-4">
               {TOP_INDUSTRIES.map((industry) => (
                 <div key={industry.label}>
-                  <p className="text-sm text-slate-700 mb-1">{industry.label}</p>
+                  <p className="text-sm text-slate-700 mb-1 dark:text-neutral-300">{industry.label}</p>
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="w-16 shrink-0 text-xs text-slate-500">Interested</span>
-                      <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100">
+                      <span className="w-16 shrink-0 text-xs text-slate-500 dark:text-neutral-400">Interested</span>
+                      <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10">
                         <div
                           className="h-full rounded-full"
-                          style={{ width: `${industry.interested}%`, backgroundColor: "#3b82f6" }}
+                          style={{ width: `${industry.interested}%`, backgroundColor: "#5f6062" }}
                         />
                       </div>
-                      <span className="w-8 shrink-0 text-right text-xs font-medium text-slate-900">
+                      <span className="w-8 shrink-0 text-right text-xs font-medium text-slate-900 dark:text-[#F8F9FA]">
                         {industry.interested}%
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="w-16 shrink-0 text-xs text-slate-500">Ready</span>
-                      <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100">
+                      <span className="w-16 shrink-0 text-xs text-slate-500 dark:text-neutral-400">Ready</span>
+                      <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10">
                         <div
                           className="h-full rounded-full"
-                          style={{ width: `${industry.ready}%`, backgroundColor: "#0d9488" }}
+                          style={{ width: `${industry.ready}%`, backgroundColor: "#EA580C" }}
                         />
                       </div>
-                      <span className="w-8 shrink-0 text-right text-xs font-medium text-slate-900">
+                      <span className="w-8 shrink-0 text-right text-xs font-medium text-slate-900 dark:text-[#F8F9FA]">
                         {industry.ready}%
                       </span>
                     </div>
                   </div>
                 </div>
               ))}
-              <div className="flex items-center gap-4 pt-1 text-xs text-slate-600">
+              <div className="flex items-center gap-4 pt-1 text-xs text-slate-600 dark:text-neutral-400">
                 <span className="flex items-center gap-1.5">
                   <span
                     className="h-2.5 w-2.5 rounded-full"
-                    style={{ backgroundColor: "#3b82f6" }}
+                    style={{ backgroundColor: "#5f6062" }}
                     aria-hidden="true"
                   />
                   Interested
@@ -400,7 +400,7 @@ export default function Admin() {
                 <span className="flex items-center gap-1.5">
                   <span
                     className="h-2.5 w-2.5 rounded-full"
-                    style={{ backgroundColor: "#0d9488" }}
+                    style={{ backgroundColor: "#EA580C" }}
                     aria-hidden="true"
                   />
                   Ready
@@ -426,14 +426,14 @@ export default function Admin() {
               {READINESS_OVERVIEW.map((item) => (
                 <div
                   key={item.label}
-                  className="flex items-center justify-between rounded-lg border border-slate-100 px-4 py-3"
+                  className="flex items-center justify-between rounded-lg border border-slate-100 px-4 py-3 dark:border-white/10"
                 >
                   <div>
-                    <p className="text-sm font-medium text-slate-900">{item.label}</p>
-                    <p className="text-xs text-slate-500">{item.range}</p>
+                    <p className="text-sm font-medium text-slate-900 dark:text-[#F8F9FA]">{item.label}</p>
+                    <p className="text-xs text-slate-500 dark:text-neutral-400">{item.range}</p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-sm text-slate-600">{item.count} students</span>
+                    <span className="text-sm text-slate-600 dark:text-neutral-400">{item.count} students</span>
                     <Badge tone={item.tone}>{item.count}</Badge>
                   </div>
                 </div>
@@ -446,13 +446,13 @@ export default function Admin() {
           <CardHeader title="Top Missing Skills" />
           <div className="p-5 space-y-4">
             {TOP_MISSING_SKILLS.map((skill) => (
-              <BarRow key={skill.label} label={skill.label} value={skill.value} color="#3b82f6" />
+              <BarRow key={skill.label} label={skill.label} value={skill.value} />
             ))}
           </div>
         </Card>
 
         <div className="mb-6">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3 dark:text-neutral-400">
             Employer Readiness
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -460,10 +460,10 @@ export default function Admin() {
               <Card key={item.label}>
                 <div className="flex flex-col gap-3" style={{ padding: "12px 16px" }}>
                   <div>
-                    <p className="text-slate-500" style={{ fontSize: "13px", fontWeight: 500 }}>
+                    <p className="text-slate-500 dark:text-neutral-400" style={{ fontSize: "13px", fontWeight: 500 }}>
                       {item.label}
                     </p>
-                    <p className="text-slate-900 mt-1" style={{ fontSize: "22px", fontWeight: 700 }}>
+                    <p className="text-slate-900 mt-1 dark:text-[#F8F9FA]" style={{ fontSize: "22px", fontWeight: 700 }}>
                       {item.count}
                     </p>
                   </div>
@@ -471,12 +471,11 @@ export default function Admin() {
                     type="button"
                     style={{
                       fontSize: "12px",
-                      color: "#3b82f6",
                       background: "none",
                       border: "none",
                       padding: 0,
                     }}
-                    className="self-start hover:underline"
+                    className="self-start hover:underline text-orange-600 dark:text-orange-400"
                     onClick={() => setNotification(`Viewing students ready for ${item.label} roles`)}
                   >
                     View Students
@@ -490,18 +489,17 @@ export default function Admin() {
         <Card className="mb-6">
           <CardHeader title="Students Needing Attention" />
           <div className="p-5 pt-3">
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-slate-100 dark:divide-white/10">
               {STUDENTS_NEEDING_ATTENTION.map((item) => (
                 <li key={item.label} className="flex items-center justify-between gap-4 py-3">
                   <div>
-                    <p className="text-sm font-medium text-slate-900">{item.label}</p>
-                    <p className="text-xs text-slate-500">{item.count} students</p>
+                    <p className="text-sm font-medium text-slate-900 dark:text-[#F8F9FA]">{item.label}</p>
+                    <p className="text-xs text-slate-500 dark:text-neutral-400">{item.count} students</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => setNotification(`Viewing students: ${item.label}`)}
-                    className="text-sm font-semibold hover:underline"
-                    style={{ color: "#3b82f6" }}
+                    className="text-sm font-semibold hover:underline text-orange-600 dark:text-orange-400"
                   >
                     View Students
                   </button>
@@ -513,26 +511,23 @@ export default function Admin() {
 
         <Card className="mb-6">
           <div className="flex items-center gap-2 px-5 pt-5">
-            <Lightbulb className="h-5 w-5" style={{ color: "#E87722" }} aria-hidden="true" />
-            <h2 className="text-base font-semibold text-slate-900">Recommendations</h2>
+            <Lightbulb className="h-5 w-5 text-orange-600 dark:text-orange-400" aria-hidden="true" />
+            <h2 className="text-base font-semibold text-slate-900 dark:text-[#F8F9FA]">Recommendations</h2>
           </div>
           <ul className="p-5 pt-3 space-y-2.5">
             {RECOMMENDATIONS.map((rec, i) => (
-              <li key={rec} className="flex items-start gap-2 text-sm text-slate-700">
+              <li key={rec} className="flex items-start gap-2 text-sm text-slate-700 dark:text-neutral-300">
                 <span
-                  className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full"
-                  style={{ backgroundColor: "#E87722" }}
+                  className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-orange-600 dark:bg-orange-400"
                   aria-hidden="true"
                 />
                 <span>{rec}</span>
                 {i < 2 && (
                   <span
+                    className="rounded bg-red-100 text-red-800 dark:bg-red-500/10 dark:text-red-300"
                     style={{
                       fontSize: "11px",
-                      background: "#FEE2E2",
-                      color: "#991B1B",
                       padding: "2px 6px",
-                      borderRadius: "4px",
                     }}
                   >
                     Action needed
@@ -546,7 +541,7 @@ export default function Admin() {
         <div className="flex items-center gap-3 mb-3">
           <label
             htmlFor="readiness-filter"
-            className="text-xs font-semibold uppercase tracking-wide text-slate-500"
+            className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400"
           >
             Filter by Readiness
           </label>
@@ -554,7 +549,7 @@ export default function Admin() {
             id="readiness-filter"
             value={readinessFilter}
             onChange={(e) => setReadinessFilter(e.target.value)}
-            className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 dark:border-white/10 dark:bg-[#1A1919] dark:text-neutral-300"
           >
             {READINESS_FILTER_OPTIONS.map((opt) => (
               <option key={opt} value={opt}>
@@ -565,7 +560,7 @@ export default function Admin() {
         </div>
 
         <div className="md:hidden mb-6">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3 dark:text-neutral-400">
             Student Activity
           </p>
           <div className="space-y-3">
@@ -573,12 +568,12 @@ export default function Admin() {
               <Card key={row.name} className="p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="font-medium text-slate-900">{row.name}</p>
-                    <p className="text-sm text-slate-500 truncate">{row.major}</p>
+                    <p className="font-medium text-slate-900 dark:text-[#F8F9FA]">{row.name}</p>
+                    <p className="text-sm text-slate-500 truncate dark:text-neutral-400">{row.major}</p>
                   </div>
                   <Badge tone={readinessTone(row.readiness)}>{row.readiness}%</Badge>
                 </div>
-                <p className="mt-2 text-xs text-slate-400">
+                <p className="mt-2 text-xs text-slate-400 dark:text-neutral-500">
                   Last active {formatDate(row.lastActive)}
                 </p>
               </Card>
@@ -591,7 +586,7 @@ export default function Admin() {
           <div className="p-5 pt-3 overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200">
+                <tr className="border-b border-slate-200 dark:border-white/10">
                   {TABLE_COLUMNS.map((col) => {
                     const key = COLUMN_KEYS[col];
                     const isActive = sortKey === key;
@@ -603,10 +598,10 @@ export default function Admin() {
                         aria-sort={isActive ? (sortDirection === "asc" ? "ascending" : "descending") : "none"}
                         onClick={() => handleSort(col)}
                         onKeyDown={(e) => handleSortKeyDown(e, col)}
-                        className="text-left font-medium text-[#6B7280] text-[13px] px-3 py-2.5 cursor-pointer select-none hover:text-slate-700"
+                        className="text-left font-medium text-slate-500 text-[13px] px-3 py-2.5 cursor-pointer select-none hover:text-slate-700 dark:text-neutral-400 dark:hover:text-neutral-200"
                       >
                         {col}{" "}
-                        <span className={isActive ? "text-slate-600" : "text-slate-300"}>
+                        <span className={isActive ? "text-slate-600 dark:text-neutral-300" : "text-slate-300 dark:text-neutral-600"}>
                           {isActive ? (sortDirection === "asc" ? "↑" : "↓") : "↕"}
                         </span>
                       </th>
@@ -620,26 +615,26 @@ export default function Admin() {
                   return (
                     <tr
                       key={row.name}
-                      className={`border-l-4 ${ROW_BORDER_CLASSES[tone]} transition-colors hover:bg-[#F9FAFB] ${
-                        i % 2 === 1 ? "bg-slate-50" : "bg-white"
+                      className={`border-l-4 ${ROW_BORDER_CLASSES[tone]} transition-colors hover:bg-[#F9FAFB] dark:hover:bg-white/10 ${
+                        i % 2 === 1 ? "bg-slate-50 dark:bg-white/5" : "bg-white dark:bg-[#232428]"
                       }`}
                     >
-                      <td className="px-3 py-3 font-medium text-slate-900">{row.name}</td>
-                      <td className="px-3 py-3 text-slate-700">{row.major}</td>
-                      <td className="px-3 py-3 text-slate-700">{row.experiences}</td>
-                      <td className="px-3 py-3 text-slate-700">{row.skills}</td>
-                      <td className="px-3 py-3 text-slate-700">{row.applications}</td>
+                      <td className="px-3 py-3 font-medium text-slate-900 dark:text-[#F8F9FA]">{row.name}</td>
+                      <td className="px-3 py-3 text-slate-700 dark:text-neutral-300">{row.major}</td>
+                      <td className="px-3 py-3 text-slate-700 dark:text-neutral-300">{row.experiences}</td>
+                      <td className="px-3 py-3 text-slate-700 dark:text-neutral-300">{row.skills}</td>
+                      <td className="px-3 py-3 text-slate-700 dark:text-neutral-300">{row.applications}</td>
                       <td className="px-3 py-3">
                         <Badge tone={tone}>{row.readiness}%</Badge>
                       </td>
-                      <td className="px-3 py-3 text-slate-500">{formatDate(row.lastActive)}</td>
-                      <td className="px-3 py-3 text-slate-700">{row.targetIndustry}</td>
+                      <td className="px-3 py-3 text-slate-500 dark:text-neutral-400">{formatDate(row.lastActive)}</td>
+                      <td className="px-3 py-3 text-slate-700 dark:text-neutral-300">{row.targetIndustry}</td>
                       <td className="px-3 py-3">
-                        <Badge tone={row.resumeStatus === "Complete" ? "green" : "red"}>
+                        <Badge tone={row.resumeStatus === "Complete" ? "success" : "red"}>
                           {row.resumeStatus}
                         </Badge>
                       </td>
-                      <td className="px-3 py-3 text-slate-500">{formatDate(row.lastAppointment)}</td>
+                      <td className="px-3 py-3 text-slate-500 dark:text-neutral-400">{formatDate(row.lastAppointment)}</td>
                     </tr>
                   );
                 })}
@@ -650,13 +645,13 @@ export default function Admin() {
 
         <div className="flex items-center justify-between">
           <Button
-            style={{ backgroundColor: "#E87722" }}
+            style={{ backgroundColor: "#EA580C" }}
             className="text-white hover:opacity-90"
             onClick={() => setNotification("Report exported successfully")}
           >
             Export Report
           </Button>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-400 dark:text-neutral-500">
             Data shown is aggregated and anonymized
           </p>
         </div>

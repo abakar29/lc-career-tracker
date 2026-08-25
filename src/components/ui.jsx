@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 export function Card({ className = "", children }) {
   return (
     <div
-      className={`bg-white rounded-xl border border-slate-200 shadow-sm ${className}`}
+      className={`bg-white rounded-xl border border-slate-200 shadow-sm dark:bg-[#232428] dark:border-white/10 ${className}`}
     >
       {children}
     </div>
@@ -15,8 +15,8 @@ export function CardHeader({ title, subtitle, action }) {
   return (
     <div className="flex items-start justify-between gap-3 px-5 pt-5">
       <div>
-        <h2 className="text-base font-semibold text-slate-900">{title}</h2>
-        {subtitle && <p className="text-sm text-slate-500 mt-0.5">{subtitle}</p>}
+        <h2 className="text-base font-semibold text-slate-900 dark:text-[#F8F9FA]">{title}</h2>
+        {subtitle && <p className="text-sm text-slate-500 mt-0.5 dark:text-neutral-400">{subtitle}</p>}
       </div>
       {action}
     </div>
@@ -24,11 +24,15 @@ export function CardHeader({ title, subtitle, action }) {
 }
 
 const BADGE_STYLES = {
-  green: "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200",
-  red: "bg-red-50 text-red-700 ring-1 ring-inset ring-red-200",
-  amber: "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200",
-  orange: "bg-orange-50 text-orange-700 ring-1 ring-inset ring-orange-200",
-  slate: "bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-200",
+  // "success" replaces the old "green" tone — L&C brand excludes green entirely.
+  success:
+    "bg-orange-50 text-orange-800 ring-1 ring-inset ring-orange-200 dark:bg-orange-500/10 dark:text-orange-300 dark:ring-orange-500/30",
+  red: "bg-red-50 text-red-700 ring-1 ring-inset ring-red-200 dark:bg-red-500/10 dark:text-red-300 dark:ring-red-500/30",
+  amber: "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-500/30",
+  orange:
+    "bg-orange-50 text-orange-700 ring-1 ring-inset ring-orange-200 dark:bg-orange-500/10 dark:text-orange-300 dark:ring-orange-500/30",
+  slate:
+    "bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-200 dark:bg-white/10 dark:text-neutral-300 dark:ring-white/10",
 };
 
 export function Badge({ tone = "slate", children }) {
@@ -45,8 +49,8 @@ const BUTTON_STYLES = {
   primary:
     "bg-orange-700 text-white hover:bg-orange-800 focus-visible:ring-orange-500",
   secondary:
-    "bg-white text-orange-800 border border-orange-200 hover:bg-orange-50 focus-visible:ring-orange-500",
-  ghost: "text-slate-600 hover:bg-slate-100 focus-visible:ring-slate-400",
+    "bg-white text-orange-800 border border-orange-200 hover:bg-orange-50 focus-visible:ring-orange-500 dark:bg-[#232428] dark:text-orange-300 dark:border-orange-500/30 dark:hover:bg-white/5",
+  ghost: "text-slate-600 hover:bg-slate-100 focus-visible:ring-slate-400 dark:text-neutral-300 dark:hover:bg-white/10",
   danger: "bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500",
 };
 
@@ -68,8 +72,8 @@ export function IconButton({ icon: Icon, label, variant = "default", className =
       title={label}
       className={`inline-flex items-center justify-center rounded-lg p-3 transition-all active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
         variant === "danger"
-          ? "text-red-600 hover:bg-red-50 focus-visible:ring-red-500"
-          : "text-slate-500 hover:bg-slate-100 focus-visible:ring-slate-400"
+          ? "text-red-600 hover:bg-red-50 focus-visible:ring-red-500 dark:hover:bg-red-500/10"
+          : "text-slate-500 hover:bg-slate-100 focus-visible:ring-slate-400 dark:text-neutral-400 dark:hover:bg-white/10"
       } ${className}`}
       {...props}
     >
@@ -84,24 +88,24 @@ function fieldIds(id, autoId) {
 }
 
 const FIELD_BASE =
-  "w-full rounded-lg border px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:bg-slate-50 disabled:text-slate-400";
+  "w-full rounded-lg border px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:bg-slate-50 disabled:text-slate-400 dark:text-[#F8F9FA] dark:placeholder:text-neutral-500 dark:disabled:bg-white/5 dark:disabled:text-neutral-500";
 
 export function TextField({ id, label, error, required, className = "", ...props }) {
   const { fieldId, errorId } = fieldIds(id, useId());
   return (
     <div className={className}>
-      <label htmlFor={fieldId} className="block text-sm font-medium text-slate-700 mb-1">
+      <label htmlFor={fieldId} className="block text-sm font-medium text-slate-700 mb-1 dark:text-neutral-300">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <input
         id={fieldId}
         aria-invalid={error ? "true" : undefined}
         aria-describedby={error ? errorId : undefined}
-        className={`${FIELD_BASE} ${error ? "border-red-400" : "border-slate-300"}`}
+        className={`${FIELD_BASE} bg-white dark:bg-[#1A1919] ${error ? "border-red-400" : "border-slate-300 dark:border-white/10"}`}
         {...props}
       />
       {error && (
-        <p id={errorId} className="mt-1 text-xs text-red-600">
+        <p id={errorId} className="mt-1 text-xs text-red-600 dark:text-red-400">
           {error}
         </p>
       )}
@@ -117,7 +121,7 @@ export function TextArea({ id, label, error, required, className = "", ...props 
   const { fieldId, errorId } = fieldIds(id, useId());
   return (
     <div className={className}>
-      <label htmlFor={fieldId} className="block text-sm font-medium text-slate-700 mb-1">
+      <label htmlFor={fieldId} className="block text-sm font-medium text-slate-700 mb-1 dark:text-neutral-300">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <textarea
@@ -125,11 +129,11 @@ export function TextArea({ id, label, error, required, className = "", ...props 
         rows={3}
         aria-invalid={error ? "true" : undefined}
         aria-describedby={error ? errorId : undefined}
-        className={`${FIELD_BASE} ${error ? "border-red-400" : "border-slate-300"}`}
+        className={`${FIELD_BASE} bg-white dark:bg-[#1A1919] ${error ? "border-red-400" : "border-slate-300 dark:border-white/10"}`}
         {...props}
       />
       {error && (
-        <p id={errorId} className="mt-1 text-xs text-red-600">
+        <p id={errorId} className="mt-1 text-xs text-red-600 dark:text-red-400">
           {error}
         </p>
       )}
@@ -141,20 +145,20 @@ export function SelectField({ id, label, error, required, children, className = 
   const { fieldId, errorId } = fieldIds(id, useId());
   return (
     <div className={className}>
-      <label htmlFor={fieldId} className="block text-sm font-medium text-slate-700 mb-1">
+      <label htmlFor={fieldId} className="block text-sm font-medium text-slate-700 mb-1 dark:text-neutral-300">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <select
         id={fieldId}
         aria-invalid={error ? "true" : undefined}
         aria-describedby={error ? errorId : undefined}
-        className={`${FIELD_BASE} bg-white ${error ? "border-red-400" : "border-slate-300"}`}
+        className={`${FIELD_BASE} bg-white dark:bg-[#1A1919] ${error ? "border-red-400" : "border-slate-300 dark:border-white/10"}`}
         {...props}
       >
         {children}
       </select>
       {error && (
-        <p id={errorId} className="mt-1 text-xs text-red-600">
+        <p id={errorId} className="mt-1 text-xs text-red-600 dark:text-red-400">
           {error}
         </p>
       )}
@@ -210,7 +214,7 @@ export function Modal({ open, onClose, title, children, className = "" }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm dark:bg-black/60"
       onClick={onClose}
     >
       <div
@@ -219,10 +223,10 @@ export function Modal({ open, onClose, title, children, className = "" }) {
         aria-modal="true"
         aria-labelledby={titleId}
         onClick={(e) => e.stopPropagation()}
-        className={`w-full max-w-lg rounded-2xl bg-white shadow-xl max-h-[90vh] overflow-y-auto animate-[modal-in_0.18s_ease-out] ${className}`}
+        className={`w-full max-w-lg rounded-2xl bg-white shadow-xl max-h-[90vh] overflow-y-auto animate-[modal-in_0.18s_ease-out] dark:bg-[#232428] dark:border dark:border-white/10 ${className}`}
       >
         <div className="flex items-center justify-between gap-3 px-6 pt-5">
-          <h2 id={titleId} className="text-lg font-semibold text-slate-900">
+          <h2 id={titleId} className="text-lg font-semibold text-slate-900 dark:text-[#F8F9FA]">
             {title}
           </h2>
           <IconButton
@@ -242,7 +246,7 @@ export function Modal({ open, onClose, title, children, className = "" }) {
 export function ConfirmDialog({ open, onCancel, onConfirm, title, description, confirmLabel = "Delete" }) {
   return (
     <Modal open={open} onClose={onCancel} title={title}>
-      <p className="text-sm text-slate-600">{description}</p>
+      <p className="text-sm text-slate-600 dark:text-neutral-400">{description}</p>
       <div className="mt-5 flex justify-end gap-3">
         <Button variant="ghost" onClick={onCancel}>
           Cancel

@@ -12,14 +12,19 @@ import {
   Info,
   LogOut,
   Target,
+  Clock,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { supabase } from "../supabaseClient";
+import { useTheme } from "../context/ThemeContext";
 
 const GUEST_KEY = "abuve:guest";
 
 const NAV_ITEMS = [
   { to: "/", label: "Dashboard", mobileLabel: "Home", icon: LayoutDashboard, end: true },
+  { to: "/timeline", label: "Timeline", icon: Clock },
   { to: "/experience", label: "Experience", icon: Briefcase },
   { to: "/network", label: "Network", icon: Users },
   { to: "/skills", label: "Skills", icon: Sparkles },
@@ -50,11 +55,53 @@ const ABOUT_SECTIONS = [
 
 function navLinkClasses(isActive) {
   return [
-    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
     isActive
-      ? "bg-orange-700 text-white"
-      : "text-neutral-300 hover:bg-white/10 hover:text-white",
+      ? "bg-brand-orange text-white font-bold"
+      : "text-neutral-300 font-medium hover:bg-white/10 hover:text-white",
   ].join(" ");
+}
+
+function ThemeToggleRow() {
+  const { isDark, toggleTheme } = useTheme();
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={isDark}
+      onClick={toggleTheme}
+      className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-neutral-200 hover:bg-white/10 hover:text-white transition-colors"
+    >
+      {isDark ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+      {isDark ? "Dark mode" : "Light mode"}
+      <span
+        aria-hidden="true"
+        className={`ml-auto relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full transition-colors ${
+          isDark ? "bg-brand-orange" : "bg-white/20"
+        }`}
+      >
+        <span
+          className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
+            isDark ? "translate-x-4" : "translate-x-1"
+          }`}
+        />
+      </span>
+    </button>
+  );
+}
+
+function MobileThemeToggle() {
+  const { isDark, toggleTheme } = useTheme();
+  return (
+    <button
+      type="button"
+      onClick={toggleTheme}
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      className="absolute right-4 flex h-7 w-7 items-center justify-center rounded-full text-neutral-300 hover:bg-white/10 hover:text-white transition-colors"
+    >
+      {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+    </button>
+  );
 }
 
 export default function Layout() {
@@ -132,9 +179,9 @@ export default function Layout() {
   }, [profileOpen]);
 
   return (
-    <div className="min-h-screen bg-[#F8F9FB] md:flex">
+    <div className="min-h-screen bg-brand-surface dark:bg-[#1A1919] transition-colors md:flex">
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-neutral-950">
+      <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-brand-black">
         <div className="flex flex-col items-center gap-2 px-5 py-6 border-b border-white/10">
           <img src="/lc-logo.png" alt="" className="h-12 w-12 object-contain" />
           <p className="text-white font-semibold text-sm text-center leading-tight">
@@ -189,6 +236,7 @@ export default function Layout() {
               </div>
               <div className="border-t border-white/10" />
               <div className="py-1">
+                <ThemeToggleRow />
                 <button
                   type="button"
                   onClick={() => {
@@ -270,9 +318,10 @@ export default function Layout() {
       </aside>
 
       {/* Mobile top bar */}
-      <header className="md:hidden sticky top-0 z-20 flex items-center justify-center gap-2 bg-neutral-950 px-4 py-2.5">
+      <header className="md:hidden sticky top-0 z-20 relative flex items-center justify-center gap-2 bg-brand-black px-4 py-2.5">
         <img src="/lc-logo.png" alt="" className="h-8 w-8 object-contain" />
         <span className="text-white font-semibold text-sm">Lewis &amp; Clark College</span>
+        <MobileThemeToggle />
       </header>
 
       {/* Main content */}
@@ -293,7 +342,7 @@ export default function Layout() {
       </main>
 
       {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-20 bg-neutral-950 border-t border-white/10 flex">
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-20 bg-brand-black border-t border-white/10 flex">
         {NAV_ITEMS.map(({ to, label, mobileLabel, icon: Icon, end }) => (
           <NavLink
             key={to}
@@ -302,7 +351,7 @@ export default function Layout() {
             className={({ isActive }) =>
               [
                 "flex-1 flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors",
-                isActive ? "text-orange-400" : "text-neutral-400",
+                isActive ? "text-brand-orange" : "text-neutral-400",
               ].join(" ")
             }
           >
@@ -318,7 +367,7 @@ export default function Layout() {
           onClick={() => setAboutOpen(false)}
         >
           <div
-            className="w-full bg-white rounded-2xl shadow-xl p-6"
+            className="w-full bg-white dark:bg-[#232428] dark:border dark:border-white/10 rounded-2xl shadow-xl p-6"
             style={{ maxWidth: "500px" }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -328,8 +377,8 @@ export default function Layout() {
                 alt=""
                 className="h-10 w-10 object-contain mb-2"
               />
-              <h2 className="text-lg font-bold text-slate-900">Abuve</h2>
-              <p className="text-sm text-slate-500 mt-0.5">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-[#F8F9FA]">Abuve</h2>
+              <p className="text-sm text-slate-500 mt-0.5 dark:text-neutral-400">
                 Lewis &amp; Clark College Career Platform
               </p>
             </div>
@@ -337,26 +386,26 @@ export default function Layout() {
             <div className="space-y-5 mb-6">
               {ABOUT_SECTIONS.map(({ icon: Icon, title, description }) => (
                 <div key={title} className="flex items-start gap-3">
-                  <div className="flex-shrink-0 h-9 w-9 rounded-lg bg-orange-50 flex items-center justify-center">
-                    <Icon className="h-5 w-5 text-orange-600" />
+                  <div className="flex-shrink-0 h-9 w-9 rounded-lg bg-orange-50 dark:bg-orange-500/10 flex items-center justify-center">
+                    <Icon className="h-5 w-5 text-orange-600 dark:text-orange-300" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-slate-900">{title}</p>
-                    <p className="text-sm text-slate-500 mt-0.5">{description}</p>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-[#F8F9FA]">{title}</p>
+                    <p className="text-sm text-slate-500 mt-0.5 dark:text-neutral-400">{description}</p>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="text-center border-t border-slate-100 pt-5">
-              <p className="text-xs text-slate-400 mb-4">
+            <div className="text-center border-t border-slate-100 dark:border-white/10 pt-5">
+              <p className="text-xs text-slate-400 mb-4 dark:text-neutral-500">
                 Built exclusively for Lewis &amp; Clark College students
               </p>
               <button
                 type="button"
                 onClick={() => setAboutOpen(false)}
                 className="rounded-lg px-5 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: "#E87722" }}
+                style={{ backgroundColor: "#EA580C" }}
               >
                 Close
               </button>

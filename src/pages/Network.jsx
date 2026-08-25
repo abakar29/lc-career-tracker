@@ -54,10 +54,15 @@ const RELATIONSHIP_PURPOSES = ["Recruiter", "Mentor", "Alumni", "Career Advice"]
 const STATUS_OPTIONS = ["Overdue", "Follow Up Soon", "Active"];
 
 const RELATIONSHIP_BADGE_CLASSES = {
-  Recruiter: "bg-orange-50 text-orange-700 ring-1 ring-inset ring-orange-200",
-  Mentor: "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200",
-  Alumni: "bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-200",
-  "Career Advice": "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200",
+  Recruiter:
+    "bg-orange-50 text-orange-700 ring-1 ring-inset ring-orange-200 dark:bg-orange-500/10 dark:text-orange-300 dark:ring-orange-500/30",
+  // "Mentor" uses a deeper orange tint (not green) to stay within the L&C brand palette.
+  Mentor:
+    "bg-orange-100 text-orange-800 ring-1 ring-inset ring-orange-300 dark:bg-orange-500/20 dark:text-orange-200 dark:ring-orange-500/40",
+  Alumni:
+    "bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-200 dark:bg-white/10 dark:text-neutral-300 dark:ring-white/10",
+  "Career Advice":
+    "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-500/30",
 };
 
 const CADENCE_OPTIONS = ["Remind in 2 weeks", "Remind in 1 month", "Remind in 3 months"];
@@ -89,15 +94,15 @@ function NetworkInsights({ contacts }) {
   const industryCount = new Set(contacts.map((c) => industryFor(c.employer_company))).size;
 
   return (
-    <div className="mt-4 inline-flex flex-wrap items-center gap-1.5 rounded-full bg-orange-50 px-4 py-2 text-sm font-medium text-orange-800">
+    <div className="mt-4 inline-flex flex-wrap items-center gap-1.5 rounded-full bg-orange-50 dark:bg-orange-500/10 px-4 py-2 text-sm font-medium text-orange-800 dark:text-orange-300">
       <span>
         {total} contact{total !== 1 ? "s" : ""}
       </span>
-      <span className="text-orange-300" aria-hidden="true">
+      <span className="text-orange-300 dark:text-orange-500/60" aria-hidden="true">
         ·
       </span>
       <span>{overdueCount} overdue</span>
-      <span className="text-orange-300" aria-hidden="true">
+      <span className="text-orange-300 dark:text-orange-500/60" aria-hidden="true">
         ·
       </span>
       <span>
@@ -125,7 +130,7 @@ function avatarColor(name) {
 function urgency(days) {
   if (days > 30) return { tone: "red", label: "Overdue" };
   if (days > 14) return { tone: "amber", label: "Follow Up Soon" };
-  return { tone: "green", label: "Active" };
+  return { tone: "success", label: "Active" };
 }
 
 function todayISO() {
@@ -327,8 +332,8 @@ export default function Network() {
     <div className="px-4 sm:px-0">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Network</h1>
-          <p className="text-slate-500 mt-1">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-[#F8F9FA]">Network</h1>
+          <p className="text-slate-500 dark:text-neutral-400 mt-1">
             Alumni, recruiters, and Career Center contacts, with reminders so nobody goes cold.
           </p>
         </div>
@@ -344,7 +349,7 @@ export default function Network() {
         <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1 sm:max-w-sm">
             <Search
-              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-neutral-500"
               aria-hidden="true"
             />
             <input
@@ -353,14 +358,14 @@ export default function Network() {
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search contacts..."
               aria-label="Search contacts"
-              className="w-full rounded-lg border border-slate-300 py-2 pl-9 pr-3 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#232428] py-2 pl-9 pr-3 text-sm text-slate-700 dark:text-neutral-200 placeholder:text-slate-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
           <select
             value={relationshipFilter}
             onChange={(e) => setRelationshipFilter(e.target.value)}
             aria-label="Filter by relationship type"
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#232428] px-3 py-2 text-sm text-slate-700 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-orange-500"
           >
             <option value="">All relationship types</option>
             {RELATIONSHIP_PURPOSES.map((p) => (
@@ -373,7 +378,7 @@ export default function Network() {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             aria-label="Filter by status"
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#232428] px-3 py-2 text-sm text-slate-700 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-orange-500"
           >
             <option value="">All statuses</option>
             {STATUS_OPTIONS.map((s) => (
@@ -387,11 +392,11 @@ export default function Network() {
 
       {sorted.length === 0 ? (
         <Card className="mt-6 flex flex-col items-center justify-center gap-3 py-16 text-center">
-          <div className="rounded-full bg-orange-50 p-3">
-            <Users className="h-8 w-8 text-orange-600" aria-hidden="true" />
+          <div className="rounded-full bg-orange-50 dark:bg-orange-500/10 p-3">
+            <Users className="h-8 w-8 text-orange-600 dark:text-orange-300" aria-hidden="true" />
           </div>
-          <p className="font-medium text-slate-700">No contacts saved yet</p>
-          <p className="text-sm text-slate-500 max-w-sm">
+          <p className="font-medium text-slate-700 dark:text-neutral-200">No contacts saved yet</p>
+          <p className="text-sm text-slate-500 dark:text-neutral-400 max-w-sm">
             Save the people you meet at Career Center events, alumni panels, or on LinkedIn so
             you know exactly when to follow up.
           </p>
@@ -402,8 +407,8 @@ export default function Network() {
         </Card>
       ) : filtered.length === 0 ? (
         <Card className="mt-6 flex flex-col items-center justify-center gap-2 py-12 text-center">
-          <p className="font-medium text-slate-700">No contacts match your search</p>
-          <p className="text-sm text-slate-500 max-w-sm">
+          <p className="font-medium text-slate-700 dark:text-neutral-200">No contacts match your search</p>
+          <p className="text-sm text-slate-500 dark:text-neutral-400 max-w-sm">
             Try a different search term or clear the filters.
           </p>
         </Card>
@@ -435,7 +440,7 @@ export default function Network() {
                       <label
                         htmlFor={`photo-upload-${c.id}`}
                         title={`Upload photo for ${c.contact_name}`}
-                        className="absolute -bottom-1 -right-1 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50"
+                        className="absolute -bottom-1 -right-1 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full border border-slate-200 dark:border-white/10 bg-white dark:bg-[#232428] text-slate-600 dark:text-neutral-300 shadow-sm hover:bg-slate-50 dark:hover:bg-white/10"
                       >
                         <Camera className="h-3 w-3" aria-hidden="true" />
                         <span className="sr-only">Upload photo for {c.contact_name}</span>
@@ -449,8 +454,8 @@ export default function Network() {
                       />
                     </div>
                     <div className="min-w-0">
-                      <h3 className="font-semibold text-slate-900 truncate">{c.contact_name}</h3>
-                      <p className="text-sm text-slate-500 truncate">
+                      <h3 className="font-semibold text-slate-900 dark:text-[#F8F9FA] truncate">{c.contact_name}</h3>
+                      <p className="text-sm text-slate-500 dark:text-neutral-400 truncate">
                         {c.job_title} · {c.employer_company}
                       </p>
                     </div>
@@ -484,7 +489,7 @@ export default function Network() {
                       placeholder="Paste LinkedIn URL..."
                       value={linkedinDraft}
                       onChange={(e) => setLinkedinDraft(e.target.value)}
-                      className="flex-1 rounded-lg border border-slate-300 px-2 py-1.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="flex-1 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#1A1919] px-2 py-1.5 text-sm text-slate-900 dark:text-[#F8F9FA] placeholder:text-slate-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
                     <Button
                       type="button"
@@ -511,13 +516,13 @@ export default function Network() {
                 </div>
 
                 {c.interaction_notes && (
-                  <p className="mt-3 text-sm text-slate-600 line-clamp-2">{c.interaction_notes}</p>
+                  <p className="mt-3 text-sm text-slate-600 dark:text-neutral-300 line-clamp-2">{c.interaction_notes}</p>
                 )}
-                <p className="mt-2 text-xs text-slate-400">
+                <p className="mt-2 text-xs text-slate-400 dark:text-neutral-500">
                   Last contacted {formatDate(c.last_contacted_date)}
                 </p>
 
-                <div className="mt-3 space-y-2 border-t border-slate-100 pt-3">
+                <div className="mt-3 space-y-2 border-t border-slate-100 dark:border-white/10 pt-3">
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
@@ -526,7 +531,7 @@ export default function Network() {
                       }
                       className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-90"
                       style={{
-                        background: "#E87722",
+                        background: "#EA580C",
                         color: "#ffffff",
                         border: "none",
                         padding: "8px 14px",
@@ -549,7 +554,7 @@ export default function Network() {
                   {coffeeChatOpenId === c.id && (
                     <div className="space-y-2">
                       {coffeeChatSentId === c.id ? (
-                        <p className="rounded-lg bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-700">
+                        <p className="rounded-lg bg-orange-50 dark:bg-orange-500/10 px-3 py-2 text-xs font-medium text-orange-700 dark:text-orange-300">
                           Request sent!
                         </p>
                       ) : (
@@ -558,7 +563,7 @@ export default function Network() {
                             rows={3}
                             value={coffeeChatMessage}
                             onChange={(e) => setCoffeeChatMessage(e.target.value)}
-                            className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            className="w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#1A1919] px-2 py-1.5 text-xs text-slate-700 dark:text-neutral-200 placeholder:text-slate-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
                           />
                           <div className="flex items-center gap-4">
                             <Button
@@ -571,7 +576,7 @@ export default function Network() {
                             <button
                               type="button"
                               onClick={closeCoffeeChatForm}
-                              className="text-xs font-medium text-slate-500 hover:text-slate-700"
+                              className="text-xs font-medium text-slate-500 dark:text-neutral-400 hover:text-slate-700 dark:hover:text-neutral-200"
                             >
                               Cancel
                             </button>

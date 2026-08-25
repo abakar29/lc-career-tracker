@@ -32,20 +32,20 @@ import Onboarding from "../components/Onboarding";
 const APPLICATION_STATUSES = ["Applied", "Interviewing", "Offer", "Rejected"];
 
 const STATUS_TONE = {
-  Active: "green",
+  Active: "success",
   "In Progress": "amber",
   Completed: "slate",
-  Offer: "green",
+  Offer: "success",
   Interviewing: "amber",
   Applied: "orange",
   Rejected: "red",
 };
 
 const STAT_TINTS = {
-  orange: { bg: "bg-orange-50", text: "text-orange-600" },
-  blue: { bg: "bg-blue-50", text: "text-blue-600" },
-  purple: { bg: "bg-purple-50", text: "text-purple-600" },
-  green: { bg: "bg-emerald-50", text: "text-emerald-600" },
+  orange: { bg: "bg-orange-50 dark:bg-orange-500/10", text: "text-orange-600 dark:text-orange-300" },
+  slate: { bg: "bg-slate-100 dark:bg-white/10", text: "text-slate-600 dark:text-neutral-300" },
+  deep: { bg: "bg-orange-100 dark:bg-orange-500/15", text: "text-orange-800 dark:text-orange-200" },
+  neutral: { bg: "bg-neutral-200 dark:bg-white/15", text: "text-neutral-700 dark:text-neutral-200" },
 };
 
 const COMPANY_LOGOS = {
@@ -117,15 +117,15 @@ function CompactStatCard({ icon: Icon, value, label, sublabel, tint = "orange", 
           onClick?.();
         }
       }}
-      className="flex cursor-pointer items-center gap-3 rounded-xl bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+      className="flex cursor-pointer items-center gap-3 rounded-xl bg-white dark:bg-[#232428] p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
     >
       <div className={`rounded-lg ${colors.bg} p-2.5`}>
         <Icon className={`h-5 w-5 ${colors.text}`} aria-hidden="true" />
       </div>
       <div>
-        <p className="text-[28px] font-bold leading-tight text-slate-900">{value}</p>
-        <p className="text-xs text-slate-500">{label}</p>
-        <p className="mt-0.5 text-xs font-medium text-emerald-600">{sublabel}</p>
+        <p className="text-[28px] font-bold leading-tight text-slate-900 dark:text-[#F8F9FA]">{value}</p>
+        <p className="text-xs text-slate-500 dark:text-neutral-400">{label}</p>
+        <p className="mt-0.5 text-xs font-medium text-orange-700 dark:text-orange-300">{sublabel}</p>
       </div>
     </div>
   );
@@ -161,10 +161,10 @@ function CareerReadinessHero({ score, checks, classYear, major, name, attentionC
     attentionCount > 0
       ? `${attentionCount} task${attentionCount !== 1 ? "s" : ""} need attention`
       : "You're on track";
-  const statusTone = attentionCount > 0 ? "amber" : "green";
+  const statusTone = attentionCount > 0 ? "amber" : "success";
 
   return (
-    <div className="relative overflow-visible rounded-2xl bg-[#433E3C] px-6 py-8 md:px-8 md:py-10 text-white shadow-lg">
+    <div className="relative overflow-visible rounded-2xl bg-brand-black px-6 py-8 md:px-8 md:py-10 text-white shadow-lg">
       <div
         className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-orange-500/20 blur-3xl"
         aria-hidden="true"
@@ -223,8 +223,8 @@ function CareerReadinessHero({ score, checks, classYear, major, name, attentionC
               View breakdown
             </button>
             {breakdownOpen && (
-              <div className="absolute left-1/2 top-full z-50 mt-3 w-64 -translate-x-1/2 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-xl">
-                <p className="text-sm font-semibold text-slate-900">Score Breakdown</p>
+              <div className="absolute left-1/2 top-full z-50 mt-3 w-64 -translate-x-1/2 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#232428] p-4 text-left shadow-xl">
+                <p className="text-sm font-semibold text-slate-900 dark:text-[#F8F9FA]">Score Breakdown</p>
                 <ul className="mt-3 space-y-3">
                   {breakdown.map((b) => (
                     <li key={b.label}>
@@ -232,20 +232,20 @@ function CareerReadinessHero({ score, checks, classYear, major, name, attentionC
                         <span className="flex items-center gap-2">
                           <span
                             className={`flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full ${
-                              b.complete ? "bg-emerald-100" : "bg-slate-100"
+                              b.complete ? "bg-orange-100 dark:bg-orange-500/20" : "bg-slate-100 dark:bg-white/10"
                             }`}
                           >
                             {b.complete && (
-                              <Check className="h-2.5 w-2.5 text-emerald-600" strokeWidth={3} aria-hidden="true" />
+                              <Check className="h-2.5 w-2.5 text-orange-600 dark:text-orange-300" strokeWidth={3} aria-hidden="true" />
                             )}
                           </span>
-                          <span className="text-sm font-medium text-slate-700">{b.label}</span>
+                          <span className="text-sm font-medium text-slate-700 dark:text-neutral-300">{b.label}</span>
                         </span>
-                        <span className="text-sm font-semibold text-slate-900">{b.weight}</span>
+                        <span className="text-sm font-semibold text-slate-900 dark:text-[#F8F9FA]">{b.weight}</span>
                       </div>
-                      <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-slate-100">
+                      <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-white/10">
                         <div
-                          className={`h-full rounded-full ${b.complete ? "bg-emerald-500" : "bg-slate-300"}`}
+                          className={`h-full rounded-full ${b.complete ? "bg-orange-500" : "bg-slate-300 dark:bg-white/20"}`}
                           style={{ width: b.complete ? "100%" : "0%" }}
                         />
                       </div>
@@ -260,11 +260,11 @@ function CareerReadinessHero({ score, checks, classYear, major, name, attentionC
             className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium ${
               statusTone === "amber"
                 ? "bg-amber-500/15 text-amber-300"
-                : "bg-emerald-500/15 text-emerald-300"
+                : "bg-orange-500/15 text-orange-300"
             }`}
           >
             <span
-              className={`h-1.5 w-1.5 rounded-full ${statusTone === "amber" ? "bg-amber-400" : "bg-emerald-400"}`}
+              className={`h-1.5 w-1.5 rounded-full ${statusTone === "amber" ? "bg-amber-400" : "bg-orange-400"}`}
               aria-hidden="true"
             />
             {statusLabel}
@@ -329,7 +329,7 @@ function ApplicationTrackerCard({ applications: initialApplications }) {
   }
 
   return (
-    <div className="h-full rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md">
+    <div className="h-full rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#232428] shadow-sm transition-all hover:shadow-md">
       <CardHeader
         title="Application Tracker"
         subtitle={`${applications.length} applications`}
@@ -346,7 +346,7 @@ function ApplicationTrackerCard({ applications: initialApplications }) {
       />
 
       {showForm && (
-        <div className="mx-5 mt-3 space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
+        <div className="mx-5 mt-3 space-y-3 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-4">
           <TextField
             label="Company"
             value={company}
@@ -376,7 +376,7 @@ function ApplicationTrackerCard({ applications: initialApplications }) {
             <button
               type="button"
               onClick={resetForm}
-              className="text-sm font-medium text-slate-500 hover:text-slate-700"
+              className="text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-neutral-400 dark:hover:text-neutral-200"
             >
               Cancel
             </button>
@@ -384,7 +384,7 @@ function ApplicationTrackerCard({ applications: initialApplications }) {
         </div>
       )}
 
-      <ul className="mt-2 max-h-[260px] divide-y divide-slate-100 overflow-y-auto px-5 pb-5">
+      <ul className="mt-2 max-h-[260px] divide-y divide-slate-100 dark:divide-white/10 overflow-y-auto px-5 pb-5">
         {sorted.map((a) => {
           const isExpanded = expandedId === a.id;
           return (
@@ -396,8 +396,8 @@ function ApplicationTrackerCard({ applications: initialApplications }) {
                 <div className="flex min-w-0 items-center gap-3">
                   <CompanyLogo company={a.company} />
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-slate-800">{a.company}</p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-sm font-medium text-slate-800 dark:text-neutral-200">{a.company}</p>
+                    <p className="text-xs text-slate-500 dark:text-neutral-400">
                       {a.role} · Applied {formatDate(a.dateApplied)}
                     </p>
                   </div>
@@ -415,9 +415,9 @@ function ApplicationTrackerCard({ applications: initialApplications }) {
                     <Badge tone={STATUS_TONE[a.status] ?? "slate"}>{a.status}</Badge>
                   </button>
                   {isExpanded ? (
-                    <ChevronUp className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                    <ChevronUp className="h-4 w-4 text-slate-400 dark:text-neutral-500" aria-hidden="true" />
                   ) : (
-                    <ChevronDown className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                    <ChevronDown className="h-4 w-4 text-slate-400 dark:text-neutral-500" aria-hidden="true" />
                   )}
                 </div>
               </div>
@@ -425,9 +425,9 @@ function ApplicationTrackerCard({ applications: initialApplications }) {
               {isExpanded && (
                 <div
                   onClick={(e) => e.stopPropagation()}
-                  className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 cursor-default"
+                  className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-3 py-2.5 cursor-default"
                 >
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-500 dark:text-neutral-400">
                     {a.role} at {a.company} · Applied {formatDate(a.dateApplied)}
                   </p>
                   <Button
@@ -477,9 +477,9 @@ function buildCompassItems(navigate) {
     },
     {
       key: "skills",
-      borderColor: "border-l-emerald-500",
+      borderColor: "border-l-orange-800",
       icon: TrendingUp,
-      iconColor: "text-emerald-500",
+      iconColor: "text-orange-800 dark:text-orange-400",
       title: "Add more skills to your profile",
       subtitle: "You have 5 experiences but only 7 skills logged",
       actionLabel: "Add Skills →",
@@ -490,11 +490,11 @@ function buildCompassItems(navigate) {
 
 function CareerCompassCard({ items }) {
   return (
-    <div className="h-full rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md">
+    <div className="h-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#232428] shadow-sm transition-all hover:shadow-md">
       <div className="flex items-start justify-between gap-3 px-5 pt-5">
         <div>
-          <h2 className="text-base font-semibold text-slate-900">Career Compass</h2>
-          <p className="text-sm text-slate-500 mt-0.5">Your personalized next steps</p>
+          <h2 className="text-base font-semibold text-slate-900 dark:text-[#F8F9FA]">Career Compass</h2>
+          <p className="text-sm text-slate-500 mt-0.5 dark:text-neutral-400">Your personalized next steps</p>
         </div>
         <Compass className="h-5 w-5 flex-shrink-0 text-brand-orange" aria-hidden="true" />
       </div>
@@ -502,7 +502,7 @@ function CareerCompassCard({ items }) {
         {items.map((item) => (
           <div
             key={item.key}
-            className={`rounded-lg border border-slate-200 border-l-4 bg-slate-50/60 px-3 py-3 ${item.borderColor}`}
+            className={`rounded-lg border border-slate-200 dark:border-white/10 border-l-4 bg-slate-50/60 dark:bg-white/5 px-3 py-3 ${item.borderColor}`}
           >
             <div className="flex items-start gap-2.5">
               <item.icon
@@ -510,8 +510,8 @@ function CareerCompassCard({ items }) {
                 aria-hidden="true"
               />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-slate-900">{item.title}</p>
-                <p className="text-xs text-slate-500 mt-0.5">{item.subtitle}</p>
+                <p className="text-sm font-semibold text-slate-900 dark:text-[#F8F9FA]">{item.title}</p>
+                <p className="text-xs text-slate-500 mt-0.5 dark:text-neutral-400">{item.subtitle}</p>
                 <button
                   type="button"
                   onClick={item.onAction}
@@ -593,7 +593,7 @@ export default function Dashboard() {
         breakdown={scoreBreakdown}
       />
 
-      <hr className="border-t border-slate-200" aria-hidden="true" />
+      <hr className="border-t border-slate-200 dark:border-white/10" aria-hidden="true" />
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <CompactStatCard
@@ -609,7 +609,7 @@ export default function Dashboard() {
           value={networkConnections.length}
           label="Network"
           sublabel="1 overdue"
-          tint="blue"
+          tint="slate"
           onClick={() => navigate("/network")}
         />
         <CompactStatCard
@@ -617,7 +617,7 @@ export default function Dashboard() {
           value={skills.length}
           label="Skills"
           sublabel="3 advanced"
-          tint="purple"
+          tint="deep"
           onClick={() => navigate("/skills")}
         />
         <CompactStatCard
@@ -625,7 +625,7 @@ export default function Dashboard() {
           value={applications.length}
           label="Applications"
           sublabel="1 offer"
-          tint="green"
+          tint="neutral"
           onClick={scrollToApplications}
         />
       </div>

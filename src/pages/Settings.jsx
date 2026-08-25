@@ -9,16 +9,16 @@ function ToggleRow({ label, description, checked, onChange }) {
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className="flex w-full items-center justify-between gap-4 rounded-lg px-2 py-3 text-left transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+      className="flex w-full items-center justify-between gap-4 rounded-lg px-2 py-3 text-left transition-colors hover:bg-slate-50 dark:hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
     >
       <div className="min-w-0">
-        <p className="text-sm font-medium text-slate-800">{label}</p>
-        {description && <p className="text-xs text-slate-500 mt-0.5">{description}</p>}
+        <p className="text-sm font-medium text-slate-800 dark:text-neutral-200">{label}</p>
+        {description && <p className="text-xs text-slate-500 mt-0.5 dark:text-neutral-400">{description}</p>}
       </div>
       <span
         aria-hidden="true"
         className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${
-          checked ? "bg-slate-700" : "bg-slate-300"
+          checked ? "bg-brand-orange" : "bg-slate-300 dark:bg-white/15"
         }`}
       >
         <span
@@ -55,12 +55,12 @@ export default function Settings() {
   }
 
   return (
-    <div className="-mx-4 -my-6 min-h-screen bg-[#F8F9FB] px-4 py-6 md:-mx-8 md:-my-8 md:px-8 md:py-8">
-      <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
-      <p className="text-slate-500 mt-1">Manage your profile, notifications, and app info.</p>
+    <div className="-mx-4 -my-6 min-h-screen bg-brand-surface dark:bg-[#1A1919] px-4 py-6 md:-mx-8 md:-my-8 md:px-8 md:py-8 transition-colors">
+      <h1 className="text-2xl font-bold text-slate-900 dark:text-[#F8F9FA]">Settings</h1>
+      <p className="text-slate-500 dark:text-neutral-400 mt-1">Manage your profile, notifications, and app info.</p>
 
       <div className="mt-6 max-w-2xl space-y-6">
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#232428] shadow-sm">
           <CardHeader title="Profile Settings" />
           <form onSubmit={handleSave} className="px-5 pb-5 pt-3 space-y-4">
             <TextField label="Name" value={name} onChange={(e) => setName(e.target.value)} />
@@ -88,15 +88,15 @@ export default function Settings() {
             <div className="pt-1 flex items-center gap-3">
               <Button type="submit">Save Changes</Button>
               {saved && (
-                <span className="text-sm font-medium text-emerald-600">Profile saved</span>
+                <span className="text-sm font-medium text-orange-600 dark:text-orange-300">Profile saved</span>
               )}
             </div>
           </form>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#232428] shadow-sm">
           <CardHeader title="Notification Preferences" />
-          <div className="px-5 pb-4 pt-1 divide-y divide-slate-100">
+          <div className="px-5 pb-4 pt-1 divide-y divide-slate-100 dark:divide-white/10">
             <ToggleRow
               label="Network follow-up reminders"
               description="Get notified when a contact is overdue for a follow-up"
@@ -118,11 +118,11 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#232428] shadow-sm">
           <CardHeader title="About Abuve" />
           <div className="px-5 pb-5 pt-1 space-y-2">
-            <p className="text-sm text-slate-500">Version v1.0.0</p>
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-slate-500 dark:text-neutral-400">Version v1.0.0</p>
+            <p className="text-sm text-slate-600 dark:text-neutral-400">
               Built for Lewis &amp; Clark College students to track and accelerate their career
               journey
             </p>
@@ -130,7 +130,7 @@ export default function Settings() {
               href="https://github.com/abakar29/lc-career-tracker"
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-slate-700 hover:text-slate-900 hover:underline"
+              className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white hover:underline"
             >
               <ExternalLink className="h-4 w-4" aria-hidden="true" />
               View on GitHub

@@ -4,6 +4,7 @@ import { supabase } from "./supabaseClient";
 import Layout from "./components/Layout";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import Timeline from "./pages/Timeline";
 import Experience from "./pages/Experience";
 import Network from "./pages/Network";
 import Skills from "./pages/Skills";
@@ -35,11 +36,8 @@ export default function App() {
 
   if (session === undefined && !isGuest) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: "#F8F9FB" }}
-      >
-        <p className="text-sm text-slate-500">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center bg-brand-surface dark:bg-[#1A1919]">
+        <p className="text-sm text-slate-500 dark:text-neutral-400">Loading...</p>
       </div>
     );
   }
@@ -52,6 +50,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<Dashboard />} />
+            <Route path="timeline" element={<Timeline />} />
             <Route path="experience" element={<Experience />} />
             <Route path="network" element={<Network />} />
             <Route path="skills" element={<Skills />} />
