@@ -18,6 +18,7 @@ import {
 import { useData } from "../context/DataContext";
 import { formatDate, daysSince, computeProfileCompleteness } from "../lib/utils";
 import { networkConnections as mockNetworkConnections } from "../data/mockData";
+import { formatAcademicSummary } from "../data/academics";
 import {
   CardHeader,
   Badge,
@@ -544,12 +545,10 @@ export default function Dashboard() {
   const [profileName] = useState(
     () => localStorage.getItem("abuve:profile:name") || "Abu"
   );
-  const [profileMajor] = useState(
-    () => localStorage.getItem("abuve:profile:major") || "Economics & Entrepreneurship"
-  );
   const [profileClassYear] = useState(
     () => localStorage.getItem("abuve:profile:classyear") || "2029"
   );
+  const academicSummary = formatAcademicSummary(profile);
   const navigate = useNavigate();
   const applicationTrackerRef = useRef(null);
 
@@ -587,7 +586,7 @@ export default function Dashboard() {
         score={score}
         checks={checks}
         classYear={profileClassYear}
-        major={profileMajor}
+        major={academicSummary}
         name={profileName}
         attentionCount={compassItems.length}
         breakdown={scoreBreakdown}

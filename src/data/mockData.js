@@ -4,7 +4,9 @@
 export const profile = {
   name: "Alex Morgan",
   classYear: "2029",
-  major: "Business Administration & Data Science",
+  primaryMajor: "Economics",
+  secondaryMajor: null,
+  minors: [],
   studentId: "lc-2024-001",
 };
 

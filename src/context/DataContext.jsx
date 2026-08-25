@@ -43,6 +43,10 @@ export function DataProvider({ children }) {
     setData((d) => ({ ...d, profile: { ...d.profile, targetCareerPath: path } }));
   }, []);
 
+  const updateAcademics = useCallback((patch) => {
+    setData((d) => ({ ...d, profile: { ...d.profile, ...patch } }));
+  }, []);
+
   const makeCollectionActions = useCallback((key) => ({
     add: (entry) =>
       setData((d) => {
@@ -73,6 +77,7 @@ export function DataProvider({ children }) {
       onboarded,
       completeOnboarding,
       setTargetCareerPath,
+      updateAcademics,
       addExperience: experienceActions.add,
       updateExperience: experienceActions.update,
       deleteExperience: experienceActions.remove,
@@ -83,7 +88,16 @@ export function DataProvider({ children }) {
       updateSkill: skillActions.update,
       deleteSkill: skillActions.remove,
     }),
-    [data, onboarded, completeOnboarding, setTargetCareerPath, experienceActions, contactActions, skillActions]
+    [
+      data,
+      onboarded,
+      completeOnboarding,
+      setTargetCareerPath,
+      updateAcademics,
+      experienceActions,
+      contactActions,
+      skillActions,
+    ]
   );
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

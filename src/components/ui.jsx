@@ -45,6 +45,22 @@ export function Badge({ tone = "slate", children }) {
   );
 }
 
+export function RemovablePill({ label, onRemove, removeLabel }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-50 dark:bg-orange-500/10 pl-3 pr-1.5 py-1 text-xs font-medium text-orange-800 dark:text-orange-300 ring-1 ring-inset ring-orange-200 dark:ring-orange-500/30">
+      {label}
+      <button
+        type="button"
+        onClick={onRemove}
+        aria-label={removeLabel ?? `Remove ${label}`}
+        className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-orange-600 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+      >
+        <X className="h-3 w-3" aria-hidden="true" />
+      </button>
+    </span>
+  );
+}
+
 const BUTTON_STYLES = {
   primary:
     "bg-orange-700 text-white hover:bg-orange-800 focus-visible:ring-orange-500",
