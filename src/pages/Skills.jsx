@@ -82,7 +82,10 @@ const BUILD_CONTEXTS = [
   "Coursework",
   "Employment",
   "Research",
+  "Other",
 ];
+
+const OTHER_EXPERIENCE_VALUE = "__other__";
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -94,6 +97,7 @@ function emptyForm() {
     proficiency_level: "",
     context: "",
     experience_id: "",
+    other_experience_description: "",
     resume_description: "",
     date_added: todayISO(),
   };
@@ -279,6 +283,7 @@ export default function Skills() {
       proficiency_level: skill.proficiency_level ?? "",
       context: skill.context ?? "",
       experience_id: skill.experience_id ?? "",
+      other_experience_description: skill.other_experience_description ?? "",
       resume_description: skill.resume_description ?? "",
       date_added: skill.date_added ?? todayISO(),
     });
@@ -601,7 +606,18 @@ export default function Skills() {
                 {exp.organization_name}
               </option>
             ))}
+            <option value={OTHER_EXPERIENCE_VALUE}>Other / Independent</option>
           </SelectField>
+
+          {formValues.experience_id === OTHER_EXPERIENCE_VALUE && (
+            <input
+              type="text"
+              placeholder="Describe where you built this skill"
+              value={formValues.other_experience_description}
+              onChange={(e) => updateField("other_experience_description", e.target.value)}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+          )}
 
           <div>
             <TextField
