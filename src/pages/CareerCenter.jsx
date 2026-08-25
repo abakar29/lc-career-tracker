@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, Clock, Briefcase, Users, ExternalLink, Search } from "lucide-react";
+
+const JOB_BOARDS = [
+  { label: "L&C Job Board", icon: Briefcase, url: "https://careercenter.lclark.edu/jobs/" },
+  { label: "Handshake", icon: Users, url: "https://joinhandshake.com" },
+  { label: "LinkedIn Jobs", icon: ExternalLink, url: "https://linkedin.com/jobs" },
+  { label: "Indeed", icon: Search, url: "https://indeed.com" },
+];
 
 const UPCOMING_EVENTS = [
   {
@@ -69,6 +76,30 @@ export default function CareerCenter() {
           <p className="mt-3 text-lg font-semibold text-slate-900">Drop-in Hours</p>
           <p className="mt-1 text-sm text-slate-500">Mon-Fri 2-4pm, no booking needed</p>
         </button>
+      </div>
+
+      <div className="mt-6 rounded-2xl bg-white p-6 shadow-sm">
+        <p className="text-xs font-semibold uppercase tracking-wide text-[#B85A12]">
+          Job Boards
+        </p>
+        <h2 className="mt-2 text-lg font-bold text-[#111827]">Find your next opportunity</h2>
+        <p className="mt-1 text-sm text-[#6B7280]">
+          Browse curated job boards used by L&amp;C students
+        </p>
+
+        <div className="mt-5 flex flex-wrap gap-3">
+          {JOB_BOARDS.map(({ label, icon: Icon, url }) => (
+            <button
+              key={label}
+              type="button"
+              onClick={() => window.open(url, "_blank")}
+              className="flex items-center gap-2 rounded-lg border border-[#E5E7EB] bg-white px-4 py-2.5 text-sm font-semibold text-[#111827] transition-colors hover:border-[#E87722]"
+            >
+              <Icon className="h-4 w-4 text-[#E87722]" aria-hidden="true" />
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="mt-6">
