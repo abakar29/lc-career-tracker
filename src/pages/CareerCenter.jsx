@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Calendar, Clock } from "lucide-react";
 
 const UPCOMING_EVENTS = [
@@ -24,7 +23,6 @@ const UPCOMING_EVENTS = [
 ];
 
 export default function CareerCenter() {
-  const navigate = useNavigate();
   const [selected, setSelected] = useState(null);
   const [rsvped, setRsvped] = useState({});
 
@@ -51,7 +49,7 @@ export default function CareerCenter() {
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <button
           type="button"
-          onClick={() => navigate("/book-appointment")}
+          onClick={() => window.open("https://careerdevelopmentappt.youcanbook.me", "_blank")}
           className="rounded-2xl p-6 text-left transition-colors border-2 border-transparent"
           style={{ backgroundColor: "#1a1a1a" }}
         >

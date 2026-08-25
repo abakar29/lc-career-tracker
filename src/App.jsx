@@ -9,7 +9,6 @@ import Network from "./pages/Network";
 import Skills from "./pages/Skills";
 import Resume from "./pages/Resume";
 import CareerCenter from "./pages/CareerCenter";
-import BookAppointment from "./pages/BookAppointment";
 import Admin from "./pages/Admin";
 import Settings from "./pages/Settings";
 
@@ -58,7 +57,6 @@ export default function App() {
             <Route path="skills" element={<Skills />} />
             <Route path="resume" element={<Resume />} />
             <Route path="career-center" element={<CareerCenter />} />
-            <Route path="book-appointment" element={<BookAppointment />} />
             <Route path="settings" element={<Settings />} />
             <Route path="admin" element={<Admin />} />
           </Route>
