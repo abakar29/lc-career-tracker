@@ -34,6 +34,8 @@ function ToggleRow({ label, description, checked, onChange }) {
 export default function Settings() {
   const [name, setName] = useState(() => localStorage.getItem('abuve:profile:name') || 'Abu Bakar');
   const [major, setMajor] = useState(() => localStorage.getItem('abuve:profile:major') || 'Economics & Entrepreneurship');
+  const [secondMajor, setSecondMajor] = useState(() => localStorage.getItem('abuve:profile:secondmajor') || '');
+  const [minor, setMinor] = useState(() => localStorage.getItem('abuve:profile:minor') || '');
   const [classYear, setClassYear] = useState(() => localStorage.getItem('abuve:profile:classyear') || 'Class of 2029');
   const [saved, setSaved] = useState(false);
 
@@ -45,6 +47,8 @@ export default function Settings() {
     e.preventDefault();
     localStorage.setItem("abuve:profile:name", name);
     localStorage.setItem("abuve:profile:major", major);
+    localStorage.setItem("abuve:profile:secondmajor", secondMajor);
+    localStorage.setItem("abuve:profile:minor", minor);
     localStorage.setItem("abuve:profile:classyear", classYear);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -61,6 +65,21 @@ export default function Settings() {
           <form onSubmit={handleSave} className="px-5 pb-5 pt-3 space-y-4">
             <TextField label="Name" value={name} onChange={(e) => setName(e.target.value)} />
             <TextField label="Major" value={major} onChange={(e) => setMajor(e.target.value)} />
+            <TextField
+              label="Second Major"
+              placeholder="e.g. Computer Science (optional)"
+              value={secondMajor}
+              onChange={(e) => setSecondMajor(e.target.value)}
+            />
+            <div>
+              <TextField
+                label="Minor"
+                placeholder="e.g. French, Mathematics (optional)"
+                value={minor}
+                onChange={(e) => setMinor(e.target.value)}
+              />
+              <p className="mt-1 text-xs text-slate-500">Separate multiple minors with a comma</p>
+            </div>
             <TextField
               label="Class Year"
               value={classYear}
