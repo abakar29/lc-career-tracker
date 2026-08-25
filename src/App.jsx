@@ -57,8 +57,8 @@ export default function App() {
             <Route path="resume" element={<Resume />} />
             <Route path="career-center" element={<CareerCenter />} />
             <Route path="settings" element={<Settings />} />
-            <Route path="admin" element={<Admin />} />
           </Route>
+          <Route path="/admin" element={<Admin />} />
         </Routes>
       ) : (
         <Login />
