@@ -5,7 +5,9 @@ import { useData } from "../context/DataContext";
 import { LC_MAJORS, LC_MINORS, formatAcademicSummary } from "../data/academics";
 
 function AcademicsFields({ profile, updateAcademics }) {
-  const { primaryMajor, secondaryMajor, minors } = profile;
+  const primaryMajor = profile.primaryMajor ?? "";
+  const secondaryMajor = profile.secondaryMajor ?? null;
+  const minors = profile.minors ?? [];
   const [addingSecondMajor, setAddingSecondMajor] = useState(false);
 
   function setPrimaryMajor(value) {
@@ -40,6 +42,11 @@ function AcademicsFields({ profile, updateAcademics }) {
         value={primaryMajor}
         onChange={(e) => setPrimaryMajor(e.target.value)}
       >
+        {!primaryMajor && (
+          <option value="" disabled>
+            Select your major
+          </option>
+        )}
         {LC_MAJORS.map((m) => (
           <option key={m} value={m}>
             {m}

@@ -4,13 +4,16 @@ import './index.css'
 import App from './App.jsx'
 import { DataProvider } from './context/DataContext.jsx'
 import { ThemeProvider } from './context/ThemeContext.jsx'
+import ErrorBoundary from './components/ErrorBoundary.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <ThemeProvider>
-      <DataProvider>
-        <App />
-      </DataProvider>
-    </ThemeProvider>
+    <ErrorBoundary message="Abuve couldn't start up correctly. Reloading usually fixes this.">
+      <ThemeProvider>
+        <DataProvider>
+          <App />
+        </DataProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )

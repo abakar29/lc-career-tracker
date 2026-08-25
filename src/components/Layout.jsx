@@ -21,6 +21,7 @@ import { supabase } from "../supabaseClient";
 import { useTheme } from "../context/ThemeContext";
 import { useData } from "../context/DataContext";
 import { formatAcademicSummary } from "../data/academics";
+import ErrorBoundary from "./ErrorBoundary";
 
 const GUEST_KEY = "abuve:guest";
 
@@ -342,7 +343,9 @@ export default function Layout() {
               exit={reduceMotion ? undefined : { opacity: 0, y: -8 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
             >
-              <Outlet />
+              <ErrorBoundary key={location.pathname}>
+                <Outlet />
+              </ErrorBoundary>
             </motion.div>
           </AnimatePresence>
         </div>
