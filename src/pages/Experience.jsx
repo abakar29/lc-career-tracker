@@ -27,7 +27,7 @@ const EXPERIENCE_TYPES = [
 const STATUS_OPTIONS = ["Active", "In Progress", "Completed"];
 
 const STATUS_TONE = {
-  Active: "green",
+  Active: "success",
   "In Progress": "amber",
   Completed: "slate",
 };
@@ -55,7 +55,7 @@ const TYPE_STYLES = {
   Internship: { dot: "bg-orange-500", badge: "orange" },
   "Study Abroad": { dot: "bg-amber-500", badge: "amber" },
   "Campus Activity": { dot: "bg-slate-500", badge: "slate" },
-  Research: { dot: "bg-emerald-500", badge: "green" },
+  Research: { dot: "bg-orange-800", badge: "success" },
   Volunteer: { dot: "bg-orange-800", badge: "orange" },
   Other: { dot: "bg-slate-400", badge: "slate" },
 };
@@ -208,8 +208,8 @@ export default function Experience() {
     <div>
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Experience</h1>
-          <p className="text-slate-500 mt-1">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-[#F8F9FA]">Experience</h1>
+          <p className="text-slate-500 dark:text-neutral-400 mt-1">
             Internships, study abroad, campus activities: everything that builds your story.
           </p>
         </div>
@@ -220,11 +220,11 @@ export default function Experience() {
       </div>
 
       {sorted.length > 0 && (
-        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="mt-6 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#232428] p-4 shadow-sm">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="relative flex-1">
               <Search
-                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#E87722]"
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#E87722] dark:text-orange-400"
                 aria-hidden="true"
               />
               <input
@@ -233,14 +233,14 @@ export default function Experience() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search experiences..."
                 aria-label="Search experiences"
-                className="w-full rounded-lg border border-[#E5E7EB] bg-white py-2 pl-9 pr-3 text-sm text-[#111827] placeholder:text-[#6B7280] focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full rounded-lg border border-[#E5E7EB] dark:border-white/10 bg-white dark:bg-[#1A1919] py-2 pl-9 pr-3 text-sm text-[#111827] dark:text-[#F8F9FA] placeholder:text-[#6B7280] dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
               aria-label="Filter by type"
-              className="rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-orange-500 sm:w-48"
+              className="rounded-lg border border-[#E5E7EB] dark:border-white/10 bg-white dark:bg-[#1A1919] px-3 py-2 text-sm text-[#111827] dark:text-[#F8F9FA] focus:outline-none focus:ring-2 focus:ring-orange-500 sm:w-48"
             >
               {TYPE_FILTER_OPTIONS.map((t) => (
                 <option key={t} value={t}>
@@ -252,7 +252,7 @@ export default function Experience() {
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               aria-label="Filter by status"
-              className="rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-orange-500 sm:w-40"
+              className="rounded-lg border border-[#E5E7EB] dark:border-white/10 bg-white dark:bg-[#1A1919] px-3 py-2 text-sm text-[#111827] dark:text-[#F8F9FA] focus:outline-none focus:ring-2 focus:ring-orange-500 sm:w-40"
             >
               {STATUS_FILTER_OPTIONS.map((s) => (
                 <option key={s} value={s}>
@@ -266,11 +266,11 @@ export default function Experience() {
 
       {sorted.length === 0 ? (
         <Card className="mt-6 flex flex-col items-center justify-center gap-3 py-16 text-center">
-          <div className="rounded-full bg-orange-50 p-3">
-            <Briefcase className="h-8 w-8 text-orange-600" aria-hidden="true" />
+          <div className="rounded-full bg-orange-50 dark:bg-orange-500/10 p-3">
+            <Briefcase className="h-8 w-8 text-orange-600 dark:text-orange-300" aria-hidden="true" />
           </div>
-          <p className="font-medium text-slate-700">No experience logged yet</p>
-          <p className="text-sm text-slate-500 max-w-sm">
+          <p className="font-medium text-slate-700 dark:text-neutral-200">No experience logged yet</p>
+          <p className="text-sm text-slate-500 dark:text-neutral-400 max-w-sm">
             Add your first internship, study abroad term, or campus activity to start building
             your timeline.
           </p>
@@ -281,10 +281,10 @@ export default function Experience() {
         </Card>
       ) : filteredSorted.length === 0 ? (
         <Card className="mt-6 flex flex-col items-center justify-center gap-2 py-12 text-center">
-          <p className="text-sm text-[#6B7280]">No experiences match your search</p>
+          <p className="text-sm text-[#6B7280] dark:text-neutral-400">No experiences match your search</p>
         </Card>
       ) : (
-        <ol className="relative mt-6 border-l-2 border-slate-200 pl-6 space-y-6">
+        <ol className="relative mt-6 border-l-2 border-slate-200 dark:border-white/10 pl-6 space-y-6">
           {filteredSorted.map((exp) => {
             const style = TYPE_STYLES[exp.experience_type] ?? TYPE_STYLES.Other;
             const isExpanded = expandedId === exp.id;
@@ -292,7 +292,7 @@ export default function Experience() {
             return (
               <li key={exp.id} className="relative">
                 <span
-                  className={`absolute -left-[1.9rem] top-5 h-3 w-3 rounded-full ring-4 ring-slate-50 ${style.dot}`}
+                  className={`absolute -left-[1.9rem] top-5 h-3 w-3 rounded-full ring-4 ring-brand-surface dark:ring-[#1A1919] ${style.dot}`}
                   aria-hidden="true"
                 />
                 <div onClick={() => toggleExpand(exp.id)} className="cursor-pointer">
@@ -305,11 +305,11 @@ export default function Experience() {
                             {STATUS_LABELS[exp.current_status] ?? exp.current_status}
                           </Badge>
                         </div>
-                        <h3 className="mt-2 font-semibold text-slate-900 truncate">
+                        <h3 className="mt-2 font-semibold text-slate-900 dark:text-[#F8F9FA] truncate">
                           {exp.organization_name}
                         </h3>
-                        {exp.location && <p className="text-sm text-slate-500">{exp.location}</p>}
-                        <p className="text-xs text-slate-400 mt-1">
+                        {exp.location && <p className="text-sm text-slate-500 dark:text-neutral-400">{exp.location}</p>}
+                        <p className="text-xs text-slate-400 dark:text-neutral-500 mt-1">
                           {formatDate(exp.start_date)} – {formatDate(exp.end_date)}
                         </p>
                       </div>
@@ -323,9 +323,9 @@ export default function Experience() {
                           }}
                         />
                         {isExpanded ? (
-                          <ChevronUp className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                          <ChevronUp className="h-4 w-4 text-slate-400 dark:text-neutral-500" aria-hidden="true" />
                         ) : (
-                          <ChevronDown className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                          <ChevronDown className="h-4 w-4 text-slate-400 dark:text-neutral-500" aria-hidden="true" />
                         )}
                       </div>
                     </div>
@@ -333,7 +333,7 @@ export default function Experience() {
                     {isExpanded && (
                       <div
                         onClick={(e) => e.stopPropagation()}
-                        className="mt-4 space-y-4 border-t border-slate-100 pt-4 cursor-default"
+                        className="mt-4 space-y-4 border-t border-slate-100 dark:border-white/10 pt-4 cursor-default"
                       >
                         <TextArea
                           label="Role Description"
@@ -348,7 +348,7 @@ export default function Experience() {
                           onChange={(e) => updateAchievements(exp, e.target.value)}
                         />
                         <div>
-                          <p className="mb-1 block text-sm font-medium text-slate-700">
+                          <p className="mb-1 block text-sm font-medium text-slate-700 dark:text-neutral-300">
                             Skills Developed
                           </p>
                           <div className="flex flex-wrap gap-2">
@@ -359,23 +359,23 @@ export default function Experience() {
                                 </Badge>
                               ))
                             ) : (
-                              <p className="text-sm text-slate-400">No matching skills yet</p>
+                              <p className="text-sm text-slate-400 dark:text-neutral-500">No matching skills yet</p>
                             )}
                           </div>
                         </div>
                         <div>
-                          <p className="mb-1 block text-sm font-medium text-slate-700">
+                          <p className="mb-1 block text-sm font-medium text-slate-700 dark:text-neutral-300">
                             Resume Bullet
                           </p>
-                          <div className="flex items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
-                            <p className="flex-1 text-sm text-slate-700">
+                          <div className="flex items-start gap-2 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-3">
+                            <p className="flex-1 text-sm text-slate-700 dark:text-neutral-300">
                               • {exp.organization_name}:{" "}
                               {descriptionFor(exp) || "Add a role description to generate a bullet"}
                             </p>
                             <button
                               type="button"
                               onClick={() => handleCopyBullet(exp)}
-                              className="flex flex-shrink-0 items-center gap-1 text-xs font-semibold text-[#B85A12] hover:text-orange-600"
+                              className="flex flex-shrink-0 items-center gap-1 text-xs font-semibold text-[#B85A12] dark:text-orange-300 hover:text-orange-600 dark:hover:text-orange-200"
                             >
                               <Copy className="h-3.5 w-3.5" aria-hidden="true" />
                               {copiedId === exp.id ? "Copied!" : "Copy"}
