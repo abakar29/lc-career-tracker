@@ -33,6 +33,30 @@ const ORG_SECTOR_KEYWORDS = [
   { keywords: ["sustainab", "environment", "electric"], sector: SECTORS.ENV },
 ];
 
+// Broad buckets used by the sticky category filter bar. Every experience
+// type and every skill maps into exactly one of these three.
+export const FILTER_CATEGORIES = [
+  { key: "all", label: "All" },
+  { key: "internships-work", label: "Internships & Work" },
+  { key: "campus-leadership", label: "Campus Leadership" },
+  { key: "coursework-skills", label: "Coursework & Skills" },
+];
+
+export const CATEGORY_SHORT_LABELS = {
+  "internships-work": "Work",
+  "campus-leadership": "Leadership",
+  "coursework-skills": "Coursework",
+};
+
+const EXPERIENCE_TYPE_FILTER_CATEGORY = {
+  Internship: "internships-work",
+  Volunteer: "internships-work",
+  "Campus Activity": "campus-leadership",
+  "Study Abroad": "campus-leadership",
+  Research: "coursework-skills",
+  Other: "coursework-skills",
+};
+
 function matchKeyword(text, table) {
   const lower = text.toLowerCase();
   for (const { keywords, sector } of table) {
@@ -72,22 +96,30 @@ export function buildTimelineEntries({ experiences, skills }) {
     .filter((exp) => exp.start_date)
     .map((exp) => ({
       id: `exp-${exp.id}`,
+      refId: exp.id,
       kind: "EXPERIENCE",
+      typeLabel: exp.experience_type,
       title: exp.organization_name,
       description: [exp.experience_type, exp.location].filter(Boolean).join(" · "),
       sector: inferExperienceSector(exp),
+      filterCategory: EXPERIENCE_TYPE_FILTER_CATEGORY[exp.experience_type] ?? "coursework-skills",
       date: exp.start_date,
+      raw: exp,
     }));
 
   const skillEntries = skills
     .filter((s) => s.date_added)
     .map((s) => ({
       id: `skill-${s.id}`,
+      refId: s.id,
       kind: "SKILLS",
+      typeLabel: "Skill",
       title: s.skill_name,
       description: `${s.proficiency_level} · built through ${s.context}`,
       sector: inferSkillSector(s),
+      filterCategory: "coursework-skills",
       date: s.date_added,
+      raw: s,
     }));
 
   return [...experienceEntries, ...skillEntries];

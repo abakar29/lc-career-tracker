@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { supabase } from "./supabaseClient";
 import Layout from "./components/Layout";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Timeline from "./pages/Timeline";
-import Experience from "./pages/Experience";
 import Network from "./pages/Network";
 import Skills from "./pages/Skills";
 import Resume from "./pages/Resume";
@@ -51,7 +50,7 @@ export default function App() {
           <Route path="/" element={<Layout />}>
             <Route index element={<Dashboard />} />
             <Route path="timeline" element={<Timeline />} />
-            <Route path="experience" element={<Experience />} />
+            <Route path="experience" element={<Navigate to="/timeline" replace />} />
             <Route path="network" element={<Network />} />
             <Route path="skills" element={<Skills />} />
             <Route path="resume" element={<Resume />} />
