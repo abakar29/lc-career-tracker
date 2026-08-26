@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   GraduationCap,
-  Network,
+  Users,
   Zap,
   FileCheck,
   Plus,
@@ -27,6 +27,7 @@ import {
   TextField,
   SelectField,
   DateField,
+  InfoTooltip,
 } from "../components/ui";
 import Onboarding from "../components/Onboarding";
 
@@ -105,7 +106,7 @@ function CompanyLogo({ company }) {
   );
 }
 
-function CompactStatCard({ icon: Icon, value, label, sublabel, tint = "orange", onClick }) {
+function CompactStatCard({ icon: Icon, value, label, sublabel, tint = "orange", onClick, tooltip }) {
   const colors = STAT_TINTS[tint];
   return (
     <div
@@ -118,8 +119,15 @@ function CompactStatCard({ icon: Icon, value, label, sublabel, tint = "orange", 
           onClick?.();
         }
       }}
-      className="flex cursor-pointer items-center gap-3 rounded-xl bg-white dark:bg-[#232428] p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+      className="relative flex cursor-pointer items-center gap-3 rounded-xl bg-white dark:bg-[#232428] p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
     >
+      {tooltip && (
+        <InfoTooltip
+          text={tooltip}
+          label={`About ${label}`}
+          className="absolute right-3 top-3"
+        />
+      )}
       <div className={`rounded-lg ${colors.bg} p-2.5`}>
         <Icon className={`h-5 w-5 ${colors.text}`} aria-hidden="true" />
       </div>
@@ -183,7 +191,7 @@ function CareerReadinessHero({ score, checks, classYear, major, name, attentionC
           <h1 className="mt-1 text-[32px] font-bold">{getGreeting()}, {name}</h1>
           <p className="mt-3 max-w-md text-neutral-300 text-sm">
             Your Career Readiness Score reflects how prepared you are to apply, right now,
-            based on your logged experience, network, and skills.
+            based on your logged experience, connections, and skills.
           </p>
 
           {next.length > 0 && (
@@ -214,7 +222,10 @@ function CareerReadinessHero({ score, checks, classYear, major, name, attentionC
 
         <div className="flex flex-col items-center gap-2">
           <RadialProgress value={score} size={140} strokeWidth={12} progressColor="#f97316" />
-          <p className="text-xs text-neutral-300 font-medium">Career Readiness Score</p>
+          <p className="flex items-center gap-1 text-xs text-neutral-300 font-medium">
+            Career Readiness Score
+            <InfoTooltip text="A score from 0-100 based on your logged experience, connections, skills, and applications - each worth 25%." />
+          </p>
 
           <div ref={breakdownRef} className="relative">
             <button
@@ -333,7 +344,12 @@ function ApplicationTrackerCard({ applications: initialApplications }) {
   return (
     <div className="h-full rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#232428] shadow-sm transition-all hover:shadow-md">
       <CardHeader
-        title="Application Tracker"
+        title={
+          <span className="inline-flex items-center gap-1.5">
+            Application Tracker
+            <InfoTooltip text="Track applications through Applied, Interviewing, Offer, or Rejected. Click a status pill to cycle it forward." />
+          </span>
+        }
         subtitle={`${applications.length} applications`}
         action={
           <button
@@ -465,7 +481,7 @@ function buildCompassItems(navigate) {
       title: `Follow up with ${mostOverdueContact.contact_name}`,
       subtitle: `${overdueDays} days since last contact — overdue`,
       actionLabel: "Follow up →",
-      onAction: () => navigate("/network"),
+      onAction: () => navigate("/connections"),
     },
     {
       key: "resume",
@@ -495,7 +511,10 @@ function CareerCompassCard({ items }) {
     <div className="h-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#232428] shadow-sm transition-all hover:shadow-md">
       <div className="flex items-start justify-between gap-3 px-5 pt-5">
         <div>
-          <h2 className="text-base font-semibold text-slate-900 dark:text-[#F8F9FA]">Career Compass</h2>
+          <h2 className="flex items-center gap-1.5 text-base font-semibold text-slate-900 dark:text-[#F8F9FA]">
+            Career Compass
+            <InfoTooltip text="Personalized next steps based on your connections, resume, and skill gaps - refreshed as you update your profile." />
+          </h2>
           <p className="text-sm text-slate-500 mt-0.5 dark:text-neutral-400">Your personalized next steps</p>
         </div>
         <Compass className="h-5 w-5 flex-shrink-0 text-brand-orange" aria-hidden="true" />
@@ -575,7 +594,7 @@ export default function Dashboard() {
   const scoreBreakdown = [
     { label: "Experiences", weight: "25%", complete: experiences.length > 0 },
     { label: "Skills", weight: "25%", complete: skills.length > 0 },
-    { label: "Network", weight: "25%", complete: networkConnections.length > 0 },
+    { label: "Connections", weight: "25%", complete: networkConnections.length > 0 },
     { label: "Applications", weight: "25%", complete: applications.length > 0 },
   ];
 
@@ -603,14 +622,16 @@ export default function Dashboard() {
           sublabel="2 active"
           tint="orange"
           onClick={() => navigate("/timeline")}
+          tooltip="Internships, campus activities, research, and other experiences you've logged on your Timeline."
         />
         <CompactStatCard
-          icon={Network}
+          icon={Users}
           value={networkConnections.length}
-          label="Network"
+          label="Connections"
           sublabel="1 overdue"
           tint="slate"
-          onClick={() => navigate("/network")}
+          onClick={() => navigate("/connections")}
+          tooltip="Faculty, alumni, and industry contacts you're tracking, with reminders so follow-ups don't go cold."
         />
         <CompactStatCard
           icon={Zap}
@@ -619,6 +640,7 @@ export default function Dashboard() {
           sublabel="3 advanced"
           tint="deep"
           onClick={() => navigate("/skills")}
+          tooltip="Skills you've logged from internships, coursework, and campus activities."
         />
         <CompactStatCard
           icon={FileCheck}
@@ -627,6 +649,7 @@ export default function Dashboard() {
           sublabel="1 offer"
           tint="neutral"
           onClick={scrollToApplications}
+          tooltip="Jobs and internships you've applied to, tracked from Applied through Offer."
         />
       </div>
 

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useData } from "../context/DataContext";
 import { careerPaths, careerPathGroups, getMissingSkills } from "../data/careerPaths";
+import { NACE_COMPETENCIES } from "../data/naceCompetencies";
 import {
   Card,
   CardHeader,
@@ -100,6 +101,8 @@ function emptyForm() {
     other_experience_description: "",
     resume_description: "",
     date_added: todayISO(),
+    course_name: "",
+    nace_competencies: [],
   };
 }
 
@@ -170,6 +173,28 @@ function SkillSourceBars({ data }) {
   );
 }
 
+function FoundationalCompetencies() {
+  return (
+    <Card className="mt-6">
+      <CardHeader
+        title="Foundational Competencies"
+        subtitle="The 8 NACE Career Readiness Competencies employers look for"
+      />
+      <div className="grid grid-cols-2 gap-2.5 px-5 pb-5 pt-1.5 sm:grid-cols-4">
+        {NACE_COMPETENCIES.map((c) => (
+          <div
+            key={c.key}
+            title={c.description}
+            className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-white/10 dark:bg-white/5"
+          >
+            <p className="text-xs font-semibold text-slate-800 dark:text-neutral-200">{c.label}</p>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
 function SkillCard({ skill, onEdit, onDelete }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -198,6 +223,7 @@ function SkillCard({ skill, onEdit, onDelete }) {
           </div>
           <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
             {skill.proficiency_level} · {skill.context}
+            {skill.course_name && ` · ${skill.course_name}`}
           </p>
         </div>
 
@@ -235,9 +261,24 @@ function SkillCard({ skill, onEdit, onDelete }) {
         </div>
       </div>
 
-      <span className="mt-2 inline-flex items-center rounded-full bg-gray-100 dark:bg-white/10 px-2 py-0.5 text-[11px] font-medium text-gray-600 dark:text-neutral-300">
-        {skill.context}
-      </span>
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        <span className="inline-flex items-center rounded-full bg-gray-100 dark:bg-white/10 px-2 py-0.5 text-[11px] font-medium text-gray-600 dark:text-neutral-300">
+          {skill.context}
+        </span>
+        {(skill.nace_competencies ?? []).map((key) => {
+          const comp = NACE_COMPETENCIES.find((c) => c.key === key);
+          if (!comp) return null;
+          return (
+            <span
+              key={key}
+              title={comp.description}
+              className="inline-flex items-center rounded-full bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 text-[11px] font-medium text-orange-700 dark:text-orange-300"
+            >
+              {comp.label}
+            </span>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -291,6 +332,8 @@ export default function Skills() {
       other_experience_description: skill.other_experience_description ?? "",
       resume_description: skill.resume_description ?? "",
       date_added: skill.date_added ?? todayISO(),
+      course_name: skill.course_name ?? "",
+      nace_competencies: skill.nace_competencies ?? [],
     });
     setErrors({});
     setModalOpen(true);
@@ -298,6 +341,15 @@ export default function Skills() {
 
   function updateField(field, value) {
     setFormValues((v) => ({ ...v, [field]: value }));
+  }
+
+  function toggleNaceCompetency(key) {
+    setFormValues((v) => ({
+      ...v,
+      nace_competencies: v.nace_competencies.includes(key)
+        ? v.nace_competencies.filter((k) => k !== key)
+        : [...v.nace_competencies, key],
+    }));
   }
 
   function handleSubmit(e) {
@@ -355,6 +407,8 @@ export default function Skills() {
         <StatPill label={`${sourcesUsed} Learning Source${sourcesUsed !== 1 ? "s" : ""}`} />
         <StatPill label={`Profile Strength: ${profileStrength}%`} />
       </div>
+
+      <FoundationalCompetencies />
 
       <div className="mt-6 grid lg:grid-cols-2 gap-6">
         <Card className="hover:shadow-md transition-all">
@@ -593,6 +647,41 @@ export default function Skills() {
             </div>
             {errors.context && <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">{errors.context}</p>}
           </div>
+
+          {formValues.context === "Coursework" && (
+            <div className="space-y-3 rounded-xl border border-dashed border-orange-200 dark:border-orange-500/30 bg-orange-50/50 dark:bg-orange-500/5 p-3.5">
+              <TextField
+                label="Course / class name"
+                placeholder="e.g. ECON 101, CS 301 Capstone"
+                value={formValues.course_name}
+                onChange={(e) => updateField("course_name", e.target.value)}
+              />
+              <div>
+                <p className="mb-1.5 text-sm font-medium text-slate-700 dark:text-neutral-300">
+                  Which NACE competencies did this course practice?
+                </p>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {NACE_COMPETENCIES.map((c) => {
+                    const checked = formValues.nace_competencies.includes(c.key);
+                    return (
+                      <label
+                        key={c.key}
+                        className="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-[#1A1919] px-2.5 py-2 text-sm"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleNaceCompetency(c.key)}
+                          className="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-slate-300 dark:border-white/20 text-brand-orange focus:ring-2 focus:ring-orange-500"
+                        />
+                        <span className="text-slate-700 dark:text-neutral-300">{c.label}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
 
           <SelectField
             label="Which experience?"
