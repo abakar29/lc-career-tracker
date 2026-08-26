@@ -28,7 +28,6 @@ const GUEST_KEY = "abuve:guest";
 const NAV_ITEMS = [
   { to: "/", label: "Dashboard", mobileLabel: "Home", icon: LayoutDashboard, end: true },
   { to: "/timeline", label: "Timeline", icon: Clock },
-  { to: "/experience", label: "Experience", icon: Briefcase },
   { to: "/network", label: "Network", icon: Users },
   { to: "/skills", label: "Skills", icon: Sparkles },
   { to: "/resume", label: "Resume", icon: FileText },

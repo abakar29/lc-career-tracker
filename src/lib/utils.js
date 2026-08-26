@@ -35,7 +35,7 @@ export function computeProfileCompleteness({
       label: "Log an experience",
       done: experiences.length >= 1,
       why: "The Career Center and employers use your experience history to match you to postings and write referrals.",
-      cta: { label: "Add an experience", to: "/experience" },
+      cta: { label: "Add an experience", to: "/timeline" },
     },
     {
       label: "Save a network contact",

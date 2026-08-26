@@ -602,7 +602,7 @@ export default function Dashboard() {
           label="Experience"
           sublabel="2 active"
           tint="orange"
-          onClick={() => navigate("/experience")}
+          onClick={() => navigate("/timeline")}
         />
         <CompactStatCard
           icon={Network}
