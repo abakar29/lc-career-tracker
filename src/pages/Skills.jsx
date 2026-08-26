@@ -9,7 +9,7 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 import { useData } from "../context/DataContext";
-import { careerPaths, getMissingSkills } from "../data/careerPaths";
+import { careerPaths, careerPathGroups, getMissingSkills } from "../data/careerPaths";
 import {
   Card,
   CardHeader,
@@ -251,15 +251,20 @@ export default function Skills() {
   const [formValues, setFormValues] = useState(emptyForm());
   const [errors, setErrors] = useState({});
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const [addedToPlan, setAddedToPlan] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All Categories");
   const [levelFilter, setLevelFilter] = useState("All Levels");
 
   const closeModal = useCallback(() => setModalOpen(false), []);
 
-  function handleAddToLearningPlan(name) {
-    setAddedToPlan((prev) => (prev.includes(name) ? prev : [...prev, name]));
+  function handleAddToMySkills(name) {
+    addSkill({
+      skill_name: name,
+      proficiency_level: "Beginner",
+      context: "Coursework",
+      resume_description: `Developing ${name} skills at Lewis & Clark`,
+      date_added: todayISO(),
+    });
   }
 
   const selectedPathId = profile.targetCareerPath ?? careerPaths[0].id;
@@ -378,10 +383,16 @@ export default function Skills() {
               value={selectedPathId}
               onChange={(e) => setTargetCareerPath(e.target.value)}
             >
-              {careerPaths.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.label}
-                </option>
+              {careerPathGroups.map((group) => (
+                <optgroup key={group} label={group}>
+                  {careerPaths
+                    .filter((p) => p.group === group)
+                    .map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.label}
+                      </option>
+                    ))}
+                </optgroup>
               ))}
             </SelectField>
 
@@ -405,25 +416,15 @@ export default function Skills() {
                           Required for {selectedPath.label} roles
                         </p>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {addedToPlan.includes(name) && (
-                          <span className="text-xs font-medium text-orange-600 dark:text-orange-300">
-                            Added to your learning plan
-                          </span>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => handleAddToLearningPlan(name)}
-                          aria-label={`Add ${name} to learning plan`}
-                          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 ${
-                            addedToPlan.includes(name)
-                              ? "bg-orange-200 text-orange-800 hover:bg-orange-300 focus-visible:ring-orange-400 dark:bg-orange-500/25 dark:text-orange-200 dark:hover:bg-orange-500/35"
-                              : "bg-orange-100 text-orange-700 hover:bg-orange-200 focus-visible:ring-orange-400 dark:bg-white/10 dark:text-orange-300 dark:hover:bg-white/15"
-                          }`}
-                        >
-                          Add to Learning Plan
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleAddToMySkills(name)}
+                        aria-label={`Add ${name} to my skills`}
+                        className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-brand-orange px-2.5 py-1 text-xs font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
+                      >
+                        <Plus className="h-3 w-3" aria-hidden="true" />
+                        Add to My Skills
+                      </button>
                     </div>
                   ))}
                 </div>
