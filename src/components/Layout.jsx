@@ -25,6 +25,15 @@ import ErrorBoundary from "./ErrorBoundary";
 
 const GUEST_KEY = "abuve:guest";
 
+function initials(name) {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join("");
+}
+
 const NAV_ITEMS = [
   { to: "/", label: "Dashboard", mobileLabel: "Home", icon: LayoutDashboard, end: true },
   { to: "/timeline", label: "Experience", icon: Clock },
@@ -306,11 +315,17 @@ export default function Layout() {
               aria-label="Change profile photo"
               className="group relative h-9 w-9 flex-shrink-0 rounded-full overflow-hidden"
             >
-              <img
-                src={photoUrl || "/Abu_Bakar.jpeg"}
-                alt="Student Profile"
-                className="h-9 w-9 rounded-full object-cover"
-              />
+              {photoUrl ? (
+                <img
+                  src={photoUrl}
+                  alt="Student Profile"
+                  className="h-9 w-9 rounded-full object-cover"
+                />
+              ) : (
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-orange text-sm font-semibold text-white">
+                  {initials(profileName)}
+                </div>
+              )}
 
               <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/60 text-white text-[10px] font-medium opacity-0 group-hover:opacity-100 transition-opacity">
                 Edit
