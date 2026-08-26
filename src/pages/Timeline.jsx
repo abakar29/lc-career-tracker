@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import { Search, Plus, ChevronDown, ChevronRight, Clock } from "lucide-react";
 import { useData } from "../context/DataContext";
 import { formatShortDate } from "../lib/utils";
-import { buildTimelineEntries, groupByTerm, FILTER_CATEGORIES, CATEGORY_SHORT_LABELS } from "../lib/timeline";
+import { buildTimelineEntries, groupByTerm, FILTER_CATEGORIES } from "../lib/timeline";
 import {
   Card,
   Button,
@@ -19,8 +19,21 @@ const EXPERIENCE_TYPES = ["Internship", "Study Abroad", "Campus Activity", "Rese
 const STATUS_OPTIONS = ["Active", "In Progress", "Completed"];
 const STATUS_LABELS = { Active: "Current", "In Progress": "In Progress", Completed: "Completed" };
 
-const CATEGORY_BADGE_CLASS =
+const TYPE_BADGE_CLASSES = {
+  Internship: "bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200 dark:bg-blue-500/10 dark:text-blue-300 dark:ring-blue-500/30",
+  "Study Abroad": "bg-purple-50 text-purple-700 ring-1 ring-inset ring-purple-200 dark:bg-purple-500/10 dark:text-purple-300 dark:ring-purple-500/30",
+  "Campus Activity": "bg-pink-50 text-pink-700 ring-1 ring-inset ring-pink-200 dark:bg-pink-500/10 dark:text-pink-300 dark:ring-pink-500/30",
+  Research: "bg-cyan-50 text-cyan-700 ring-1 ring-inset ring-cyan-200 dark:bg-cyan-500/10 dark:text-cyan-300 dark:ring-cyan-500/30",
+  Volunteer: "bg-green-50 text-green-700 ring-1 ring-inset ring-green-200 dark:bg-green-500/10 dark:text-green-300 dark:ring-green-500/30",
+  Other: "bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-200 dark:bg-white/10 dark:text-neutral-300 dark:ring-white/20",
+  Skill: "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-500/30",
+};
+const DEFAULT_BADGE_CLASS =
   "bg-orange-50 text-orange-700 ring-1 ring-inset ring-orange-200 dark:bg-orange-500/10 dark:text-orange-300 dark:ring-orange-500/30";
+
+function typeBadgeClass(typeLabel) {
+  return TYPE_BADGE_CLASSES[typeLabel] ?? DEFAULT_BADGE_CLASS;
+}
 
 const EMPTY_FORM = {
   experience_type: "Internship",
@@ -59,14 +72,13 @@ function TimelineRow({ entry, onOpen }) {
       className="flex w-full items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-left transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-[#232428]"
     >
       <span
-        className={`inline-flex flex-shrink-0 items-center rounded-full px-2 py-1 text-[10px] font-bold tracking-wide ${CATEGORY_BADGE_CLASS}`}
+        className={`inline-flex flex-shrink-0 items-center rounded-full px-2 py-1 text-[10px] font-bold tracking-wide ${typeBadgeClass(entry.typeLabel)}`}
       >
-        {CATEGORY_SHORT_LABELS[entry.filterCategory]}
+        {entry.typeLabel}
       </span>
 
       <div className="flex min-w-0 flex-1 items-baseline gap-2">
         <span className="truncate font-semibold text-slate-900 dark:text-[#F8F9FA]">{entry.title}</span>
-        <span className="flex-shrink-0 text-xs text-slate-400 dark:text-neutral-500">{entry.typeLabel}</span>
       </div>
 
       <span className="flex-shrink-0 text-xs font-medium text-slate-500 dark:text-neutral-400">
@@ -78,8 +90,8 @@ function TimelineRow({ entry, onOpen }) {
 }
 
 function TermAccordion({ term, isExpanded, onToggle, onOpenEntry }) {
-  const presentCategories = useMemo(
-    () => [...new Set(term.entries.map((e) => e.filterCategory))],
+  const presentTypes = useMemo(
+    () => [...new Set(term.entries.map((e) => e.typeLabel))],
     [term.entries]
   );
 
@@ -106,9 +118,9 @@ function TermAccordion({ term, isExpanded, onToggle, onOpenEntry }) {
           {term.entries.length} {term.entries.length === 1 ? "entry" : "entries"}
         </span>
         <div className="hidden flex-wrap gap-1.5 sm:flex">
-          {presentCategories.map((cat) => (
-            <span key={cat} className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${CATEGORY_BADGE_CLASS}`}>
-              {CATEGORY_SHORT_LABELS[cat]}
+          {presentTypes.map((type) => (
+            <span key={type} className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${typeBadgeClass(type)}`}>
+              {type}
             </span>
           ))}
         </div>
