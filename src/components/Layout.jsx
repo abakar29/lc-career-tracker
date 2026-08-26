@@ -25,6 +25,15 @@ import ErrorBoundary from "./ErrorBoundary";
 
 const GUEST_KEY = "abuve:guest";
 
+function initials(name) {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join("");
+}
+
 const NAV_ITEMS = [
   { to: "/", label: "Dashboard", mobileLabel: "Home", icon: LayoutDashboard, end: true },
   { to: "/timeline", label: "Experience", icon: Clock },
@@ -119,6 +128,9 @@ export default function Layout() {
   const [classYear, setClassYear] = useState(
     () => localStorage.getItem("abuve:profile:classyear") || "2029"
   );
+  const [profileName, setProfileName] = useState(
+    () => localStorage.getItem("abuve:profile:name") || "Abu Bakar"
+  );
   const profileRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -129,7 +141,10 @@ export default function Layout() {
   }, []);
 
   useEffect(() => {
-    const handler = () => setClassYear(localStorage.getItem('abuve:profile:classyear') || '2029');
+    const handler = () => {
+      setClassYear(localStorage.getItem('abuve:profile:classyear') || '2029');
+      setProfileName(localStorage.getItem('abuve:profile:name') || 'Abu Bakar');
+    };
     window.addEventListener('storage', handler);
     return () => window.removeEventListener('storage', handler);
   }, []);
@@ -139,8 +154,6 @@ export default function Layout() {
     const saved = localStorage.getItem(`profile_photo_${userEmail}`);
     setPhotoUrl(saved || null);
   }, [userEmail]);
-
-  const userInitial = userEmail ? userEmail[0].toUpperCase() : "";
 
   const handleSignOut = async () => {
     try {
@@ -209,10 +222,12 @@ export default function Layout() {
           {profileOpen && (
             <div className="absolute bottom-full left-3 right-3 mb-2 rounded-lg bg-neutral-900 border border-white/10 shadow-lg overflow-hidden">
               <div className="px-4 py-3">
-                <p className="text-sm font-medium text-white truncate">{userEmail}</p>
-                <p className="text-xs text-neutral-400">Class of {classYear}</p>
-                {academicSummary && (
-                  <p className="text-xs text-brand-orange mt-0.5 truncate">{academicSummary}</p>
+                <p className="text-sm font-semibold text-white truncate">{profileName}</p>
+                <p className="text-xs text-brand-orange mt-0.5 truncate">
+                  {academicSummary ? `${academicSummary} | Class of ${classYear}` : `Class of ${classYear}`}
+                </p>
+                {userEmail && (
+                  <p className="text-[11px] text-neutral-500 truncate mt-0.5">{userEmail}</p>
                 )}
               </div>
               <div className="border-t border-white/10" />
@@ -303,12 +318,12 @@ export default function Layout() {
               {photoUrl ? (
                 <img
                   src={photoUrl}
-                  alt=""
+                  alt="Student Profile"
                   className="h-9 w-9 rounded-full object-cover"
                 />
               ) : (
-                <div className="h-9 w-9 rounded-full bg-orange-700 flex items-center justify-center text-sm font-semibold text-white">
-                  {userInitial}
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-orange text-sm font-semibold text-white">
+                  {initials(profileName)}
                 </div>
               )}
 
@@ -317,7 +332,7 @@ export default function Layout() {
               </div>
             </button>
             <div className="min-w-0 text-left">
-              <p className="text-sm font-medium text-white truncate">{userEmail}</p>
+              <p className="text-sm font-medium text-white truncate">{profileName}</p>
               <p className="text-xs text-neutral-400 truncate">Class of {classYear}</p>
             </div>
           </div>
