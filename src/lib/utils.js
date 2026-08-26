@@ -38,10 +38,10 @@ export function computeProfileCompleteness({
       cta: { label: "Add an experience", to: "/timeline" },
     },
     {
-      label: "Save a network contact",
+      label: "Save a connection",
       done: networkConnections.length >= 1,
-      why: "Most internships trace back to a warm intro; an empty network means relying on cold applications alone.",
-      cta: { label: "Add a contact", to: "/network" },
+      why: "Most internships trace back to a warm intro; no saved connections means relying on cold applications alone.",
+      cta: { label: "Add a contact", to: "/connections" },
     },
     {
       label: "Add 3+ skills",

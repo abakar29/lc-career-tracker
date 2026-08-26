@@ -5,7 +5,7 @@ import Layout from "./components/Layout";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Timeline from "./pages/Timeline";
-import Network from "./pages/Network";
+import Connections from "./pages/Connections";
 import Skills from "./pages/Skills";
 import Resume from "./pages/Resume";
 import CareerCenter from "./pages/CareerCenter";
@@ -51,7 +51,8 @@ export default function App() {
             <Route index element={<Dashboard />} />
             <Route path="timeline" element={<Timeline />} />
             <Route path="experience" element={<Navigate to="/timeline" replace />} />
-            <Route path="network" element={<Network />} />
+            <Route path="connections" element={<Connections />} />
+            <Route path="network" element={<Navigate to="/connections" replace />} />
             <Route path="skills" element={<Skills />} />
             <Route path="resume" element={<Resume />} />
             <Route path="career-center" element={<CareerCenter />} />

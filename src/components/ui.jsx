@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { X } from "lucide-react";
+import { X, Info } from "lucide-react";
 
 export function Card({ className = "", children }) {
   return (
@@ -57,6 +57,38 @@ export function RemovablePill({ label, onRemove, removeLabel }) {
       >
         <X className="h-3 w-3" aria-hidden="true" />
       </button>
+    </span>
+  );
+}
+
+export function InfoTooltip({ text, label = "More info", className = "" }) {
+  const [open, setOpen] = useState(false);
+  const tooltipId = useId();
+
+  return (
+    <span className={`relative inline-flex ${className}`}>
+      <button
+        type="button"
+        aria-label={label}
+        aria-describedby={open ? tooltipId : undefined}
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setOpen(false)}
+        onClick={(e) => e.stopPropagation()}
+        className="flex h-4 w-4 items-center justify-center rounded-full text-slate-400 hover:text-brand-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 dark:text-neutral-500 dark:hover:text-orange-300"
+      >
+        <Info className="h-3.5 w-3.5" aria-hidden="true" />
+      </button>
+      {open && (
+        <span
+          id={tooltipId}
+          role="tooltip"
+          className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 w-56 -translate-x-1/2 rounded-lg bg-brand-black px-3 py-2 text-xs font-medium leading-snug text-white shadow-lg dark:bg-[#2B2C31] dark:border dark:border-white/10"
+        >
+          {text}
+        </span>
+      )}
     </span>
   );
 }

@@ -37,7 +37,7 @@ function initials(name) {
 const NAV_ITEMS = [
   { to: "/", label: "Dashboard", mobileLabel: "Home", icon: LayoutDashboard, end: true },
   { to: "/timeline", label: "Experience", icon: Clock },
-  { to: "/network", label: "Network", icon: Users },
+  { to: "/connections", label: "Connections", icon: Users },
   { to: "/skills", label: "Skills", icon: Sparkles },
   { to: "/resume", label: "Resume", icon: FileText },
   { to: "/career-center", label: "Career Center", mobileLabel: "Career", icon: Building2 },
@@ -52,9 +52,9 @@ const ABOUT_SECTIONS = [
   },
   {
     icon: Users,
-    title: "Build Your Network",
+    title: "Build Your Connections",
     description:
-      "Keep track of mentors, alumni and recruiters with smart follow-up reminders so no connection goes cold",
+      "Keep track of faculty, alumni and industry contacts with smart follow-up reminders so no connection goes cold",
   },
   {
     icon: Target,
