@@ -129,41 +129,15 @@ export default function Resume() {
   const [snapshotExpanded, setSnapshotExpanded] = useState(true);
   const [atsExpanded, setAtsExpanded] = useState(true);
 
-  const [excludedExpIds, setExcludedExpIds] = useState(() => new Set());
-  const [excludedSkillIds, setExcludedSkillIds] = useState(() => new Set());
-
-  function toggleExp(id) {
-    setExcludedExpIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }
-
-  function toggleSkill(id) {
-    setExcludedSkillIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }
-
-  const includedExperiences = experiences.filter((exp) => !excludedExpIds.has(exp.id));
-  const includedSkills = skills.filter((s) => !excludedSkillIds.has(s.id));
-
   const skillsByCategory = SKILL_CATEGORY_ORDER.reduce((acc, category) => {
     acc[category] = skills.filter((s) => categorizeSkill(s.skill_name) === category);
     return acc;
   }, {});
 
   function buildSnapshotText() {
-    const expLines = includedExperiences.map((exp) => `• ${defaultExpText(exp)}`);
+    const expLines = experiences.map((exp) => `• ${defaultExpText(exp)}`);
     const skillLines = SKILL_CATEGORY_ORDER.map((category) => {
-      const names = includedSkills
-        .filter((s) => categorizeSkill(s.skill_name) === category)
-        .map((s) => s.skill_name);
+      const names = (skillsByCategory[category] ?? []).map((s) => s.skill_name);
       return names.length > 0 ? `${category}: ${names.join(", ")}` : null;
     }).filter(Boolean);
     return [...expLines, "", ...skillLines].join("\n");
@@ -222,7 +196,7 @@ export default function Resume() {
               Your experiences, ready to copy
             </h2>
             <p className="mt-1 text-sm text-[#6B7280] dark:text-neutral-400">
-              Auto-pulled from your Timeline and Skills. Uncheck anything you don't want on this resume.
+              Auto-pulled from your Timeline and Skills.
             </p>
           </div>
 
@@ -251,30 +225,13 @@ export default function Resume() {
                     </Link>
                   </p>
                 ) : (
-                  <ul className="space-y-2.5 text-sm">
-                    {experiences.map((exp) => {
-                      const included = !excludedExpIds.has(exp.id);
-                      return (
-                        <li key={exp.id} className="flex items-start gap-2.5">
-                          <input
-                            type="checkbox"
-                            checked={included}
-                            onChange={() => toggleExp(exp.id)}
-                            aria-label={`Include ${exp.organization_name} on resume`}
-                            className="mt-1 h-4 w-4 flex-shrink-0 rounded border-slate-300 dark:border-white/20 text-brand-orange focus:ring-2 focus:ring-orange-500"
-                          />
-                          <span
-                            className={
-                              included
-                                ? "text-[#111827] dark:text-[#F8F9FA]"
-                                : "text-slate-400 line-through dark:text-neutral-600"
-                            }
-                          >
-                            {defaultExpText(exp)}
-                          </span>
-                        </li>
-                      );
-                    })}
+                  <ul className="space-y-2.5 text-sm text-[#111827] dark:text-[#F8F9FA]">
+                    {experiences.map((exp) => (
+                      <li key={exp.id} className="flex gap-2">
+                        <span className="flex-shrink-0 text-brand-orange">•</span>
+                        <span>{defaultExpText(exp)}</span>
+                      </li>
+                    ))}
                   </ul>
                 )}
 
@@ -296,28 +253,14 @@ export default function Resume() {
                             {category}
                           </p>
                           <div className="mt-1.5 flex flex-wrap gap-2">
-                            {items.map((skill) => {
-                              const included = !excludedSkillIds.has(skill.id);
-                              return (
-                                <label
-                                  key={skill.id}
-                                  className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
-                                    included
-                                      ? "border-orange-200 bg-orange-50 text-orange-800 dark:border-orange-500/30 dark:bg-orange-500/10 dark:text-orange-300"
-                                      : "border-slate-200 bg-slate-50 text-slate-400 line-through dark:border-white/10 dark:bg-white/5 dark:text-neutral-600"
-                                  }`}
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={included}
-                                    onChange={() => toggleSkill(skill.id)}
-                                    aria-label={`Include ${skill.skill_name} on resume`}
-                                    className="h-3 w-3 rounded border-slate-300 text-brand-orange focus:ring-2 focus:ring-orange-500"
-                                  />
-                                  {skill.skill_name}
-                                </label>
-                              );
-                            })}
+                            {items.map((skill) => (
+                              <span
+                                key={skill.id}
+                                className="rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-medium text-orange-800 dark:border-orange-500/30 dark:bg-orange-500/10 dark:text-orange-300"
+                              >
+                                {skill.skill_name}
+                              </span>
+                            ))}
                           </div>
                         </div>
                       );
