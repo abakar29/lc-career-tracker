@@ -400,7 +400,7 @@ function ApplicationTrackerCard({ applications: initialApplications }) {
         </div>
       )}
 
-      <ul className="mt-2 max-h-[260px] divide-y divide-slate-100 dark:divide-white/10 overflow-y-auto px-5 pb-5">
+      <ul className="mt-2 divide-y divide-slate-100 dark:divide-white/10 px-5 pb-5">
         {sorted.map((a) => {
           const isExpanded = expandedId === a.id;
           return (
