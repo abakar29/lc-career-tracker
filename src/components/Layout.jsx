@@ -24,6 +24,7 @@ import { formatAcademicSummary } from "../data/academics";
 import ErrorBoundary from "./ErrorBoundary";
 
 const GUEST_KEY = "abuve:guest";
+const SHOW_FACULTY_VIEW = false; // TODO: re-enable once faculty view is ready
 
 function initials(name) {
   return name
@@ -243,18 +244,20 @@ export default function Layout() {
                   <Settings className="h-4 w-4" />
                   Settings
                 </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setProfileOpen(false);
-                    navigate("/admin");
-                  }}
-                  className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-neutral-200 hover:bg-white/10 hover:text-white transition-colors"
-                >
-                  <Shield className="h-4 w-4" />
-                  Faculty View
-                  <span className="ml-auto text-xs text-neutral-500">Career Center</span>
-                </button>
+                {SHOW_FACULTY_VIEW && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setProfileOpen(false);
+                      navigate("/admin");
+                    }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-neutral-200 hover:bg-white/10 hover:text-white transition-colors"
+                  >
+                    <Shield className="h-4 w-4" />
+                    Faculty View
+                    <span className="ml-auto text-xs text-neutral-500">Career Center</span>
+                  </button>
+                )}
               </div>
               <div className="border-t border-white/10" />
               <div className="py-1">
