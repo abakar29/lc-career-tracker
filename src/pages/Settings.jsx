@@ -206,7 +206,7 @@ export default function Settings() {
           <CardHeader title="Notification Preferences" />
           <div className="px-5 pb-4 pt-1 divide-y divide-slate-100 dark:divide-white/10">
             <ToggleRow
-              label="Network follow-up reminders"
+              label="Connection follow-up reminders"
               description="Get notified when a contact is overdue for a follow-up"
               checked={followUpReminders}
               onChange={setFollowUpReminders}

@@ -343,6 +343,14 @@ export default function Skills() {
     setFormValues((v) => ({ ...v, [field]: value }));
   }
 
+  function updateContext(value) {
+    setFormValues((v) =>
+      value === "Coursework"
+        ? { ...v, context: value }
+        : { ...v, context: value, course_name: "", nace_competencies: [] }
+    );
+  }
+
   function toggleNaceCompetency(key) {
     setFormValues((v) => ({
       ...v,
@@ -633,7 +641,7 @@ export default function Skills() {
                   <button
                     key={c}
                     type="button"
-                    onClick={() => updateField("context", c)}
+                    onClick={() => updateContext(c)}
                     className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
                       isSelected
                         ? "border-orange-500 bg-brand-orange text-white"

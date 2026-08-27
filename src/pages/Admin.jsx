@@ -51,7 +51,7 @@ const EMPLOYER_READINESS = [
 const STUDENTS_NEEDING_ATTENTION = [
   { label: "No resume", count: 14 },
   { label: "No internship", count: 9 },
-  { label: "No networking activity", count: 22 },
+  { label: "No connections logged", count: 22 },
   { label: "No applications submitted", count: 31 },
 ];
 
@@ -59,7 +59,7 @@ const RECOMMENDATIONS = [
   "Host an Excel workshop",
   "Invite more Finance employers",
   "42 students are internship-ready",
-  "Marketing students need networking support",
+  "Marketing students need help building connections",
   "Resume completion has dropped this month",
 ];
 
