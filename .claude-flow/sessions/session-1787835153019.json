@@ -1,0 +1,15 @@
+{
+  "id": "session-1787835153019",
+  "startedAt": "2026-08-27T12:52:33.019Z",
+  "cwd": "/Users/barbuchiabba/Documents/GitHub/lc-career-tracker",
+  "context": {},
+  "metrics": {
+    "edits": 0,
+    "commands": 0,
+    "tasks": 0,
+    "errors": 0
+  },
+  "restoredAt": "2026-08-27T12:52:33.175Z",
+  "endedAt": "2026-08-27T12:52:34.113Z",
+  "duration": 1094
+}

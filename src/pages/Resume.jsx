@@ -1,10 +1,5 @@
 import { useState } from "react";
 import {
-  UploadCloud,
-  CheckCircle2,
-  ArrowRight,
-  Copy,
-  Loader2,
   Pencil,
   X,
   Code2,
@@ -14,11 +9,11 @@ import {
   Scale,
   GraduationCap,
 } from "lucide-react";
-import { experiences, skills } from "../data/mockData";
+import { useData } from "../context/DataContext";
 import { formatDate } from "../lib/utils";
-import { Badge } from "../components/ui";
+import JobFitToolkit from "../components/JobFitToolkit";
 
-function buildSnapshotText() {
+function buildSnapshotText(experiences, skills) {
   const expLines = experiences.map(
     (exp) =>
       `${exp.organization_name} - ${exp.experience_type} | ${exp.location} | ${formatDate(
@@ -62,34 +57,13 @@ const RESUME_TEMPLATES = [
   },
 ];
 
-const MISSING_KEYWORDS = ["financial modeling", "Python", "data analysis", "Excel"];
-const STRONG_MATCHES = ["project management", "research", "communication"];
-const IMPROVEMENTS = [
-  "Work \"financial modeling\" and \"data analysis\" into your experience bullets.",
-  "Quantify results with specific metrics and outcomes where possible.",
-  "Call out any exposure to Excel or Python, even from coursework.",
-];
-
-function buildAtsReportText() {
-  return `Job Match Score: 73%
-
-MISSING KEYWORDS
-${MISSING_KEYWORDS.join(", ")}
-
-STRONG MATCHES
-${STRONG_MATCHES.join(", ")}
-
-WHAT TO IMPROVE
-${IMPROVEMENTS.map((item) => `- ${item}`).join("\n")}`;
-}
-
 export default function Resume() {
+  const { experiences, skills } = useData();
   const [copied, setCopied] = useState(false);
   const [snapshotExpanded, setSnapshotExpanded] = useState(true);
-  const [atsExpanded, setAtsExpanded] = useState(true);
 
   function handleCopy() {
-    navigator.clipboard.writeText(buildSnapshotText());
+    navigator.clipboard.writeText(buildSnapshotText(experiences, skills));
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   }
@@ -127,34 +101,6 @@ export default function Resume() {
 
   function addSkillItem() {
     setSkillItems((items) => [...items, ""]);
-  }
-
-  const [atsStage, setAtsStage] = useState("form");
-  const [jobDescription, setJobDescription] = useState("");
-  const [resumeFileName, setResumeFileName] = useState("");
-  const [reportCopied, setReportCopied] = useState(false);
-
-  function handleResumeFileChosen(file) {
-    if (!file) return;
-    setResumeFileName(file.name);
-  }
-
-  function handleAnalyzeMatch() {
-    setAtsStage("loading");
-    setTimeout(() => setAtsStage("result"), 2000);
-  }
-
-  function handleStartOver() {
-    setAtsStage("form");
-    setJobDescription("");
-    setResumeFileName("");
-    setReportCopied(false);
-  }
-
-  function handleCopyReport() {
-    navigator.clipboard.writeText(buildAtsReportText());
-    setReportCopied(true);
-    setTimeout(() => setReportCopied(false), 1500);
   }
 
   function handleDownloadTemplate() {
@@ -312,182 +258,7 @@ export default function Resume() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-6">
-          <div className="rounded-2xl border-l-2 border-l-brand-orange bg-white dark:bg-[#232428] p-6 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-[#B85A12] dark:text-orange-300">
-              Job Fit & Resume Optimizer
-            </p>
-            <h2 className="mt-2 text-lg font-bold text-[#111827] dark:text-[#F8F9FA]">
-              See how well your resume fits a job
-            </h2>
-            <p className="mt-1 text-sm text-[#6B7280] dark:text-neutral-400">
-              Paste a job posting and upload your resume for an instant match score
-            </p>
-          </div>
-
-          <div className="flex-1 rounded-2xl bg-white dark:bg-[#232428] p-6 shadow-sm">
-            <div className="flex items-center justify-end">
-              <button
-                type="button"
-                onClick={() => setAtsExpanded((v) => !v)}
-                className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 dark:text-neutral-400 hover:text-slate-700 dark:hover:text-neutral-200"
-              >
-                {atsExpanded ? "Hide ▲" : "Show ▼"}
-              </button>
-            </div>
-
-            <div
-              className={`grid transition-all duration-300 ease-in-out ${
-                atsExpanded ? "mt-2 grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-              }`}
-            >
-              <div className="overflow-hidden">
-                {atsStage === "form" && (
-                  <div>
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-brand-orange">
-                        Job Description
-                      </p>
-                      <textarea
-                        value={jobDescription}
-                        onChange={(e) => setJobDescription(e.target.value)}
-                        placeholder="Paste the job description here..."
-                        rows={4}
-                        className="mt-3 w-full resize-none rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#1A1919] px-3 py-2 text-sm text-[#111827] dark:text-[#F8F9FA] placeholder:text-slate-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      />
-                    </div>
-
-                    <hr className="my-5 border-slate-200 dark:border-white/10" />
-
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-brand-orange">
-                        Your Resume
-                      </p>
-
-                      {resumeFileName === "" ? (
-                        <label className="mt-3 flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-[#EA580C] dark:border-orange-500/30 bg-[#FEF0E6] dark:bg-orange-500/10 px-4 py-8 text-center">
-                          <UploadCloud className="h-6 w-6 text-[#EA580C] dark:text-orange-300" aria-hidden="true" />
-                          <p className="text-sm font-medium text-slate-800 dark:text-neutral-200">
-                            Drop your resume or click to browse
-                          </p>
-                          <p className="text-xs text-slate-500 dark:text-neutral-400">Supports PDF, DOC, DOCX</p>
-                          <input
-                            type="file"
-                            accept=".pdf,.doc,.docx"
-                            className="hidden"
-                            onChange={(e) => handleResumeFileChosen(e.target.files?.[0])}
-                          />
-                        </label>
-                      ) : (
-                        <div className="mt-3 flex items-center gap-2 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-3 py-2.5">
-                          <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-orange-600 dark:text-orange-300" aria-hidden="true" />
-                          <p className="truncate text-sm text-slate-700 dark:text-neutral-200">{resumeFileName}</p>
-                        </div>
-                      )}
-                    </div>
-
-                    <button
-                      type="button"
-                      disabled={jobDescription.trim() === "" || resumeFileName === ""}
-                      onClick={handleAnalyzeMatch}
-                      className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-lg bg-brand-orange px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      Analyze Job Fit
-                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                    </button>
-                  </div>
-                )}
-
-                {atsStage === "loading" && (
-                  <div className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-3 py-10 text-sm text-slate-500 dark:text-neutral-400">
-                    <Loader2 className="h-5 w-5 animate-spin text-brand-orange" aria-hidden="true" />
-                    Analyzing match...
-                  </div>
-                )}
-
-                {atsStage === "result" && (
-                  <div>
-                    <div className="flex items-baseline justify-between">
-                      <p className="text-sm font-semibold text-[#111827] dark:text-[#F8F9FA]">Job Match Score</p>
-                      <p className="text-sm font-bold text-brand-orange">73%</p>
-                    </div>
-                    <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-white/10">
-                      <div className="h-full rounded-full bg-brand-orange" style={{ width: "73%" }} />
-                    </div>
-
-                    <div className="mt-5 rounded-lg bg-orange-50 dark:bg-orange-500/10 p-3 text-[12px] text-orange-800 dark:text-orange-300">
-                      <p className="font-semibold uppercase tracking-wide">
-                        Relevant Experiences From Your Profile
-                      </p>
-                      <ul className="mt-2 space-y-1">
-                        {experiences.map((exp, i) => (
-                          <li key={i}>
-                            ✓ {exp.organization_name} - {exp.experience_type}
-                          </li>
-                        ))}
-                      </ul>
-                      <p className="mt-2">
-                        Consider adding these to your resume to improve your match score
-                      </p>
-                    </div>
-
-                    <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-[#6B7280] dark:text-neutral-400">
-                      Missing Keywords
-                    </p>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {MISSING_KEYWORDS.map((keyword) => (
-                        <Badge key={keyword} tone="red">
-                          {keyword}
-                        </Badge>
-                      ))}
-                    </div>
-
-                    <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-[#6B7280] dark:text-neutral-400">
-                      Strong Matches
-                    </p>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {STRONG_MATCHES.map((match) => (
-                        <Badge key={match} tone="success">
-                          {match}
-                        </Badge>
-                      ))}
-                    </div>
-
-                    <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-[#6B7280] dark:text-neutral-400">
-                      What to Improve
-                    </p>
-                    <ul className="mt-2 space-y-1.5 text-sm text-[#111827] dark:text-[#F8F9FA]">
-                      {IMPROVEMENTS.map((item) => (
-                        <li key={item} className="flex gap-2">
-                          <span className="flex-shrink-0 text-brand-orange">•</span>
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-
-                    <div className="mt-6 flex items-center gap-4">
-                      <button
-                        type="button"
-                        onClick={handleCopyReport}
-                        className="inline-flex w-fit items-center gap-1.5 rounded-lg bg-brand-orange px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-                      >
-                        <Copy className="h-4 w-4" aria-hidden="true" />
-                        {reportCopied ? "Copied!" : "Copy Report"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleStartOver}
-                        className="text-sm font-medium text-slate-500 dark:text-neutral-400 hover:text-slate-700 dark:hover:text-neutral-200"
-                      >
-                        Start Over
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+        <JobFitToolkit experiences={experiences} skills={skills} />
       </div>
 
       <div className="mt-6">
