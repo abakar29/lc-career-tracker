@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { Users, Plus, Pencil, Camera, Coffee, Search, Clock } from "lucide-react";
+import { Users, Plus, Pencil, Camera, Coffee, Search, X } from "lucide-react";
 import { useData } from "../context/DataContext";
 import { formatDate, daysSince } from "../lib/utils";
 import {
@@ -13,6 +13,8 @@ import {
   SelectField,
   DateField,
   TextArea,
+  RemovablePill,
+  InfoTooltip,
 } from "../components/ui";
 
 const CONNECTION_SOURCES = [
@@ -49,23 +51,44 @@ function industryFor(employer) {
   return EMPLOYER_INDUSTRIES[employer] ?? employer;
 }
 
-const RELATIONSHIP_PURPOSES = ["Recruiter", "Mentor", "Alumni", "Career Advice"];
+// Relationship type: what this person is to the student. "Mentor" isn't a
+// standalone type here - a mentor relationship is captured through the
+// functional tags below (e.g. Career advice, Industry introductions).
+const RELATIONSHIP_TYPES = [
+  "Faculty",
+  "Alumni",
+  "Staff / Career Services",
+  "Industry Professional",
+  "Peer / Student",
+  "Community Partner",
+];
 
 const STATUS_OPTIONS = ["Overdue", "Follow Up Soon", "Active"];
 
-const RELATIONSHIP_BADGE_CLASSES = {
-  Recruiter:
-    "bg-orange-50 text-orange-700 ring-1 ring-inset ring-orange-200 dark:bg-orange-500/10 dark:text-orange-300 dark:ring-orange-500/30",
-  // "Mentor" uses a deeper orange tint (not green) to stay within the L&C brand palette.
-  Mentor:
-    "bg-orange-100 text-orange-800 ring-1 ring-inset ring-orange-300 dark:bg-orange-500/20 dark:text-orange-200 dark:ring-orange-500/40",
-  Alumni:
-    "bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-200 dark:bg-white/10 dark:text-neutral-300 dark:ring-white/10",
-  "Career Advice":
-    "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-500/30",
-};
-
-const CADENCE_OPTIONS = ["Remind in 2 weeks", "Remind in 1 month", "Remind in 3 months"];
+// Actionable "who can I turn to for..." functional tags. `label` is used on
+// the quick-filter pills, tag chips, and the add-tag picker alike.
+const FUNCTIONAL_TAGS = [
+  {
+    key: "recommendation-letters",
+    emoji: "📝",
+    label: "Recommendation Letters",
+  },
+  {
+    key: "industry-intros",
+    emoji: "🚪",
+    label: "Industry Intros",
+  },
+  {
+    key: "career-advice",
+    emoji: "💡",
+    label: "Career Advice & Info Interviews",
+  },
+  {
+    key: "grad-school-insights",
+    emoji: "🎓",
+    label: "Grad School Insights",
+  },
+];
 
 function buildCoffeeChatMessage(contact) {
   return `Hi ${contact.contact_name}, I'd love to connect for a quick coffee chat to learn more about your experience at ${contact.employer_company}. Would you be available for 15-20 minutes?`;
@@ -88,7 +111,7 @@ function LinkedinIcon({ className }) {
   );
 }
 
-function NetworkInsights({ contacts }) {
+function ConnectionsInsights({ contacts }) {
   const total = contacts.length;
   const overdueCount = contacts.filter((c) => daysSince(c.last_contacted_date) > 30).length;
   const industryCount = new Set(contacts.map((c) => industryFor(c.employer_company))).size;
@@ -96,7 +119,7 @@ function NetworkInsights({ contacts }) {
   return (
     <div className="mt-4 inline-flex flex-wrap items-center gap-1.5 rounded-full bg-orange-50 dark:bg-orange-500/10 px-4 py-2 text-sm font-medium text-orange-800 dark:text-orange-300">
       <span>
-        {total} contact{total !== 1 ? "s" : ""}
+        {total} connection{total !== 1 ? "s" : ""}
       </span>
       <span className="text-orange-300 dark:text-orange-500/60" aria-hidden="true">
         ·
@@ -168,7 +191,22 @@ function loadStoredMap(prefix, contacts) {
   return map;
 }
 
-export default function Network() {
+function loadStoredListMap(prefix, contacts) {
+  const map = {};
+  contacts.forEach((c) => {
+    const stored = localStorage.getItem(`${prefix}${c.contact_name}`);
+    if (!stored) return;
+    try {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) map[c.contact_name] = parsed;
+    } catch {
+      // ignore malformed entries from an older format
+    }
+  });
+  return map;
+}
+
+export default function Connections() {
   const { networkConnections, addContact, updateContact, deleteContact } = useData();
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -184,17 +222,24 @@ export default function Network() {
   );
   const [linkedinEditingId, setLinkedinEditingId] = useState(null);
   const [linkedinDraft, setLinkedinDraft] = useState("");
-  const [relationshipPurpose, setRelationshipPurpose] = useState(() =>
+  const [relationshipType, setRelationshipType] = useState(() =>
     loadStoredMap("relationship_", networkConnections)
   );
-  const [cadence, setCadence] = useState(() => loadStoredMap("cadence_", networkConnections));
+  const [functionalTags, setFunctionalTags] = useState(() =>
+    loadStoredListMap("functional_tags_", networkConnections)
+  );
+  const [customTags, setCustomTags] = useState(() =>
+    loadStoredListMap("custom_tags_", networkConnections)
+  );
+  const [tagMenuOpenId, setTagMenuOpenId] = useState(null);
+  const [customTagDraft, setCustomTagDraft] = useState("");
   const [coffeeChatOpenId, setCoffeeChatOpenId] = useState(null);
   const [coffeeChatMessage, setCoffeeChatMessage] = useState("");
   const [coffeeChatSentId, setCoffeeChatSentId] = useState(null);
-  const [reminderOpenId, setReminderOpenId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [relationshipFilter, setRelationshipFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [functionalFilter, setFunctionalFilter] = useState("");
 
   const closeModal = useCallback(() => setModalOpen(false), []);
 
@@ -213,14 +258,46 @@ export default function Network() {
     setCoffeeChatSentId(contactId);
   }
 
-  function updateRelationshipPurpose(contact, value) {
-    localStorage.setItem(`relationship_${contact.contact_name}`, value);
-    setRelationshipPurpose((prev) => ({ ...prev, [contact.contact_name]: value }));
+  function updateRelationshipType(contact, value) {
+    if (value) {
+      localStorage.setItem(`relationship_${contact.contact_name}`, value);
+    } else {
+      localStorage.removeItem(`relationship_${contact.contact_name}`);
+    }
+    setRelationshipType((prev) => ({ ...prev, [contact.contact_name]: value }));
   }
 
-  function updateCadence(contact, value) {
-    localStorage.setItem(`cadence_${contact.contact_name}`, value);
-    setCadence((prev) => ({ ...prev, [contact.contact_name]: value }));
+  function toggleFunctionalTag(contact, tagKey) {
+    setFunctionalTags((prev) => {
+      const current = prev[contact.contact_name] ?? [];
+      const next = current.includes(tagKey)
+        ? current.filter((k) => k !== tagKey)
+        : [...current, tagKey];
+      localStorage.setItem(`functional_tags_${contact.contact_name}`, JSON.stringify(next));
+      return { ...prev, [contact.contact_name]: next };
+    });
+  }
+
+  function addCustomTag(contact, rawText) {
+    const trimmed = rawText.trim();
+    if (!trimmed) return;
+    const tag = trimmed.startsWith("#") ? trimmed : `#${trimmed}`;
+    setCustomTags((prev) => {
+      const current = prev[contact.contact_name] ?? [];
+      if (current.some((t) => t.toLowerCase() === tag.toLowerCase())) return prev;
+      const next = [...current, tag];
+      localStorage.setItem(`custom_tags_${contact.contact_name}`, JSON.stringify(next));
+      return { ...prev, [contact.contact_name]: next };
+    });
+    setCustomTagDraft("");
+  }
+
+  function removeCustomTag(contact, tag) {
+    setCustomTags((prev) => {
+      const next = (prev[contact.contact_name] ?? []).filter((t) => t !== tag);
+      localStorage.setItem(`custom_tags_${contact.contact_name}`, JSON.stringify(next));
+      return { ...prev, [contact.contact_name]: next };
+    });
   }
 
   function handlePhotoChange(contact, e) {
@@ -267,7 +344,7 @@ export default function Network() {
       last_contacted_date: c.last_contacted_date,
       connection_source: c.connection_source,
       interaction_notes: c.interaction_notes ?? "",
-      relationship_purpose: relationshipPurpose[c.contact_name] ?? "",
+      relationship_purpose: relationshipType[c.contact_name] ?? "",
     });
     setErrors({});
     setModalOpen(true);
@@ -297,9 +374,8 @@ export default function Network() {
       setLinkedinUrls((u) => ({ ...u, [key]: trimmedLinkedin }));
     }
 
-    const trimmedRelationship = relationship_purpose.trim();
-    if (trimmedRelationship && key) {
-      updateRelationshipPurpose({ contact_name: key }, trimmedRelationship);
+    if (key) {
+      updateRelationshipType({ contact_name: key }, relationship_purpose.trim());
     }
 
     setModalOpen(false);
@@ -322,17 +398,19 @@ export default function Network() {
       c.employer_company.toLowerCase().includes(query) ||
       c.job_title.toLowerCase().includes(query);
     const matchesRelationship =
-      !relationshipFilter || relationshipPurpose[c.contact_name] === relationshipFilter;
+      !relationshipFilter || relationshipType[c.contact_name] === relationshipFilter;
     const matchesStatus =
       !statusFilter || urgency(daysSince(c.last_contacted_date)).label === statusFilter;
-    return matchesQuery && matchesRelationship && matchesStatus;
+    const matchesFunctional =
+      !functionalFilter || (functionalTags[c.contact_name] ?? []).includes(functionalFilter);
+    return matchesQuery && matchesRelationship && matchesStatus && matchesFunctional;
   });
 
   return (
     <div className="px-4 sm:px-0">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-[#F8F9FA]">Network</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-[#F8F9FA]">Connections</h1>
           <p className="text-slate-500 dark:text-neutral-400 mt-1">
             Alumni, recruiters, and Career Center contacts, with reminders so nobody goes cold.
           </p>
@@ -343,7 +421,51 @@ export default function Network() {
         </Button>
       </div>
 
-      {sorted.length > 0 && <NetworkInsights contacts={sorted} />}
+      {sorted.length > 0 && <ConnectionsInsights contacts={sorted} />}
+
+      {sorted.length > 0 && (
+        <div className="mt-5">
+          <p className="flex items-center gap-1.5 text-sm font-semibold text-slate-600 dark:text-neutral-300">
+            <InfoTooltip
+              text="Filter your circle by practical, real-world support—from recommendation letters to industry introductions."
+              label="About the circle filter"
+            />
+            Who in my circle can I turn to for...
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setFunctionalFilter("")}
+              aria-pressed={functionalFilter === ""}
+              className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+                functionalFilter === ""
+                  ? "bg-brand-orange text-white"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/10 dark:text-neutral-300 dark:hover:bg-white/15"
+              }`}
+            >
+              All
+            </button>
+            {FUNCTIONAL_TAGS.map((tag) => {
+              const active = functionalFilter === tag.key;
+              return (
+                <button
+                  key={tag.key}
+                  type="button"
+                  onClick={() => setFunctionalFilter((prev) => (prev === tag.key ? "" : tag.key))}
+                  aria-pressed={active}
+                  className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    active
+                      ? "bg-brand-orange text-white"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/10 dark:text-neutral-300 dark:hover:bg-white/15"
+                  }`}
+                >
+                  {tag.emoji} {tag.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {sorted.length > 0 && (
         <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -368,7 +490,7 @@ export default function Network() {
             className="rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#232428] px-3 py-2 text-sm text-slate-700 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-orange-500"
           >
             <option value="">All relationship types</option>
-            {RELATIONSHIP_PURPOSES.map((p) => (
+            {RELATIONSHIP_TYPES.map((p) => (
               <option key={p} value={p}>
                 {p}
               </option>
@@ -418,6 +540,10 @@ export default function Network() {
             const days = daysSince(c.last_contacted_date);
             const status = urgency(days);
             const contactLinkedin = linkedinUrls[c.contact_name] || DEFAULT_LINKEDIN_URLS[c.contact_name];
+            const contactRelationship = relationshipType[c.contact_name];
+            const contactFunctionalTags = functionalTags[c.contact_name] ?? [];
+            const contactCustomTags = customTags[c.contact_name] ?? [];
+            const tagMenuOpen = tagMenuOpenId === c.id;
             return (
               <Card key={c.id} className="p-3 hover:shadow-md hover:-translate-y-0.5 transition-all">
                 <div className="flex items-start justify-between gap-2">
@@ -504,14 +630,96 @@ export default function Network() {
                 <div className="mt-3 flex flex-wrap items-center gap-1.5">
                   <Badge tone="slate">{c.connection_source}</Badge>
                   <Badge tone={status.tone}>{status.label}</Badge>
-                  {relationshipPurpose[c.contact_name] && (
-                    <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        RELATIONSHIP_BADGE_CLASSES[relationshipPurpose[c.contact_name]]
-                      }`}
+                  {contactRelationship && (
+                    <RemovablePill
+                      label={contactRelationship}
+                      onRemove={() => updateRelationshipType(c, "")}
+                    />
+                  )}
+                  {contactFunctionalTags.map((key) => {
+                    const tag = FUNCTIONAL_TAGS.find((t) => t.key === key);
+                    if (!tag) return null;
+                    return (
+                      <RemovablePill
+                        key={key}
+                        label={`${tag.emoji} ${tag.label}`}
+                        onRemove={() => toggleFunctionalTag(c, key)}
+                      />
+                    );
+                  })}
+                  {contactCustomTags.map((tag) => (
+                    <RemovablePill key={tag} label={tag} onRemove={() => removeCustomTag(c, tag)} />
+                  ))}
+                </div>
+
+                <div className="mt-2">
+                  {tagMenuOpen ? (
+                    <div className="space-y-2 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-2.5">
+                      <div className="flex flex-wrap gap-1.5">
+                        {FUNCTIONAL_TAGS.map((tag) => {
+                          const active = contactFunctionalTags.includes(tag.key);
+                          return (
+                            <button
+                              key={tag.key}
+                              type="button"
+                              onClick={() => toggleFunctionalTag(c, tag.key)}
+                              aria-pressed={active}
+                              className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+                                active
+                                  ? "bg-brand-orange text-white"
+                                  : "bg-white text-slate-600 ring-1 ring-inset ring-slate-200 hover:bg-slate-100 dark:bg-[#232428] dark:text-neutral-300 dark:ring-white/10 dark:hover:bg-white/10"
+                              }`}
+                            >
+                              {tag.emoji} {tag.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          autoFocus
+                          value={customTagDraft}
+                          onChange={(e) => setCustomTagDraft(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              addCustomTag(c, customTagDraft);
+                            }
+                          }}
+                          placeholder="#CustomTag"
+                          aria-label={`Add a custom tag for ${c.contact_name}`}
+                          className="flex-1 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#232428] px-2 py-1 text-xs text-slate-900 dark:text-[#F8F9FA] placeholder:text-slate-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => addCustomTag(c, customTagDraft)}
+                          className="flex-shrink-0 text-xs font-semibold text-brand-orange hover:text-orange-700 dark:hover:text-orange-300"
+                        >
+                          Add
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setTagMenuOpenId(null)}
+                          aria-label="Done adding tags"
+                          className="flex-shrink-0 text-slate-400 hover:text-slate-600 dark:text-neutral-500 dark:hover:text-neutral-300"
+                        >
+                          <X className="h-3.5 w-3.5" aria-hidden="true" />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTagMenuOpenId(c.id);
+                        setCustomTagDraft("");
+                      }}
+                      className="inline-flex items-center gap-1 text-xs font-medium text-brand-orange hover:text-orange-700 dark:hover:text-orange-300"
                     >
-                      {relationshipPurpose[c.contact_name]}
-                    </span>
+                      <Plus className="h-3 w-3" aria-hidden="true" />
+                      Add Tag
+                    </button>
                   )}
                 </div>
 
@@ -531,7 +739,7 @@ export default function Network() {
                       }
                       className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-90"
                       style={{
-                        background: "#EA580C",
+                        background: "#F36F21",
                         color: "#ffffff",
                         border: "none",
                         padding: "8px 14px",
@@ -652,12 +860,12 @@ export default function Network() {
             </SelectField>
           </div>
           <SelectField
-            label="Relationship"
+            label="Relationship type"
             value={formValues.relationship_purpose}
             onChange={(e) => updateField("relationship_purpose", e.target.value)}
           >
-            <option value="">Select relationship</option>
-            {RELATIONSHIP_PURPOSES.map((p) => (
+            <option value="">Select relationship type</option>
+            {RELATIONSHIP_TYPES.map((p) => (
               <option key={p} value={p}>
                 {p}
               </option>
@@ -700,7 +908,7 @@ export default function Network() {
         onCancel={() => setDeleteTarget(null)}
         onConfirm={handleDelete}
         title="Delete contact?"
-        description={`This removes ${deleteTarget?.contact_name ?? "this contact"} from your network. This can't be undone.`}
+        description={`This removes ${deleteTarget?.contact_name ?? "this contact"} from your connections. This can't be undone.`}
       />
     </div>
   );

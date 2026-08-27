@@ -61,7 +61,7 @@ export default function CareerCenter() {
 
         <div
           className={`rounded-2xl bg-white dark:bg-[#232428] p-6 transition-colors border-2 ${
-            selected === "dropin" ? "border-[#EA580C] dark:border-orange-400" : "border-[#EA580C]/40 dark:border-orange-400/30"
+            selected === "dropin" ? "border-[#F36F21] dark:border-orange-400" : "border-[#F36F21]/40 dark:border-orange-400/30"
           }`}
         >
           <button type="button" onClick={() => setSelected("dropin")} className="w-full text-left">
@@ -72,14 +72,14 @@ export default function CareerCenter() {
           <div className="mt-3 flex flex-col gap-1.5">
             <a
               href="mailto:careers@lclark.edu"
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-[#EA580C] hover:underline"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-[#F36F21] hover:underline"
             >
               <Mail className="h-4 w-4" aria-hidden="true" />
               careers@lclark.edu
             </a>
             <a
               href="tel:+15037687114"
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-[#EA580C] hover:underline"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-[#F36F21] hover:underline"
             >
               <Phone className="h-4 w-4" aria-hidden="true" />
               503-768-7114
@@ -121,7 +121,7 @@ export default function CareerCenter() {
             href="https://college.lclark.edu/student_life/career_development/news_and_events/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs font-semibold text-[#EA580C] hover:underline"
+            className="text-xs font-semibold text-[#F36F21] hover:underline"
           >
             View all on L&amp;C site
           </a>
@@ -178,7 +178,7 @@ export default function CareerCenter() {
                   <button
                     type="button"
                     onClick={() => window.open(event.link, "_blank", "noopener,noreferrer")}
-                    className="bg-[#EA580C] dark:bg-orange-600 text-white hover:bg-orange-700 dark:hover:bg-orange-500 transition-colors"
+                    className="bg-[#F36F21] dark:bg-orange-600 text-white hover:bg-orange-700 dark:hover:bg-orange-500 transition-colors"
                     style={{
                       marginTop: "12px",
                       border: "none",

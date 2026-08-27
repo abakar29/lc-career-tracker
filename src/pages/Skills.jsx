@@ -9,7 +9,8 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 import { useData } from "../context/DataContext";
-import { careerPaths, getMissingSkills } from "../data/careerPaths";
+import { careerPaths, careerPathGroups, getMissingSkills } from "../data/careerPaths";
+import { NACE_COMPETENCIES } from "../data/naceCompetencies";
 import {
   Card,
   CardHeader,
@@ -30,7 +31,7 @@ const PROFICIENCY_DOT = {
 };
 const PROFICIENCY_WEIGHT = { Advanced: 1, Intermediate: 0.65, Beginner: 0.35 };
 
-const ORANGE = "#E87722";
+const ORANGE = "#F36F21";
 
 const PROFICIENCY_OPTIONS = [
   { level: "Beginner", description: "Just started learning" },
@@ -100,6 +101,8 @@ function emptyForm() {
     other_experience_description: "",
     resume_description: "",
     date_added: todayISO(),
+    course_name: "",
+    nace_competencies: [],
   };
 }
 
@@ -170,6 +173,62 @@ function SkillSourceBars({ data }) {
   );
 }
 
+function FoundationalCompetencies({ skills, addSkill }) {
+  function isAdded(competency) {
+    return skills.some((s) => s.skill_name.trim().toLowerCase() === competency.label.toLowerCase());
+  }
+
+  function handleAdd(competency) {
+    addSkill({
+      skill_name: competency.label,
+      proficiency_level: "Beginner",
+      context: "Coursework",
+      resume_description: `Developing ${competency.label.toLowerCase()} through coursework and campus activities at Lewis & Clark`,
+      date_added: todayISO(),
+      nace_competencies: [competency.key],
+    });
+  }
+
+  return (
+    <Card className="mt-6">
+      <CardHeader
+        title="Foundational Competencies"
+        subtitle="The 8 NACE Career Readiness Competencies employers look for"
+      />
+      <div className="grid grid-cols-2 gap-2.5 px-5 pb-5 pt-1.5 sm:grid-cols-4">
+        {NACE_COMPETENCIES.map((c) => {
+          const added = isAdded(c);
+          return (
+            <div
+              key={c.key}
+              title={c.description}
+              className="flex flex-col items-start justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-white/10 dark:bg-white/5"
+            >
+              <p className="text-xs font-semibold text-slate-800 dark:text-neutral-200">{c.label}</p>
+              {added ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-semibold text-orange-800 dark:bg-orange-500/15 dark:text-orange-200">
+                  <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
+                  Added
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleAdd(c)}
+                  aria-label={`Add ${c.label} to my skills`}
+                  className="inline-flex items-center gap-1 rounded-full bg-brand-orange px-2 py-1 text-[11px] font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
+                >
+                  <Plus className="h-3 w-3" aria-hidden="true" />
+                  Add to My Skills
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </Card>
+  );
+}
+
 function SkillCard({ skill, onEdit, onDelete }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -198,6 +257,7 @@ function SkillCard({ skill, onEdit, onDelete }) {
           </div>
           <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
             {skill.proficiency_level} · {skill.context}
+            {skill.course_name && ` · ${skill.course_name}`}
           </p>
         </div>
 
@@ -235,9 +295,24 @@ function SkillCard({ skill, onEdit, onDelete }) {
         </div>
       </div>
 
-      <span className="mt-2 inline-flex items-center rounded-full bg-gray-100 dark:bg-white/10 px-2 py-0.5 text-[11px] font-medium text-gray-600 dark:text-neutral-300">
-        {skill.context}
-      </span>
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        <span className="inline-flex items-center rounded-full bg-gray-100 dark:bg-white/10 px-2 py-0.5 text-[11px] font-medium text-gray-600 dark:text-neutral-300">
+          {skill.context}
+        </span>
+        {(skill.nace_competencies ?? []).map((key) => {
+          const comp = NACE_COMPETENCIES.find((c) => c.key === key);
+          if (!comp) return null;
+          return (
+            <span
+              key={key}
+              title={comp.description}
+              className="inline-flex items-center rounded-full bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 text-[11px] font-medium text-orange-700 dark:text-orange-300"
+            >
+              {comp.label}
+            </span>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -251,15 +326,20 @@ export default function Skills() {
   const [formValues, setFormValues] = useState(emptyForm());
   const [errors, setErrors] = useState({});
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const [addedToPlan, setAddedToPlan] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All Categories");
   const [levelFilter, setLevelFilter] = useState("All Levels");
 
   const closeModal = useCallback(() => setModalOpen(false), []);
 
-  function handleAddToLearningPlan(name) {
-    setAddedToPlan((prev) => (prev.includes(name) ? prev : [...prev, name]));
+  function handleAddToMySkills(name) {
+    addSkill({
+      skill_name: name,
+      proficiency_level: "Beginner",
+      context: "Coursework",
+      resume_description: `Developing ${name} skills at Lewis & Clark`,
+      date_added: todayISO(),
+    });
   }
 
   const selectedPathId = profile.targetCareerPath ?? careerPaths[0].id;
@@ -286,6 +366,8 @@ export default function Skills() {
       other_experience_description: skill.other_experience_description ?? "",
       resume_description: skill.resume_description ?? "",
       date_added: skill.date_added ?? todayISO(),
+      course_name: skill.course_name ?? "",
+      nace_competencies: skill.nace_competencies ?? [],
     });
     setErrors({});
     setModalOpen(true);
@@ -293,6 +375,23 @@ export default function Skills() {
 
   function updateField(field, value) {
     setFormValues((v) => ({ ...v, [field]: value }));
+  }
+
+  function updateContext(value) {
+    setFormValues((v) =>
+      value === "Coursework"
+        ? { ...v, context: value }
+        : { ...v, context: value, course_name: "", nace_competencies: [] }
+    );
+  }
+
+  function toggleNaceCompetency(key) {
+    setFormValues((v) => ({
+      ...v,
+      nace_competencies: v.nace_competencies.includes(key)
+        ? v.nace_competencies.filter((k) => k !== key)
+        : [...v.nace_competencies, key],
+    }));
   }
 
   function handleSubmit(e) {
@@ -351,6 +450,8 @@ export default function Skills() {
         <StatPill label={`Profile Strength: ${profileStrength}%`} />
       </div>
 
+      <FoundationalCompetencies skills={skills} addSkill={addSkill} />
+
       <div className="mt-6 grid lg:grid-cols-2 gap-6">
         <Card className="hover:shadow-md transition-all">
           <CardHeader
@@ -378,10 +479,16 @@ export default function Skills() {
               value={selectedPathId}
               onChange={(e) => setTargetCareerPath(e.target.value)}
             >
-              {careerPaths.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.label}
-                </option>
+              {careerPathGroups.map((group) => (
+                <optgroup key={group} label={group}>
+                  {careerPaths
+                    .filter((p) => p.group === group)
+                    .map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.label}
+                      </option>
+                    ))}
+                </optgroup>
               ))}
             </SelectField>
 
@@ -405,25 +512,15 @@ export default function Skills() {
                           Required for {selectedPath.label} roles
                         </p>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {addedToPlan.includes(name) && (
-                          <span className="text-xs font-medium text-orange-600 dark:text-orange-300">
-                            Added to your learning plan
-                          </span>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => handleAddToLearningPlan(name)}
-                          aria-label={`Add ${name} to learning plan`}
-                          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 ${
-                            addedToPlan.includes(name)
-                              ? "bg-orange-200 text-orange-800 hover:bg-orange-300 focus-visible:ring-orange-400 dark:bg-orange-500/25 dark:text-orange-200 dark:hover:bg-orange-500/35"
-                              : "bg-orange-100 text-orange-700 hover:bg-orange-200 focus-visible:ring-orange-400 dark:bg-white/10 dark:text-orange-300 dark:hover:bg-white/15"
-                          }`}
-                        >
-                          Add to Learning Plan
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleAddToMySkills(name)}
+                        aria-label={`Add ${name} to my skills`}
+                        className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-brand-orange px-2.5 py-1 text-xs font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
+                      >
+                        <Plus className="h-3 w-3" aria-hidden="true" />
+                        Add to My Skills
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -578,7 +675,7 @@ export default function Skills() {
                   <button
                     key={c}
                     type="button"
-                    onClick={() => updateField("context", c)}
+                    onClick={() => updateContext(c)}
                     className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
                       isSelected
                         ? "border-orange-500 bg-brand-orange text-white"
@@ -592,6 +689,41 @@ export default function Skills() {
             </div>
             {errors.context && <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">{errors.context}</p>}
           </div>
+
+          {formValues.context === "Coursework" && (
+            <div className="space-y-3 rounded-xl border border-dashed border-orange-200 dark:border-orange-500/30 bg-orange-50/50 dark:bg-orange-500/5 p-3.5">
+              <TextField
+                label="Course / class name"
+                placeholder="e.g. ECON 101, CS 301 Capstone"
+                value={formValues.course_name}
+                onChange={(e) => updateField("course_name", e.target.value)}
+              />
+              <div>
+                <p className="mb-1.5 text-sm font-medium text-slate-700 dark:text-neutral-300">
+                  Which NACE competencies did this course practice?
+                </p>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {NACE_COMPETENCIES.map((c) => {
+                    const checked = formValues.nace_competencies.includes(c.key);
+                    return (
+                      <label
+                        key={c.key}
+                        className="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-[#1A1919] px-2.5 py-2 text-sm"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleNaceCompetency(c.key)}
+                          className="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-slate-300 dark:border-white/20 text-brand-orange focus:ring-2 focus:ring-orange-500"
+                        />
+                        <span className="text-slate-700 dark:text-neutral-300">{c.label}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
 
           <SelectField
             label="Which experience?"
