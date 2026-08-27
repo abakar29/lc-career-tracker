@@ -1,6 +1,134 @@
 import { useState } from "react";
-import { ExternalLink } from "lucide-react";
-import { CardHeader, Button, TextField } from "../components/ui";
+import { ExternalLink, Plus, X } from "lucide-react";
+import { CardHeader, Button, TextField, SelectField, RemovablePill } from "../components/ui";
+import { useData } from "../context/DataContext";
+import { LC_MAJORS, LC_MINORS, formatAcademicSummary } from "../data/academics";
+
+function AcademicsFields({ profile, updateAcademics }) {
+  const primaryMajor = profile.primaryMajor ?? "";
+  const secondaryMajor = profile.secondaryMajor ?? null;
+  const minors = profile.minors ?? [];
+  const [addingSecondMajor, setAddingSecondMajor] = useState(false);
+
+  function setPrimaryMajor(value) {
+    const patch = { primaryMajor: value };
+    if (secondaryMajor === value) patch.secondaryMajor = null;
+    updateAcademics(patch);
+  }
+
+  function removeSecondMajor() {
+    updateAcademics({ secondaryMajor: null });
+    setAddingSecondMajor(false);
+  }
+
+  function addMinor(name) {
+    if (!name || minors.includes(name)) return;
+    updateAcademics({ minors: [...minors, name] });
+  }
+
+  function removeMinor(name) {
+    updateAcademics({ minors: minors.filter((m) => m !== name) });
+  }
+
+  const secondMajorOptions = LC_MAJORS.filter((m) => m !== primaryMajor);
+  const availableMinors = LC_MINORS.filter((m) => !minors.includes(m));
+  const showSecondMajorField = addingSecondMajor || !!secondaryMajor;
+
+  return (
+    <div className="space-y-4">
+      <SelectField
+        label="Primary Major"
+        required
+        value={primaryMajor}
+        onChange={(e) => setPrimaryMajor(e.target.value)}
+      >
+        {!primaryMajor && (
+          <option value="" disabled>
+            Select your major
+          </option>
+        )}
+        {LC_MAJORS.map((m) => (
+          <option key={m} value={m}>
+            {m}
+          </option>
+        ))}
+      </SelectField>
+
+      {showSecondMajorField ? (
+        <div>
+          <div className="mb-1 flex items-center justify-between">
+            <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+              Second Major
+            </label>
+            <button
+              type="button"
+              onClick={removeSecondMajor}
+              className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 dark:text-neutral-400 hover:text-red-600 dark:hover:text-red-400"
+            >
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
+              Remove second major
+            </button>
+          </div>
+          <select
+            value={secondaryMajor ?? ""}
+            onChange={(e) => updateAcademics({ secondaryMajor: e.target.value || null })}
+            aria-label="Second major"
+            className="w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#1A1919] px-3 py-2 text-sm text-slate-900 dark:text-[#F8F9FA] focus:outline-none focus:ring-2 focus:ring-orange-500"
+          >
+            <option value="">Select second major</option>
+            {secondMajorOptions.map((m) => (
+              <option key={m} value={m}>
+                {m}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setAddingSecondMajor(true)}
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-orange hover:text-orange-700 dark:hover:text-orange-300"
+        >
+          <Plus className="h-4 w-4" aria-hidden="true" />
+          Add Second Major
+        </button>
+      )}
+
+      <div>
+        <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-neutral-300">
+          Minors
+        </label>
+        {minors.length > 0 && (
+          <div className="mb-2 flex flex-wrap gap-2">
+            {minors.map((m) => (
+              <RemovablePill key={m} label={m} onRemove={() => removeMinor(m)} />
+            ))}
+          </div>
+        )}
+        <select
+          value=""
+          onChange={(e) => addMinor(e.target.value)}
+          aria-label="Add a minor"
+          disabled={availableMinors.length === 0}
+          className="w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#1A1919] px-3 py-2 text-sm text-slate-500 dark:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
+        >
+          <option value="">
+            {availableMinors.length === 0 ? "All minors added" : "+ Add a minor..."}
+          </option>
+          {availableMinors.map((m) => (
+            <option key={m} value={m}>
+              {m}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <p className="rounded-lg bg-orange-50 dark:bg-orange-500/10 px-3 py-2 text-sm font-medium text-orange-800 dark:text-orange-300">
+        {formatAcademicSummary({ primaryMajor, secondaryMajor, minors })}
+      </p>
+    </div>
+  );
+}
 
 function ToggleRow({ label, description, checked, onChange }) {
   return (
@@ -32,10 +160,8 @@ function ToggleRow({ label, description, checked, onChange }) {
 }
 
 export default function Settings() {
+  const { profile, updateAcademics } = useData();
   const [name, setName] = useState(() => localStorage.getItem('abuve:profile:name') || 'Abu Bakar');
-  const [major, setMajor] = useState(() => localStorage.getItem('abuve:profile:major') || 'Economics & Entrepreneurship');
-  const [secondMajor, setSecondMajor] = useState(() => localStorage.getItem('abuve:profile:secondmajor') || '');
-  const [minor, setMinor] = useState(() => localStorage.getItem('abuve:profile:minor') || '');
   const [classYear, setClassYear] = useState(() => localStorage.getItem('abuve:profile:classyear') || 'Class of 2029');
   const [saved, setSaved] = useState(false);
 
@@ -46,9 +172,6 @@ export default function Settings() {
   function handleSave(e) {
     e.preventDefault();
     localStorage.setItem("abuve:profile:name", name);
-    localStorage.setItem("abuve:profile:major", major);
-    localStorage.setItem("abuve:profile:secondmajor", secondMajor);
-    localStorage.setItem("abuve:profile:minor", minor);
     localStorage.setItem("abuve:profile:classyear", classYear);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -64,22 +187,7 @@ export default function Settings() {
           <CardHeader title="Profile Settings" />
           <form onSubmit={handleSave} className="px-5 pb-5 pt-3 space-y-4">
             <TextField label="Name" value={name} onChange={(e) => setName(e.target.value)} />
-            <TextField label="Major" value={major} onChange={(e) => setMajor(e.target.value)} />
-            <TextField
-              label="Second Major"
-              placeholder="e.g. Computer Science (optional)"
-              value={secondMajor}
-              onChange={(e) => setSecondMajor(e.target.value)}
-            />
-            <div>
-              <TextField
-                label="Minor"
-                placeholder="e.g. French, Mathematics (optional)"
-                value={minor}
-                onChange={(e) => setMinor(e.target.value)}
-              />
-              <p className="mt-1 text-xs text-slate-500">Separate multiple minors with a comma</p>
-            </div>
+            <AcademicsFields profile={profile} updateAcademics={updateAcademics} />
             <TextField
               label="Class Year"
               value={classYear}
@@ -98,7 +206,7 @@ export default function Settings() {
           <CardHeader title="Notification Preferences" />
           <div className="px-5 pb-4 pt-1 divide-y divide-slate-100 dark:divide-white/10">
             <ToggleRow
-              label="Network follow-up reminders"
+              label="Connection follow-up reminders"
               description="Get notified when a contact is overdue for a follow-up"
               checked={followUpReminders}
               onChange={setFollowUpReminders}

@@ -19,14 +19,26 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { supabase } from "../supabaseClient";
 import { useTheme } from "../context/ThemeContext";
+import { useData } from "../context/DataContext";
+import { formatAcademicSummary } from "../data/academics";
+import ErrorBoundary from "./ErrorBoundary";
 
 const GUEST_KEY = "abuve:guest";
+const SHOW_FACULTY_VIEW = false; // TODO: re-enable once faculty view is ready
+
+function initials(name) {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join("");
+}
 
 const NAV_ITEMS = [
   { to: "/", label: "Dashboard", mobileLabel: "Home", icon: LayoutDashboard, end: true },
-  { to: "/timeline", label: "Timeline", icon: Clock },
-  { to: "/experience", label: "Experience", icon: Briefcase },
-  { to: "/network", label: "Network", icon: Users },
+  { to: "/timeline", label: "Experience", icon: Clock },
+  { to: "/connections", label: "Connections", icon: Users },
   { to: "/skills", label: "Skills", icon: Sparkles },
   { to: "/resume", label: "Resume", icon: FileText },
   { to: "/career-center", label: "Career Center", mobileLabel: "Career", icon: Building2 },
@@ -41,9 +53,9 @@ const ABOUT_SECTIONS = [
   },
   {
     icon: Users,
-    title: "Build Your Network",
+    title: "Build Your Connections",
     description:
-      "Keep track of mentors, alumni and recruiters with smart follow-up reminders so no connection goes cold",
+      "Keep track of faculty, alumni and industry contacts with smart follow-up reminders so no connection goes cold",
   },
   {
     icon: Target,
@@ -108,12 +120,17 @@ export default function Layout() {
   const location = useLocation();
   const reduceMotion = useReducedMotion();
   const navigate = useNavigate();
+  const { profile } = useData();
+  const academicSummary = formatAcademicSummary(profile);
   const [profileOpen, setProfileOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [photoUrl, setPhotoUrl] = useState(null);
   const [classYear, setClassYear] = useState(
     () => localStorage.getItem("abuve:profile:classyear") || "2029"
+  );
+  const [profileName, setProfileName] = useState(
+    () => localStorage.getItem("abuve:profile:name") || "Abu Bakar"
   );
   const profileRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -125,7 +142,10 @@ export default function Layout() {
   }, []);
 
   useEffect(() => {
-    const handler = () => setClassYear(localStorage.getItem('abuve:profile:classyear') || '2029');
+    const handler = () => {
+      setClassYear(localStorage.getItem('abuve:profile:classyear') || '2029');
+      setProfileName(localStorage.getItem('abuve:profile:name') || 'Abu Bakar');
+    };
     window.addEventListener('storage', handler);
     return () => window.removeEventListener('storage', handler);
   }, []);
@@ -135,8 +155,6 @@ export default function Layout() {
     const saved = localStorage.getItem(`profile_photo_${userEmail}`);
     setPhotoUrl(saved || null);
   }, [userEmail]);
-
-  const userInitial = userEmail ? userEmail[0].toUpperCase() : "";
 
   const handleSignOut = async () => {
     try {
@@ -205,8 +223,13 @@ export default function Layout() {
           {profileOpen && (
             <div className="absolute bottom-full left-3 right-3 mb-2 rounded-lg bg-neutral-900 border border-white/10 shadow-lg overflow-hidden">
               <div className="px-4 py-3">
-                <p className="text-sm font-medium text-white truncate">{userEmail}</p>
-                <p className="text-xs text-neutral-400">Class of {classYear}</p>
+                <p className="text-sm font-semibold text-white truncate">{profileName}</p>
+                <p className="text-xs text-brand-orange mt-0.5 truncate">
+                  {academicSummary ? `${academicSummary} | Class of ${classYear}` : `Class of ${classYear}`}
+                </p>
+                {userEmail && (
+                  <p className="text-[11px] text-neutral-500 truncate mt-0.5">{userEmail}</p>
+                )}
               </div>
               <div className="border-t border-white/10" />
               <div className="py-1">
@@ -221,18 +244,20 @@ export default function Layout() {
                   <Settings className="h-4 w-4" />
                   Settings
                 </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setProfileOpen(false);
-                    navigate("/admin");
-                  }}
-                  className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-neutral-200 hover:bg-white/10 hover:text-white transition-colors"
-                >
-                  <Shield className="h-4 w-4" />
-                  Faculty View
-                  <span className="ml-auto text-xs text-neutral-500">Career Center</span>
-                </button>
+                {SHOW_FACULTY_VIEW && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setProfileOpen(false);
+                      navigate("/admin");
+                    }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-neutral-200 hover:bg-white/10 hover:text-white transition-colors"
+                  >
+                    <Shield className="h-4 w-4" />
+                    Faculty View
+                    <span className="ml-auto text-xs text-neutral-500">Career Center</span>
+                  </button>
+                )}
               </div>
               <div className="border-t border-white/10" />
               <div className="py-1">
@@ -296,12 +321,12 @@ export default function Layout() {
               {photoUrl ? (
                 <img
                   src={photoUrl}
-                  alt=""
+                  alt="Student Profile"
                   className="h-9 w-9 rounded-full object-cover"
                 />
               ) : (
-                <div className="h-9 w-9 rounded-full bg-orange-700 flex items-center justify-center text-sm font-semibold text-white">
-                  {userInitial}
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-orange text-sm font-semibold text-white">
+                  {initials(profileName)}
                 </div>
               )}
 
@@ -310,8 +335,8 @@ export default function Layout() {
               </div>
             </button>
             <div className="min-w-0 text-left">
-              <p className="text-sm font-medium text-white truncate">{userEmail}</p>
-              <p className="text-xs text-neutral-400">Class of 2029</p>
+              <p className="text-sm font-medium text-white truncate">{profileName}</p>
+              <p className="text-xs text-neutral-400 truncate">Class of {classYear}</p>
             </div>
           </div>
         </div>
@@ -335,7 +360,9 @@ export default function Layout() {
               exit={reduceMotion ? undefined : { opacity: 0, y: -8 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
             >
-              <Outlet />
+              <ErrorBoundary key={location.pathname}>
+                <Outlet />
+              </ErrorBoundary>
             </motion.div>
           </AnimatePresence>
         </div>
@@ -405,7 +432,7 @@ export default function Layout() {
                 type="button"
                 onClick={() => setAboutOpen(false)}
                 className="rounded-lg px-5 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: "#EA580C" }}
+                style={{ backgroundColor: "#F36F21" }}
               >
                 Close
               </button>

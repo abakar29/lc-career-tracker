@@ -1,0 +1,22 @@
+{
+  "source": "https://college.lclark.edu/student_life/career_development/news_and_events/",
+  "scrapedAt": "2026-08-27T05:10:42.291Z",
+  "events": [
+    {
+      "title": "Resume Roundup",
+      "date": "August 26, 2026 · All Day",
+      "dateISO": "2026-08-26T07:00:00.000Z",
+      "description": "Get your resume reviewed Fast! Send Career Center your resume, enter a Raffle!SEND RESUME HERE",
+      "image": "https://college.lclark.edu/live/image/gid/484/width/144/height/144/crop/1/src_region/0,0,2000,2000/114273_Livewhale_Handshake.rev.1787773759.png",
+      "link": "https://college.lclark.edu/calendars/events/event/405028-resume-roundup"
+    },
+    {
+      "title": "Get Hired: Finding Your On-Campus Job",
+      "date": "September 3, 2026 · 3:30pm",
+      "dateISO": "2026-09-03T07:00:00.000Z",
+      "description": "Join us for a practical, interactive session on finding and landing an on-campus job.",
+      "image": "https://college.lclark.edu/live/image/gid/40/width/144/height/144/crop/1/src_region/0,0,500,500/114055_Student_Employment_Square_Logo.rev.1785903424.png",
+      "link": "https://college.lclark.edu/live/events/402447-get-hired-finding-your-on-campus-job"
+    }
+  ]
+}

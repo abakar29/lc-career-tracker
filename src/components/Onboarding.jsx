@@ -17,7 +17,7 @@ export default function Onboarding({ open, onDismiss }) {
         <p className="text-sm text-slate-600 dark:text-neutral-400">
           Right now, your job search is scattered across Handshake, spreadsheets,
           LinkedIn messages, and sticky notes, with no single place connecting what
-          you&apos;ve <strong className="dark:text-neutral-200">done</strong> (experience), <strong className="dark:text-neutral-200">who you know</strong> (network),
+          you&apos;ve <strong className="dark:text-neutral-200">done</strong> (experience), <strong className="dark:text-neutral-200">who you know</strong> (connections),
           and <strong className="dark:text-neutral-200">what you can do</strong> (skills) into a clear picture of how ready you
           are to apply.
         </p>

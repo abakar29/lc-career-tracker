@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { X } from "lucide-react";
+import { X, Info } from "lucide-react";
 
 export function Card({ className = "", children }) {
   return (
@@ -72,6 +72,70 @@ export function ToggleSwitch({ label, description, checked, onChange, disabled =
         />
       </span>
     </button>
+  );
+}
+
+export function RemovablePill({ label, onRemove, removeLabel }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-50 dark:bg-orange-500/10 pl-3 pr-1.5 py-1 text-xs font-medium text-orange-800 dark:text-orange-300 ring-1 ring-inset ring-orange-200 dark:ring-orange-500/30">
+      {label}
+      <button
+        type="button"
+        onClick={onRemove}
+        aria-label={removeLabel ?? `Remove ${label}`}
+        className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-orange-600 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+      >
+        <X className="h-3 w-3" aria-hidden="true" />
+      </button>
+    </span>
+  );
+}
+
+const TOOLTIP_VERTICAL = {
+  top: "bottom-full mb-2",
+  bottom: "top-full mt-2",
+};
+
+const TOOLTIP_ALIGN = {
+  center: "left-1/2 -translate-x-1/2",
+  end: "right-0",
+};
+
+export function InfoTooltip({
+  text,
+  label = "More info",
+  className = "",
+  placement = "top",
+  align = "center",
+}) {
+  const [open, setOpen] = useState(false);
+  const tooltipId = useId();
+
+  return (
+    <span className={`relative inline-flex ${className}`}>
+      <button
+        type="button"
+        aria-label={label}
+        aria-describedby={open ? tooltipId : undefined}
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setOpen(false)}
+        onClick={(e) => e.stopPropagation()}
+        className="flex h-4 w-4 items-center justify-center rounded-full text-slate-400 hover:text-brand-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 dark:text-neutral-500 dark:hover:text-orange-300"
+      >
+        <Info className="h-3.5 w-3.5" aria-hidden="true" />
+      </button>
+      {open && (
+        <span
+          id={tooltipId}
+          role="tooltip"
+          className={`pointer-events-none absolute z-20 w-56 rounded-lg bg-brand-black px-3 py-2 text-xs font-medium normal-case leading-snug text-white shadow-lg dark:bg-[#2B2C31] dark:border dark:border-white/10 ${TOOLTIP_VERTICAL[placement]} ${TOOLTIP_ALIGN[align]}`}
+        >
+          {text}
+        </span>
+      )}
+    </span>
   );
 }
 

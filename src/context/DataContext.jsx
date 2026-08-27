@@ -8,6 +8,7 @@ import {
   applications as seedApplications,
 } from "../data/mockData";
 import { loadData, saveData, loadOnboarded, saveOnboarded, makeId } from "../lib/store";
+import { LC_MAJORS } from "../data/academics";
 
 function withIds(list) {
   return list.map((item) => (item.id ? item : { ...item, id: makeId() }));
@@ -24,10 +25,32 @@ function seed() {
   };
 }
 
+// Backfills fields on data persisted before they existed (or corrupted by a
+// prior crash mid-write), so stale localStorage data can never crash the app.
+function normalizeData(rawData) {
+  const data = rawData ?? {};
+  const profile = data.profile ?? {};
+  const legacyMajor = profile.major;
+  return {
+    ...data,
+    profile: {
+      ...profile,
+      primaryMajor: profile.primaryMajor ?? (LC_MAJORS.includes(legacyMajor) ? legacyMajor : ""),
+      secondaryMajor: profile.secondaryMajor ?? null,
+      minors: Array.isArray(profile.minors) ? profile.minors : [],
+    },
+    experiences: Array.isArray(data.experiences) ? data.experiences : [],
+    networkConnections: Array.isArray(data.networkConnections) ? data.networkConnections : [],
+    skills: Array.isArray(data.skills) ? data.skills : [],
+    resumeVersions: Array.isArray(data.resumeVersions) ? data.resumeVersions : [],
+    applications: Array.isArray(data.applications) ? data.applications : [],
+  };
+}
+
 const DataContext = createContext(null);
 
 export function DataProvider({ children }) {
-  const [data, setData] = useState(() => loadData(seed));
+  const [data, setData] = useState(() => normalizeData(loadData(seed)));
   const [onboarded, setOnboarded] = useState(() => loadOnboarded());
 
   useEffect(() => {
@@ -41,6 +64,10 @@ export function DataProvider({ children }) {
 
   const setTargetCareerPath = useCallback((path) => {
     setData((d) => ({ ...d, profile: { ...d.profile, targetCareerPath: path } }));
+  }, []);
+
+  const updateAcademics = useCallback((patch) => {
+    setData((d) => ({ ...d, profile: { ...d.profile, ...patch } }));
   }, []);
 
   const makeCollectionActions = useCallback((key) => ({
@@ -73,6 +100,7 @@ export function DataProvider({ children }) {
       onboarded,
       completeOnboarding,
       setTargetCareerPath,
+      updateAcademics,
       addExperience: experienceActions.add,
       updateExperience: experienceActions.update,
       deleteExperience: experienceActions.remove,
@@ -83,7 +111,16 @@ export function DataProvider({ children }) {
       updateSkill: skillActions.update,
       deleteSkill: skillActions.remove,
     }),
-    [data, onboarded, completeOnboarding, setTargetCareerPath, experienceActions, contactActions, skillActions]
+    [
+      data,
+      onboarded,
+      completeOnboarding,
+      setTargetCareerPath,
+      updateAcademics,
+      experienceActions,
+      contactActions,
+      skillActions,
+    ]
   );
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
