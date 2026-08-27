@@ -4,9 +4,9 @@
 
 @theme {
   /* Lewis & Clark brand tokens */
-  --color-brand-orange: #f37737; /* Palatine Hill Orange - primary brand, nav active states */
-  --color-brand-orange-strong: #ea580c; /* Stronger orange for primary buttons / CTA states */
-  --color-brand-orange-deep: #c2410c; /* Deepest orange for pressed/emphasis states */
+  --color-brand-orange: #f36f21; /* Official L&C Palatine Hill Orange - primary brand, nav active states */
+  --color-brand-orange-strong: #f36f21; /* Stronger orange for primary buttons / CTA states */
+  --color-brand-orange-deep: #f36f21; /* Deepest orange for pressed/emphasis states */
   --color-brand-black: #231f20; /* Primary brand black / slate */
   --color-brand-gray: #5f6062; /* Secondary / neutral muted gray */
   --color-brand-surface: #f8f9fa; /* Light neutral surface */

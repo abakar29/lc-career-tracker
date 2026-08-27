@@ -122,11 +122,9 @@ function CompactStatCard({ icon: Icon, value, label, sublabel, tint = "orange", 
       className="relative flex cursor-pointer items-center gap-3 rounded-xl bg-white dark:bg-[#232428] p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
     >
       {tooltip && (
-        <InfoTooltip
-          text={tooltip}
-          label={`About ${label}`}
-          className="absolute right-3 top-3"
-        />
+        <div className="absolute bottom-3 right-3">
+          <InfoTooltip text={tooltip} label={`About ${label}`} placement="bottom" align="end" />
+        </div>
       )}
       <div className={`rounded-lg ${colors.bg} p-2.5`}>
         <Icon className={`h-5 w-5 ${colors.text}`} aria-hidden="true" />

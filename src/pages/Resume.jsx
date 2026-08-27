@@ -333,8 +333,8 @@ export default function Resume() {
                       </p>
 
                       {resumeFileName === "" ? (
-                        <label className="mt-3 flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-[#EA580C] dark:border-orange-500/30 bg-[#FEF0E6] dark:bg-orange-500/10 px-4 py-8 text-center">
-                          <UploadCloud className="h-6 w-6 text-[#EA580C] dark:text-orange-300" aria-hidden="true" />
+                        <label className="mt-3 flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-[#F36F21] dark:border-orange-500/30 bg-[#FEF0E6] dark:bg-orange-500/10 px-4 py-8 text-center">
+                          <UploadCloud className="h-6 w-6 text-[#F36F21] dark:text-orange-300" aria-hidden="true" />
                           <p className="text-sm font-medium text-slate-800 dark:text-neutral-200">
                             Drop your resume or click to browse
                           </p>
@@ -478,14 +478,14 @@ export default function Resume() {
                 className="flex flex-col rounded-2xl bg-white dark:bg-[#232428] p-6 shadow-sm transition-shadow hover:shadow-md"
               >
                 <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#FFF3E8] dark:bg-orange-500/10">
-                  <Icon className="h-5 w-5 text-[#EA580C] dark:text-orange-300" aria-hidden="true" />
+                  <Icon className="h-5 w-5 text-[#F36F21] dark:text-orange-300" aria-hidden="true" />
                 </div>
                 <h3 className="mt-4 text-sm font-bold text-[#111827] dark:text-[#F8F9FA]">{template.name}</h3>
                 <p className="mt-1 flex-1 text-sm text-[#6B7280] dark:text-neutral-400">{template.description}</p>
                 <button
                   type="button"
                   onClick={handleDownloadTemplate}
-                  className="mt-5 rounded-lg border border-[#EA580C] dark:border-orange-500/30 px-4 py-2.5 text-sm font-semibold text-[#B85A12] dark:text-orange-300 transition-colors hover:bg-[#FFF3E8] dark:hover:bg-orange-500/10"
+                  className="mt-5 rounded-lg border border-[#F36F21] dark:border-orange-500/30 px-4 py-2.5 text-sm font-semibold text-[#B85A12] dark:text-orange-300 transition-colors hover:bg-[#FFF3E8] dark:hover:bg-orange-500/10"
                 >
                   Download Template
                 </button>

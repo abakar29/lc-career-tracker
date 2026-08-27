@@ -31,7 +31,7 @@ const PROFICIENCY_DOT = {
 };
 const PROFICIENCY_WEIGHT = { Advanced: 1, Intermediate: 0.65, Beginner: 0.35 };
 
-const ORANGE = "#E87722";
+const ORANGE = "#F36F21";
 
 const PROFICIENCY_OPTIONS = [
   { level: "Beginner", description: "Just started learning" },
@@ -173,7 +173,22 @@ function SkillSourceBars({ data }) {
   );
 }
 
-function FoundationalCompetencies() {
+function FoundationalCompetencies({ skills, addSkill }) {
+  function isAdded(competency) {
+    return skills.some((s) => s.skill_name.trim().toLowerCase() === competency.label.toLowerCase());
+  }
+
+  function handleAdd(competency) {
+    addSkill({
+      skill_name: competency.label,
+      proficiency_level: "Beginner",
+      context: "Coursework",
+      resume_description: `Developing ${competency.label.toLowerCase()} through coursework and campus activities at Lewis & Clark`,
+      date_added: todayISO(),
+      nace_competencies: [competency.key],
+    });
+  }
+
   return (
     <Card className="mt-6">
       <CardHeader
@@ -181,15 +196,34 @@ function FoundationalCompetencies() {
         subtitle="The 8 NACE Career Readiness Competencies employers look for"
       />
       <div className="grid grid-cols-2 gap-2.5 px-5 pb-5 pt-1.5 sm:grid-cols-4">
-        {NACE_COMPETENCIES.map((c) => (
-          <div
-            key={c.key}
-            title={c.description}
-            className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-white/10 dark:bg-white/5"
-          >
-            <p className="text-xs font-semibold text-slate-800 dark:text-neutral-200">{c.label}</p>
-          </div>
-        ))}
+        {NACE_COMPETENCIES.map((c) => {
+          const added = isAdded(c);
+          return (
+            <div
+              key={c.key}
+              title={c.description}
+              className="flex flex-col items-start justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-white/10 dark:bg-white/5"
+            >
+              <p className="text-xs font-semibold text-slate-800 dark:text-neutral-200">{c.label}</p>
+              {added ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-semibold text-orange-800 dark:bg-orange-500/15 dark:text-orange-200">
+                  <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
+                  Added
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleAdd(c)}
+                  aria-label={`Add ${c.label} to my skills`}
+                  className="inline-flex items-center gap-1 rounded-full bg-brand-orange px-2 py-1 text-[11px] font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
+                >
+                  <Plus className="h-3 w-3" aria-hidden="true" />
+                  Add to My Skills
+                </button>
+              )}
+            </div>
+          );
+        })}
       </div>
     </Card>
   );
@@ -416,7 +450,7 @@ export default function Skills() {
         <StatPill label={`Profile Strength: ${profileStrength}%`} />
       </div>
 
-      <FoundationalCompetencies />
+      <FoundationalCompetencies skills={skills} addSkill={addSkill} />
 
       <div className="mt-6 grid lg:grid-cols-2 gap-6">
         <Card className="hover:shadow-md transition-all">

@@ -61,7 +61,23 @@ export function RemovablePill({ label, onRemove, removeLabel }) {
   );
 }
 
-export function InfoTooltip({ text, label = "More info", className = "" }) {
+const TOOLTIP_VERTICAL = {
+  top: "bottom-full mb-2",
+  bottom: "top-full mt-2",
+};
+
+const TOOLTIP_ALIGN = {
+  center: "left-1/2 -translate-x-1/2",
+  end: "right-0",
+};
+
+export function InfoTooltip({
+  text,
+  label = "More info",
+  className = "",
+  placement = "top",
+  align = "center",
+}) {
   const [open, setOpen] = useState(false);
   const tooltipId = useId();
 
@@ -84,7 +100,7 @@ export function InfoTooltip({ text, label = "More info", className = "" }) {
         <span
           id={tooltipId}
           role="tooltip"
-          className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 w-56 -translate-x-1/2 rounded-lg bg-brand-black px-3 py-2 text-xs font-medium leading-snug text-white shadow-lg dark:bg-[#2B2C31] dark:border dark:border-white/10"
+          className={`pointer-events-none absolute z-20 w-56 rounded-lg bg-brand-black px-3 py-2 text-xs font-medium leading-snug text-white shadow-lg dark:bg-[#2B2C31] dark:border dark:border-white/10 ${TOOLTIP_VERTICAL[placement]} ${TOOLTIP_ALIGN[align]}`}
         >
           {text}
         </span>

@@ -429,7 +429,7 @@ export default function Layout() {
                 type="button"
                 onClick={() => setAboutOpen(false)}
                 className="rounded-lg px-5 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: "#EA580C" }}
+                style={{ backgroundColor: "#F36F21" }}
               >
                 Close
               </button>

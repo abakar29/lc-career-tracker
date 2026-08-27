@@ -62,7 +62,7 @@ export default function CareerCenter() {
           type="button"
           onClick={() => setSelected("dropin")}
           className={`rounded-2xl bg-white dark:bg-[#232428] p-6 text-left transition-colors border-2 ${
-            selected === "dropin" ? "border-[#EA580C] dark:border-orange-400" : "border-[#EA580C]/40 dark:border-orange-400/30"
+            selected === "dropin" ? "border-[#F36F21] dark:border-orange-400" : "border-[#F36F21]/40 dark:border-orange-400/30"
           }`}
         >
           <Clock className="h-7 w-7 text-slate-900 dark:text-[#F8F9FA]" aria-hidden="true" />
@@ -117,7 +117,7 @@ export default function CareerCenter() {
                 <button
                   type="button"
                   onClick={() => toggleRsvp(event.title)}
-                  className="bg-[#EA580C] dark:bg-orange-600 text-white hover:bg-orange-700 dark:hover:bg-orange-500 transition-colors"
+                  className="bg-[#F36F21] dark:bg-orange-600 text-white hover:bg-orange-700 dark:hover:bg-orange-500 transition-colors"
                   style={{
                     marginTop: "12px",
                     border: "none",

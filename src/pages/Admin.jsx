@@ -153,7 +153,7 @@ function readinessBand(score) {
   return "Getting Started";
 }
 
-function BarRow({ label, value, color = "#EA580C" }) {
+function BarRow({ label, value, color = "#F36F21" }) {
   return (
     <div>
       <div className="flex items-center justify-between text-sm mb-1">
@@ -269,7 +269,7 @@ export default function Admin() {
           </div>
           <span
             className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white shrink-0"
-            style={{ backgroundColor: "#EA580C" }}
+            style={{ backgroundColor: "#F36F21" }}
           >
             Faculty Access Only
           </span>
@@ -378,7 +378,7 @@ export default function Admin() {
                       <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10">
                         <div
                           className="h-full rounded-full"
-                          style={{ width: `${industry.ready}%`, backgroundColor: "#EA580C" }}
+                          style={{ width: `${industry.ready}%`, backgroundColor: "#F36F21" }}
                         />
                       </div>
                       <span className="w-8 shrink-0 text-right text-xs font-medium text-slate-900 dark:text-[#F8F9FA]">
@@ -400,7 +400,7 @@ export default function Admin() {
                 <span className="flex items-center gap-1.5">
                   <span
                     className="h-2.5 w-2.5 rounded-full"
-                    style={{ backgroundColor: "#EA580C" }}
+                    style={{ backgroundColor: "#F36F21" }}
                     aria-hidden="true"
                   />
                   Ready
@@ -645,7 +645,7 @@ export default function Admin() {
 
         <div className="flex items-center justify-between">
           <Button
-            style={{ backgroundColor: "#EA580C" }}
+            style={{ backgroundColor: "#F36F21" }}
             className="text-white hover:opacity-90"
             onClick={() => setNotification("Report exported successfully")}
           >

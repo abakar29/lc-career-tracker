@@ -14,6 +14,7 @@ import {
   DateField,
   TextArea,
   RemovablePill,
+  InfoTooltip,
 } from "../components/ui";
 
 const CONNECTION_SOURCES = [
@@ -64,33 +65,28 @@ const RELATIONSHIP_TYPES = [
 
 const STATUS_OPTIONS = ["Overdue", "Follow Up Soon", "Active"];
 
-// Actionable "who can I turn to for..." functional tags. `question` is the
-// phrasing used on the quick-filter pills; `label` is the shorter phrasing
-// used on tag chips and the add-tag picker.
+// Actionable "who can I turn to for..." functional tags. `label` is used on
+// the quick-filter pills, tag chips, and the add-tag picker alike.
 const FUNCTIONAL_TAGS = [
   {
     key: "recommendation-letters",
     emoji: "📝",
-    label: "Recommendation letters",
-    question: "Who can I turn to for recommendation letters?",
+    label: "Recommendation Letters",
   },
   {
     key: "industry-intros",
     emoji: "🚪",
-    label: "Industry introductions",
-    question: "Who can I turn to for industry introductions?",
+    label: "Industry Intros",
   },
   {
     key: "career-advice",
     emoji: "💡",
-    label: "Career advice",
-    question: "Who can I turn to for career advice?",
+    label: "Career Advice & Info Interviews",
   },
   {
     key: "grad-school-insights",
     emoji: "🎓",
-    label: "Grad school insights",
-    question: "Who can I turn to for grad school insights?",
+    label: "Grad School Insights",
   },
 ];
 
@@ -429,10 +425,26 @@ export default function Connections() {
 
       {sorted.length > 0 && (
         <div className="mt-5">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
-            Who can I turn to for...
+          <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+            <InfoTooltip
+              text="Filter your circle by practical, real-world support—from recommendation letters to industry introductions."
+              label="About the circle filter"
+            />
+            Who in my circle can I turn to for...
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setFunctionalFilter("")}
+              aria-pressed={functionalFilter === ""}
+              className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+                functionalFilter === ""
+                  ? "bg-brand-orange text-white"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/10 dark:text-neutral-300 dark:hover:bg-white/15"
+              }`}
+            >
+              All
+            </button>
             {FUNCTIONAL_TAGS.map((tag) => {
               const active = functionalFilter === tag.key;
               return (
@@ -447,7 +459,7 @@ export default function Connections() {
                       : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/10 dark:text-neutral-300 dark:hover:bg-white/15"
                   }`}
                 >
-                  {tag.emoji} {tag.question}
+                  {tag.emoji} {tag.label}
                 </button>
               );
             })}
@@ -727,7 +739,7 @@ export default function Connections() {
                       }
                       className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-90"
                       style={{
-                        background: "#EA580C",
+                        background: "#F36F21",
                         color: "#ffffff",
                         border: "none",
                         padding: "8px 14px",
