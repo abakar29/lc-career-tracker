@@ -5,7 +5,7 @@ import { Button } from "../components/ui";
 const GUEST_KEY = "abuve:guest";
 
 const LC_EMAIL_DOMAIN = "@lclark.edu";
-const ORANGE = "#EA580C";
+const ORANGE = "#F36F21";
 
 function isLcEmail(email) {
   return email.toLowerCase().trim().endsWith(LC_EMAIL_DOMAIN);
@@ -102,7 +102,7 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@lclark.edu"
-              className="w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#1A1919] px-3 py-2 text-sm text-slate-900 dark:text-[#F8F9FA] placeholder:text-slate-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-[#EA580C] focus:border-[#EA580C]"
+              className="w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#1A1919] px-3 py-2 text-sm text-slate-900 dark:text-[#F8F9FA] placeholder:text-slate-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-[#F36F21] focus:border-[#F36F21]"
             />
           </div>
 
@@ -117,7 +117,7 @@ export default function Login() {
               minLength={6}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#1A1919] px-3 py-2 text-sm text-slate-900 dark:text-[#F8F9FA] focus:outline-none focus:ring-2 focus:ring-[#EA580C] focus:border-[#EA580C]"
+              className="w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#1A1919] px-3 py-2 text-sm text-slate-900 dark:text-[#F8F9FA] focus:outline-none focus:ring-2 focus:ring-[#F36F21] focus:border-[#F36F21]"
             />
           </div>
 
@@ -136,7 +136,7 @@ export default function Login() {
                 minLength={6}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#1A1919] px-3 py-2 text-sm text-slate-900 dark:text-[#F8F9FA] focus:outline-none focus:ring-2 focus:ring-[#EA580C] focus:border-[#EA580C]"
+                className="w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#1A1919] px-3 py-2 text-sm text-slate-900 dark:text-[#F8F9FA] focus:outline-none focus:ring-2 focus:ring-[#F36F21] focus:border-[#F36F21]"
               />
             </div>
           )}
@@ -151,7 +151,7 @@ export default function Login() {
           <button
             type="button"
             onClick={handleGuestLogin}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-orange-500 bg-white dark:bg-white/5 border-[1.5px] border-[#EA580C] text-[#B85A12] dark:text-orange-300"
+            className="w-full inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-orange-500 bg-white dark:bg-white/5 border-[1.5px] border-[#F36F21] text-[#B85A12] dark:text-orange-300"
           >
             Continue as Guest Demo
           </button>
