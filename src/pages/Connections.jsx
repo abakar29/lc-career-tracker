@@ -425,7 +425,7 @@ export default function Connections() {
 
       {sorted.length > 0 && (
         <div className="mt-5">
-          <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+          <p className="flex items-center gap-1.5 text-sm font-semibold text-slate-600 dark:text-neutral-300">
             <InfoTooltip
               text="Filter your circle by practical, real-world support—from recommendation letters to industry introductions."
               label="About the circle filter"

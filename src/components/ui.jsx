@@ -100,7 +100,7 @@ export function InfoTooltip({
         <span
           id={tooltipId}
           role="tooltip"
-          className={`pointer-events-none absolute z-20 w-56 rounded-lg bg-brand-black px-3 py-2 text-xs font-medium leading-snug text-white shadow-lg dark:bg-[#2B2C31] dark:border dark:border-white/10 ${TOOLTIP_VERTICAL[placement]} ${TOOLTIP_ALIGN[align]}`}
+          className={`pointer-events-none absolute z-20 w-56 rounded-lg bg-brand-black px-3 py-2 text-xs font-medium normal-case leading-snug text-white shadow-lg dark:bg-[#2B2C31] dark:border dark:border-white/10 ${TOOLTIP_VERTICAL[placement]} ${TOOLTIP_ALIGN[align]}`}
         >
           {text}
         </span>
