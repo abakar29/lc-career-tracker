@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { useData } from "../context/DataContext";
 import { formatDate, daysSince, computeProfileCompleteness } from "../lib/utils";
-import { networkConnections as mockNetworkConnections } from "../data/mockData";
 import { formatAcademicSummary } from "../data/academics";
 import {
   CardHeader,
@@ -286,8 +285,8 @@ function CareerReadinessHero({ score, checks, classYear, major, name, attentionC
   );
 }
 
-function ApplicationTrackerCard({ applications: initialApplications }) {
-  const [applications, setApplications] = useState(initialApplications);
+function ApplicationTrackerCard({ applications }) {
+  const { addApplication, updateApplication, deleteApplication: removeApplication } = useData();
   const [showForm, setShowForm] = useState(false);
   const [company, setCompany] = useState("");
   const [role, setRole] = useState("");
@@ -312,31 +311,24 @@ function ApplicationTrackerCard({ applications: initialApplications }) {
   }
 
   function handleSave() {
-    setApplications((prev) => [
-      ...prev,
-      {
-        id: `app-${Date.now()}`,
-        company: company.trim(),
-        role: role.trim(),
-        dateApplied,
-        status,
-      },
-    ]);
+    addApplication({
+      company: company.trim(),
+      role: role.trim(),
+      dateApplied,
+      status,
+    });
     resetForm();
   }
 
   function cycleStatus(id) {
-    setApplications((prev) =>
-      prev.map((a) => {
-        if (a.id !== id) return a;
-        const nextIndex = (APPLICATION_STATUSES.indexOf(a.status) + 1) % APPLICATION_STATUSES.length;
-        return { ...a, status: APPLICATION_STATUSES[nextIndex] };
-      })
-    );
+    const application = applications.find((a) => a.id === id);
+    if (!application) return;
+    const nextIndex = (APPLICATION_STATUSES.indexOf(application.status) + 1) % APPLICATION_STATUSES.length;
+    updateApplication(id, { status: APPLICATION_STATUSES[nextIndex] });
   }
 
   function deleteApplication(id) {
-    setApplications((prev) => prev.filter((a) => a.id !== id));
+    removeApplication(id);
   }
 
   return (
@@ -464,14 +456,16 @@ function ApplicationTrackerCard({ applications: initialApplications }) {
   );
 }
 
-function buildCompassItems(navigate) {
-  const mostOverdueContact = [...mockNetworkConnections].sort(
+function buildCompassItems(navigate, networkConnections) {
+  const mostOverdueContact = [...networkConnections].sort(
     (a, b) => daysSince(b.last_contacted_date) - daysSince(a.last_contacted_date)
   )[0];
-  const overdueDays = daysSince(mostOverdueContact.last_contacted_date);
 
-  return [
-    {
+  const items = [];
+
+  if (mostOverdueContact) {
+    const overdueDays = daysSince(mostOverdueContact.last_contacted_date);
+    items.push({
       key: "follow-up",
       borderColor: "border-l-red-500",
       icon: AlertCircle,
@@ -480,7 +474,10 @@ function buildCompassItems(navigate) {
       subtitle: `${overdueDays} days since last contact — overdue`,
       actionLabel: "Follow up →",
       onAction: () => navigate("/connections"),
-    },
+    });
+  }
+
+  items.push(
     {
       key: "resume",
       borderColor: "border-l-amber-500",
@@ -500,8 +497,10 @@ function buildCompassItems(navigate) {
       subtitle: "You have 5 experiences but only 7 skills logged",
       actionLabel: "Add Skills →",
       onAction: () => navigate("/skills"),
-    },
-  ];
+    }
+  );
+
+  return items;
 }
 
 function CareerCompassCard({ items }) {
@@ -587,7 +586,7 @@ export default function Dashboard() {
     applications,
   });
 
-  const compassItems = buildCompassItems(navigate);
+  const compassItems = buildCompassItems(navigate, networkConnections);
 
   const scoreBreakdown = [
     { label: "Experiences", weight: "25%", complete: experiences.length > 0 },

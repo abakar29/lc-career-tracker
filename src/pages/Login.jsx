@@ -83,8 +83,13 @@ export default function Login() {
         style={{ position: "relative", zIndex: 1 }}
       >
         <div className="flex flex-col items-center text-center mb-6">
-          <img src="/lc-logo.png" alt="" className="h-14 w-14 object-contain mb-3" />
-          <h1 className="text-xl font-bold text-slate-900 dark:text-[#F8F9FA]">Abuve</h1>
+          <img src="/otter-logo-icon.png" alt="" className="h-14 w-14 object-contain mb-3 dark:hidden" />
+          <img
+            src="/otter-logo-icon-white.png"
+            alt=""
+            className="hidden h-14 w-14 object-contain mb-3 dark:block"
+          />
+          <h1 className="text-xl font-bold text-slate-900 dark:text-[#F8F9FA]">Otter Career Logbook</h1>
           <p className="text-sm text-slate-500 dark:text-neutral-400 mt-1">
             Lewis &amp; Clark College Career Platform
           </p>

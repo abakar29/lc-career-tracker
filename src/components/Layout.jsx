@@ -23,8 +23,6 @@ import { useData } from "../context/DataContext";
 import { formatAcademicSummary } from "../data/academics";
 import ErrorBoundary from "./ErrorBoundary";
 
-const GUEST_KEY = "abuve:guest";
-
 function initials(name) {
   return name
     .split(" ")
@@ -40,7 +38,13 @@ const NAV_ITEMS = [
   { to: "/connections", label: "Connections", icon: Users },
   { to: "/skills", label: "Skills", icon: Sparkles },
   { to: "/resume", label: "Resume", icon: FileText },
-  { to: "/career-center", label: "Career Center", mobileLabel: "Career", icon: Building2 },
+  {
+    href: "https://careercenter.lclark.edu/",
+    label: "Career Center",
+    mobileLabel: "Career",
+    icon: Building2,
+    external: true,
+  },
 ];
 
 const ABOUT_SECTIONS = [
@@ -146,7 +150,11 @@ export default function Layout() {
       setProfileName(localStorage.getItem('abuve:profile:name') || 'Abu Bakar');
     };
     window.addEventListener('storage', handler);
-    return () => window.removeEventListener('storage', handler);
+    window.addEventListener('abuve:profile-updated', handler);
+    return () => {
+      window.removeEventListener('storage', handler);
+      window.removeEventListener('abuve:profile-updated', handler);
+    };
   }, []);
 
   useEffect(() => {
@@ -200,23 +208,36 @@ export default function Layout() {
       {/* Desktop sidebar */}
       <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-brand-black">
         <div className="flex flex-col items-center gap-2 px-5 py-6 border-b border-white/10">
-          <img src="/lc-logo.png" alt="" className="h-12 w-12 object-contain" />
+          <img src="/otter-logo-icon-white.png" alt="" className="h-12 w-12 object-contain" />
           <p className="text-white font-semibold text-sm text-center leading-tight">
-            Lewis &amp; Clark College
+            Otter Career Logbook
           </p>
         </div>
         <nav className="flex-1 px-3 space-y-1">
-          {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={end}
-              className={({ isActive }) => navLinkClasses(isActive)}
-            >
-              <Icon className="h-5 w-5" />
-              {label}
-            </NavLink>
-          ))}
+          {NAV_ITEMS.map(({ to, href, label, icon: Icon, end, external }) =>
+            external ? (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={navLinkClasses(false)}
+              >
+                <Icon className="h-5 w-5" />
+                {label}
+              </a>
+            ) : (
+              <NavLink
+                key={to}
+                to={to}
+                end={end}
+                className={({ isActive }) => navLinkClasses(isActive)}
+              >
+                <Icon className="h-5 w-5" />
+                {label}
+              </NavLink>
+            )
+          )}
         </nav>
         <div ref={profileRef} className="relative px-5 py-5 border-t border-white/10">
           {profileOpen && (
@@ -268,7 +289,7 @@ export default function Layout() {
                   className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-neutral-200 hover:bg-white/10 hover:text-white transition-colors"
                 >
                   <Info className="h-4 w-4" />
-                  About Abuve
+                  About Otter Career Logbook
                 </button>
               </div>
               <div className="border-t border-white/10" />
@@ -341,8 +362,8 @@ export default function Layout() {
 
       {/* Mobile top bar */}
       <header className="md:hidden sticky top-0 z-20 relative flex items-center justify-center gap-2 bg-brand-black px-4 py-2.5">
-        <img src="/lc-logo.png" alt="" className="h-8 w-8 object-contain" />
-        <span className="text-white font-semibold text-sm">Lewis &amp; Clark College</span>
+        <img src="/otter-logo-icon-white.png" alt="" className="h-8 w-8 object-contain" />
+        <span className="text-white font-semibold text-sm">Otter Career Logbook</span>
         <MobileThemeToggle />
       </header>
 
@@ -367,22 +388,35 @@ export default function Layout() {
 
       {/* Mobile bottom nav */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 z-20 bg-brand-black border-t border-white/10 flex">
-        {NAV_ITEMS.map(({ to, label, mobileLabel, icon: Icon, end }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={end}
-            className={({ isActive }) =>
-              [
-                "flex-1 flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors",
-                isActive ? "text-brand-orange" : "text-neutral-400",
-              ].join(" ")
-            }
-          >
-            <Icon className="h-5 w-5" />
-            <span className="max-w-full truncate whitespace-nowrap">{mobileLabel ?? label}</span>
-          </NavLink>
-        ))}
+        {NAV_ITEMS.map(({ to, href, label, mobileLabel, icon: Icon, end, external }) =>
+          external ? (
+            <a
+              key={label}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors text-neutral-400"
+            >
+              <Icon className="h-5 w-5" />
+              <span className="max-w-full truncate whitespace-nowrap">{mobileLabel ?? label}</span>
+            </a>
+          ) : (
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              className={({ isActive }) =>
+                [
+                  "flex-1 flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors",
+                  isActive ? "text-brand-orange" : "text-neutral-400",
+                ].join(" ")
+              }
+            >
+              <Icon className="h-5 w-5" />
+              <span className="max-w-full truncate whitespace-nowrap">{mobileLabel ?? label}</span>
+            </NavLink>
+          )
+        )}
       </nav>
 
       {aboutOpen && (
@@ -397,11 +431,16 @@ export default function Layout() {
           >
             <div className="flex flex-col items-center text-center mb-6">
               <img
-                src="/lc-logo.png"
+                src="/otter-logo-icon.png"
                 alt=""
-                className="h-10 w-10 object-contain mb-2"
+                className="h-10 w-10 object-contain mb-2 dark:hidden"
               />
-              <h2 className="text-lg font-bold text-slate-900 dark:text-[#F8F9FA]">Abuve</h2>
+              <img
+                src="/otter-logo-icon-white.png"
+                alt=""
+                className="hidden h-10 w-10 object-contain mb-2 dark:block"
+              />
+              <h2 className="text-lg font-bold text-slate-900 dark:text-[#F8F9FA]">Otter Career Logbook</h2>
               <p className="text-sm text-slate-500 mt-0.5 dark:text-neutral-400">
                 Lewis &amp; Clark College Career Platform
               </p>

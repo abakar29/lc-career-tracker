@@ -206,6 +206,21 @@ function loadStoredListMap(prefix, contacts) {
   return map;
 }
 
+// Contact-keyed localStorage maps (photos, tags, ...) are keyed by contact_name;
+// renaming a contact must carry those entries over to the new key or they orphan.
+function migrateContactKey(prefix, oldName, newName, setter) {
+  if (!oldName || oldName === newName) return;
+  const stored = localStorage.getItem(`${prefix}${oldName}`);
+  if (stored === null) return;
+  localStorage.setItem(`${prefix}${newName}`, stored);
+  localStorage.removeItem(`${prefix}${oldName}`);
+  setter((prev) => {
+    if (!(oldName in prev)) return prev;
+    const { [oldName]: value, ...rest } = prev;
+    return { ...rest, [newName]: value };
+  });
+}
+
 export default function Connections() {
   const { networkConnections, addContact, updateContact, deleteContact } = useData();
 
@@ -361,14 +376,22 @@ export default function Connections() {
     if (Object.keys(nextErrors).length > 0) return;
 
     const { linkedin_url, relationship_purpose, ...contactFields } = formValues;
+    const key = formValues.contact_name.trim();
+
     if (editingId) {
+      const originalContact = networkConnections.find((c) => c.id === editingId);
+      const oldName = originalContact?.contact_name;
+      if (oldName && oldName !== key) {
+        migrateContactKey("photo_", oldName, key, setUploadedPhotos);
+        migrateContactKey("functional_tags_", oldName, key, setFunctionalTags);
+        migrateContactKey("custom_tags_", oldName, key, setCustomTags);
+      }
       updateContact(editingId, contactFields);
     } else {
       addContact(contactFields);
     }
 
     const trimmedLinkedin = linkedin_url.trim();
-    const key = formValues.contact_name.trim();
     if (trimmedLinkedin && key) {
       localStorage.setItem(`linkedin_${key}`, trimmedLinkedin);
       setLinkedinUrls((u) => ({ ...u, [key]: trimmedLinkedin }));

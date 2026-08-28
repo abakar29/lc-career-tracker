@@ -12,7 +12,7 @@ function FeaturePoint({ icon: Icon, text }) {
 
 export default function Onboarding({ open, onDismiss }) {
   return (
-    <Modal open={open} onClose={onDismiss} title="Welcome to Abuve" className="max-w-xl">
+    <Modal open={open} onClose={onDismiss} title="Welcome to Otter Career Logbook" className="max-w-xl">
       <div className="space-y-5">
         <p className="text-sm text-slate-600 dark:text-neutral-400">
           Right now, your job search is scattered across Handshake, spreadsheets,
@@ -38,7 +38,7 @@ export default function Onboarding({ open, onDismiss }) {
         </div>
 
         <p className="text-sm text-slate-600 dark:text-neutral-400">
-          Abuve turns that scattered progress into one connected profile, built for
+          Otter Career Logbook turns that scattered progress into one connected profile, built for
           L&amp;C students working with the <strong className="dark:text-neutral-200">Career Center</strong> to get ready for
           internships, study abroad, and life after Watzek.
         </p>

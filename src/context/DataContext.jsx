@@ -88,6 +88,7 @@ export function DataProvider({ children }) {
   const experienceActions = useMemo(() => makeCollectionActions("experiences"), [makeCollectionActions]);
   const contactActions = useMemo(() => makeCollectionActions("networkConnections"), [makeCollectionActions]);
   const skillActions = useMemo(() => makeCollectionActions("skills"), [makeCollectionActions]);
+  const applicationActions = useMemo(() => makeCollectionActions("applications"), [makeCollectionActions]);
 
   const value = useMemo(
     () => ({
@@ -110,6 +111,9 @@ export function DataProvider({ children }) {
       addSkill: skillActions.add,
       updateSkill: skillActions.update,
       deleteSkill: skillActions.remove,
+      addApplication: applicationActions.add,
+      updateApplication: applicationActions.update,
+      deleteApplication: applicationActions.remove,
     }),
     [
       data,
@@ -120,6 +124,7 @@ export function DataProvider({ children }) {
       experienceActions,
       contactActions,
       skillActions,
+      applicationActions,
     ]
   );
 

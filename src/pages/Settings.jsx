@@ -162,7 +162,7 @@ function ToggleRow({ label, description, checked, onChange }) {
 export default function Settings() {
   const { profile, updateAcademics } = useData();
   const [name, setName] = useState(() => localStorage.getItem('abuve:profile:name') || 'Abu Bakar');
-  const [classYear, setClassYear] = useState(() => localStorage.getItem('abuve:profile:classyear') || 'Class of 2029');
+  const [classYear, setClassYear] = useState(() => localStorage.getItem('abuve:profile:classyear') || '2029');
   const [saved, setSaved] = useState(false);
 
   const [followUpReminders, setFollowUpReminders] = useState(true);
@@ -173,6 +173,7 @@ export default function Settings() {
     e.preventDefault();
     localStorage.setItem("abuve:profile:name", name);
     localStorage.setItem("abuve:profile:classyear", classYear);
+    window.dispatchEvent(new Event("abuve:profile-updated"));
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   }
@@ -227,7 +228,7 @@ export default function Settings() {
         </div>
 
         <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#232428] shadow-sm">
-          <CardHeader title="About Abuve" />
+          <CardHeader title="About Otter Career Logbook" />
           <div className="px-5 pb-5 pt-1 space-y-2">
             <p className="text-sm text-slate-500 dark:text-neutral-400">Version v1.0.0</p>
             <p className="text-sm text-slate-600 dark:text-neutral-400">
