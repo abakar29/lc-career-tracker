@@ -45,6 +45,36 @@ export function Badge({ tone = "slate", children }) {
   );
 }
 
+export function ToggleSwitch({ label, description, checked, onChange, disabled = false }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      disabled={disabled}
+      onClick={() => onChange(!checked)}
+      className="flex w-full items-center justify-between gap-4 rounded-lg px-2 py-3 text-left transition-colors hover:bg-slate-50 dark:hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent"
+    >
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-slate-800 dark:text-neutral-200">{label}</p>
+        {description && <p className="text-xs text-slate-500 mt-0.5 dark:text-neutral-400">{description}</p>}
+      </div>
+      <span
+        aria-hidden="true"
+        className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${
+          checked ? "bg-brand-orange" : "bg-slate-300 dark:bg-white/15"
+        }`}
+      >
+        <span
+          className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+            checked ? "translate-x-6" : "translate-x-1"
+          }`}
+        />
+      </span>
+    </button>
+  );
+}
+
 export function RemovablePill({ label, onRemove, removeLabel }) {
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-50 dark:bg-orange-500/10 pl-3 pr-1.5 py-1 text-xs font-medium text-orange-800 dark:text-orange-300 ring-1 ring-inset ring-orange-200 dark:ring-orange-500/30">

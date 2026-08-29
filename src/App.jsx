@@ -9,7 +9,6 @@ import Connections from "./pages/Connections";
 import Skills from "./pages/Skills";
 import Resume from "./pages/Resume";
 import CareerCenter from "./pages/CareerCenter";
-import Admin from "./pages/Admin";
 import Settings from "./pages/Settings";
 
 const GUEST_KEY = "abuve:guest";
@@ -57,8 +56,8 @@ export default function App() {
             <Route path="resume" element={<Resume />} />
             <Route path="career-center" element={<CareerCenter />} />
             <Route path="settings" element={<Settings />} />
-            <Route path="admin" element={<Admin />} />
           </Route>
+          <Route path="/admin" element={<Navigate to="/" replace />} />
         </Routes>
       ) : (
         <Login />

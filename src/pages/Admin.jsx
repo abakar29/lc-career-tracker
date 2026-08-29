@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Lightbulb } from "lucide-react";
-import { Card, CardHeader, Badge, Button } from "../components/ui";
+import { Lightbulb, StickyNote } from "lucide-react";
+import { Card, CardHeader, Badge, Button, IconButton, Modal, TextArea } from "../components/ui";
 import { formatDate } from "../lib/utils";
+import { supabase } from "../supabaseClient";
 
 const TOP_SKILLS = [
   { label: "Project Management", value: 89 },
@@ -170,6 +171,15 @@ function BarRow({ label, value, color = "#F36F21" }) {
   );
 }
 
+function loadStoredNotes() {
+  const map = {};
+  STUDENT_ROWS.forEach((row) => {
+    const stored = localStorage.getItem(`admin_note_${row.name}`);
+    if (stored) map[row.name] = stored;
+  });
+  return map;
+}
+
 export default function Admin() {
   const navigate = useNavigate();
   const [sortKey, setSortKey] = useState("readiness");
@@ -177,6 +187,9 @@ export default function Admin() {
   const [readinessFilter, setReadinessFilter] = useState("All Levels");
   const [openStatIndex, setOpenStatIndex] = useState(null);
   const [notification, setNotification] = useState(null);
+  const [notes, setNotes] = useState(loadStoredNotes);
+  const [noteTarget, setNoteTarget] = useState(null);
+  const [noteDraft, setNoteDraft] = useState("");
 
   useEffect(() => {
     if (!notification) return;
@@ -186,6 +199,41 @@ export default function Admin() {
 
   function toggleStat(index) {
     setOpenStatIndex((prev) => (prev === index ? null : index));
+  }
+
+  function openNoteModal(row) {
+    setNoteTarget(row);
+    setNoteDraft(notes[row.name] ?? "");
+  }
+
+  function closeNoteModal() {
+    setNoteTarget(null);
+    setNoteDraft("");
+  }
+
+  function saveNote() {
+    if (!noteTarget) return;
+    const trimmed = noteDraft.trim();
+    if (trimmed) {
+      localStorage.setItem(`admin_note_${noteTarget.name}`, trimmed);
+    } else {
+      localStorage.removeItem(`admin_note_${noteTarget.name}`);
+    }
+    setNotes((prev) => ({ ...prev, [noteTarget.name]: trimmed }));
+    closeNoteModal();
+  }
+
+  async function handleSignOut() {
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.log("Sign out error (guest mode):", error);
+    } finally {
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith("abuve:")) localStorage.removeItem(key);
+      });
+      window.location.href = "/login";
+    }
   }
 
   function handleSort(column) {
@@ -221,7 +269,8 @@ export default function Admin() {
       : sortedRows.filter((row) => readinessBand(row.readiness) === readinessFilter);
 
   return (
-    <div>
+    <div className="min-h-screen bg-brand-surface dark:bg-[#1A1919] transition-colors">
+      <div className="mx-auto max-w-6xl px-4 py-6 md:px-8 md:py-8">
         {notification && (
           <div
             style={{
@@ -250,13 +299,22 @@ export default function Admin() {
           </div>
         )}
 
-        <button
-          type="button"
-          onClick={() => navigate("/")}
-          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 hover:underline mb-6 dark:text-neutral-400 dark:hover:text-neutral-200"
-        >
-          ← Back to Dashboard
-        </button>
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 hover:underline dark:text-neutral-400 dark:hover:text-neutral-200"
+          >
+            ← Back to Dashboard
+          </button>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 hover:underline dark:text-neutral-400 dark:hover:text-neutral-200"
+          >
+            Sign Out
+          </button>
+        </div>
 
         <div className="flex items-start justify-between gap-4 mb-8">
           <div>
@@ -573,9 +631,23 @@ export default function Admin() {
                   </div>
                   <Badge tone={readinessTone(row.readiness)}>{row.readiness}%</Badge>
                 </div>
-                <p className="mt-2 text-xs text-slate-400 dark:text-neutral-500">
-                  Last active {formatDate(row.lastActive)}
-                </p>
+                <div className="mt-2 flex items-center justify-between gap-2">
+                  <p className="text-xs text-slate-400 dark:text-neutral-500">
+                    Last active {formatDate(row.lastActive)}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => openNoteModal(row)}
+                    className={`inline-flex items-center gap-1 text-xs font-medium hover:underline ${
+                      notes[row.name]
+                        ? "text-orange-700 dark:text-orange-300"
+                        : "text-slate-400 dark:text-neutral-500"
+                    }`}
+                  >
+                    <StickyNote className="h-3.5 w-3.5" aria-hidden="true" />
+                    {notes[row.name] ? "Edit note" : "Add note"}
+                  </button>
+                </div>
               </Card>
             ))}
           </div>
@@ -607,6 +679,9 @@ export default function Admin() {
                       </th>
                     );
                   })}
+                  <th className="text-left font-medium text-slate-500 text-[13px] px-3 py-2.5 dark:text-neutral-400">
+                    Notes
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -635,6 +710,14 @@ export default function Admin() {
                         </Badge>
                       </td>
                       <td className="px-3 py-3 text-slate-500 dark:text-neutral-400">{formatDate(row.lastAppointment)}</td>
+                      <td className="px-3 py-3">
+                        <IconButton
+                          icon={StickyNote}
+                          label={notes[row.name] ? `Edit note for ${row.name}` : `Add note for ${row.name}`}
+                          onClick={() => openNoteModal(row)}
+                          className={notes[row.name] ? "text-orange-600 dark:text-orange-300" : ""}
+                        />
+                      </td>
                     </tr>
                   );
                 })}
@@ -655,6 +738,31 @@ export default function Admin() {
             Data shown is aggregated and anonymized
           </p>
         </div>
+      </div>
+
+      <Modal
+        open={!!noteTarget}
+        onClose={closeNoteModal}
+        title={`Note: ${noteTarget?.name ?? ""}`}
+      >
+        <div className="space-y-4">
+          <TextArea
+            label="Note"
+            placeholder="Add context for advisors, e.g. follow-up items or accommodations"
+            value={noteDraft}
+            onChange={(e) => setNoteDraft(e.target.value)}
+            rows={5}
+          />
+          <div className="flex justify-end gap-3">
+            <Button type="button" variant="ghost" onClick={closeNoteModal}>
+              Cancel
+            </Button>
+            <Button type="button" onClick={saveNote}>
+              Save Note
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

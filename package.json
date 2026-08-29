@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "scrape:events": "node scripts/scrape-career-events.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.110.8",
@@ -23,6 +24,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
     "autoprefixer": "^10.5.4",
+    "cheerio": "^1.2.0",
     "oxlint": "^1.71.0",
     "postcss": "^8.5.19",
     "tailwindcss": "^4.3.3",
