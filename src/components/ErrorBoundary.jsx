@@ -12,7 +12,7 @@ export default class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, info) {
-    console.error("Abuve crashed while rendering:", error, info?.componentStack);
+    console.error("Otter Career Logbook crashed while rendering:", error, info?.componentStack);
   }
 
   render() {

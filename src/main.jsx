@@ -8,7 +8,7 @@ import ErrorBoundary from './components/ErrorBoundary.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <ErrorBoundary message="Abuve couldn't start up correctly. Reloading usually fixes this.">
+    <ErrorBoundary message="Otter Career Logbook couldn't start up correctly. Reloading usually fixes this.">
       <ThemeProvider>
         <DataProvider>
           <App />
