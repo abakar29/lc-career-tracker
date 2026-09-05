@@ -1,9 +1,9 @@
 name: Sync Career Center events
 
 on:
-  schedule:
-    # Every 6 hours
-    - cron: "0 */6 * * *"
+  # Scheduled sync disabled for now — was causing trouble (committing on every
+  # run and triggering constant redeploys). Re-add a `schedule:` trigger here
+  # to turn it back on; until then it only runs when triggered manually.
   workflow_dispatch: {}
 
 permissions:
